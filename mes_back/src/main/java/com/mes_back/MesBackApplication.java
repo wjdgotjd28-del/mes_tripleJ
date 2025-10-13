@@ -9,6 +9,7 @@ MesBackApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MesBackApplication.class, args);
+
 	}
 
 }
