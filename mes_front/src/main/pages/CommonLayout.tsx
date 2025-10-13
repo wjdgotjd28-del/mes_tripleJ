@@ -12,7 +12,6 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
-  Typography,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -60,9 +59,6 @@ export default function CommonLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMain, setActiveMain] = useState(mainMenus[0].text);
   const [activeSub, setActiveSub] = useState(mainMenus[0].subs[0].text);
-  const [activeThird, setActiveThird] = useState(
-    mainMenus[0].subs[0].subMenus[0]
-  );
 
   // ✅ 2. 모바일 사이드바 토글 핸들러 추가
   const handleDrawerToggle = () => {
@@ -196,10 +192,6 @@ export default function CommonLayout() {
           }}
           sx={{
             display: { xs: "block", sm: "none" }, // xs 사이즈에서만 보임
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
           }}
         >
           {drawerContent}
@@ -210,10 +202,6 @@ export default function CommonLayout() {
           variant="permanent"
           sx={{
             display: { xs: "none", sm: "block" }, // sm 사이즈 이상에서만 보임
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
           }}
           open
         >
@@ -237,7 +225,6 @@ export default function CommonLayout() {
           테이블처럼 넓이가 필요한 특정 컴포넌트에 minWidth를 주는 것이 좋습니다.
           여기서는 Box의 minWidth를 제거합니다.
         */}
-        <Box>{renderPage()}</Box>
       </Box>
     </Box>
   );
