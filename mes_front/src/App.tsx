@@ -1,11 +1,13 @@
 import './App.css'
-import CommonLayout from './main/pages/CommonLayout'
+import BusinessPartner from './masterData/companies/BusinessPartner'
 
 function App() {
 
   return (
     <>
-      <CommonLayout />
+      {/* <CommonLayout /> */}
+      <BusinessPartner />
+      
     </>
   )
 }
