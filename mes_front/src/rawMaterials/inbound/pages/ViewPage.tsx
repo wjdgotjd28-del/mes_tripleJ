@@ -23,13 +23,13 @@ export default function ViewPage() {
         조회 화면
       </Typography>
       <TableContainer component={Paper}>
-        <Table>
+        <Table sx={{ width: '100%', tableLayout: 'fixed' }}>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>품목명</TableCell>
-              <TableCell>수량</TableCell>
-              <TableCell>날짜</TableCell>
+            <TableCell>ID</TableCell>
+            <TableCell>품목명</TableCell>
+            <TableCell>수량</TableCell>
+            <TableCell>날짜</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
