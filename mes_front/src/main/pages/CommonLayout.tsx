@@ -48,16 +48,16 @@ const mainMenus: MainMenu[] = [
     icon: <Layers />,
     subs: [
       {
-        text: "입고",
+        text: "수주 입고",
         subs: [{ text: "수주 대상 품목 입고" }, { text: "수주 이력 조회" }],
       },
-      { text: "출고" },
+      { text: "수주 출고" },
     ],
   },
   {
     text: "원자재 관리",
     icon: <Layers />,
-    subs: [{ text: "입고" }, { text: "출고" }, { text: "재고현황" }],
+    subs: [{ text: "원자재 입고" }, { text: "원자재 출고" }, { text: "재고현황" }],
   },
   {
     text: "기준 정보 관리",
@@ -79,7 +79,25 @@ export default function CommonLayout() {
     mainMenus[0].subs[0].subs ? mainMenus[0].subs[0].subs[0].text : null
   );
 
+  // 메뉴별 열림 상태 관리
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
+    [mainMenus[0].text]: true, // 처음엔 첫 메뉴 열림 상태로 시작
+  });
+
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+
+  // 1계층 메뉴 토글 함수
+  const toggleMainMenu = (mainText: string) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [mainText]: !prev[mainText], // 같은 메뉴 클릭 시 토글
+    }));
+
+    setActiveMain(mainText);
+    const firstSub = mainMenus.find((m) => m.text === mainText)?.subs[0];
+    setActiveSub(firstSub?.text || "");
+    setActiveThird(firstSub?.subs ? firstSub.subs[0].text : null);
+  };
 
   // 현재 경로 생성
   const currentPath = activeThird
@@ -89,13 +107,13 @@ export default function CommonLayout() {
   // ================= 페이지 매핑 =================
   const pageMap: Record<string, React.ReactNode> = {
     // 3계층
-    "수주 대상 관리 > 입고 > 수주 대상 품목 입고": <OrderInViewPage />,
-    "수주 대상 관리 > 입고 > 수주 이력 조회": <InboundHistoryPage />,
+    "수주 대상 관리 > 수주 입고 > 수주 대상 품목 입고": <OrderInViewPage />,
+    "수주 대상 관리 > 수주 입고 > 수주 이력 조회": <InboundHistoryPage />,
 
     // 2계층
-    "수주 대상 관리 > 출고": <OrderOutViewPage />,
-    "원자재 관리 > 입고": <RawInViewPage />,
-    "원자재 관리 > 출고": <RawOutViewPage />,
+    "수주 대상 관리 > 수주 출고": <OrderOutViewPage />,
+    "원자재 관리 > 원자재 입고": <RawInViewPage />,
+    "원자재 관리 > 원자재 출고": <RawOutViewPage />,
     "원자재 관리 > 재고현황": <RawMaterialInventoryStatus />,
     "기준 정보 관리 > 수주 대상 품목 관리": <OrderViewPage />,
     "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
@@ -138,20 +156,15 @@ export default function CommonLayout() {
             <ListItem disablePadding>
               <ListItemButton
                 selected={activeMain === main.text}
-                onClick={() => {
-                  setActiveMain(main.text);
-                  const firstSub = main.subs[0];
-                  setActiveSub(firstSub.text);
-                  setActiveThird(firstSub.subs ? firstSub.subs[0].text : null);
-                }}
+                onClick={() => toggleMainMenu(main.text)}
               >
                 <ListItemIcon>{main.icon}</ListItemIcon>
                 <ListItemText primary={main.text} />
               </ListItemButton>
             </ListItem>
 
-            {/* 2계층 메뉴 */}
-            {activeMain === main.text && (
+            {/* 2계층 메뉴 - openMenus 상태에 따라 열림 */}
+            {openMenus[main.text] && (
               <List sx={{ pl: 2 }}>
                 {main.subs.map((sub) => (
                   <React.Fragment key={sub.text}>
