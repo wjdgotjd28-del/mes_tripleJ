@@ -27,7 +27,7 @@ import RawOutViewPage from "../../rawMaterials/outbound/pages/RawOutViewPage";
 import OrderViewPage from "../../masterData/items/pages/OrderViewPage";
 import RawViewPage from "../../masterData/items/pages/RawViewPage";
 import RoutingLookupPage from "../../masterData/routings/pages/RoutingViewPage";
-import BusinessPartner from "../../masterData/companies/pages/BusinessPartnerViewPage";
+import BusinessPartnerViewPage from "../../masterData/companies/pages/BusinessPartnerViewPage";
 
 const drawerWidth = 260;
 
@@ -81,7 +81,7 @@ export default function CommonLayout() {
     "기준 정보 관리 > 수주대상 품목 관리": <OrderViewPage />,
     "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
     "기준 정보 관리 > 라우팅 관리": <RoutingLookupPage />,
-    "기준 정보 관리 > 업체 관리": <BusinessPartner />,
+    "기준 정보 관리 > 업체 관리": <BusinessPartnerViewPage />,
   };
 
   const renderPage = () => pageMap[`${activeMain} > ${activeSub}`] || (
