@@ -13,7 +13,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import InboundRegisterModal from "./OrderInRegisterModal";
+import InboundRegisterModal from "./OrderOutRegisterModal";
 
 const sampleData = [
   {

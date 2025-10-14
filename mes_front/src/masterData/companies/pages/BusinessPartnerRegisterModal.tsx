@@ -25,7 +25,7 @@ const style = {
   flexDirection: 'column',
 };
 
-export default function CompanyRegister() {
+export default function BusinessPartnerRegisterModel() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);

@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, TextField, Button, Typography } from "@mui/material";
 
 export default function RegisterPage() {
