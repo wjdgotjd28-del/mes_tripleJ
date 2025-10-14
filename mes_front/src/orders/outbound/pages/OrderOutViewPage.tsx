@@ -13,7 +13,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import InboundRegisterModal from "./OrderOutRegisterModal";
+import OrderOutRegisterModal from "./OrderOutRegisterModal";
 
 const sampleData = [
   {
@@ -42,7 +42,7 @@ const sampleData = [
   },
 ];
 
-export default function OrderItemLookupPage() {
+export default function OrderOutViewPage() {
   const [clientSearch, setClientSearch] = useState("");
   const [itemNoSearch, setItemNoSearch] = useState("");
   const [itemNameSearch, setItemNameSearch] = useState("");
@@ -171,7 +171,7 @@ export default function OrderItemLookupPage() {
         </Table>
       </TableContainer>
       {selectedItem && (
-        <InboundRegisterModal
+        <OrderOutRegisterModal
           open={openModal}
           onClose={() => setOpenModal(false)}
           itemName={selectedItem.itemName} // ✅ 이 줄 추가!

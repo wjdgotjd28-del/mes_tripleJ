@@ -53,7 +53,7 @@ const mainMenus = [
     text: "기준 정보 관리",
     icon: <Layers />,
     subs: [
-      { text: "수주대상 품목 관리" },
+      { text: "수주 대상 품목 관리" },
       { text: "원자재 품목 관리" },
       { text: "라우팅 관리" },
       { text: "업체 관리" },
@@ -78,7 +78,7 @@ export default function CommonLayout() {
     "수주 대상 관리 > 출고": <OrderOutViewPage />,
     "원자재 관리 > 입고": <RawInViewPage />,
     "원자재 관리 > 출고": <RawOutViewPage />,
-    "기준 정보 관리 > 수주대상 품목 관리": <OrderViewPage />,
+    "기준 정보 관리 > 수주 대상 품목 관리": <OrderViewPage />,
     "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
     "기준 정보 관리 > 라우팅 관리": <RoutingLookupPage />,
     "기준 정보 관리 > 업체 관리": <BusinessPartnerViewPage />,
