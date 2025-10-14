@@ -11,22 +11,8 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import type { Company } from "../type";
 
-
-type Company = {
-  id: number;
-  type: "거래처" | "매입처";
-  name: string;
-  ceo: string;
-  businessNumber: string;
-  ceoPhone: string;
-  managerName: string;
-  managerPhone: string;
-  managerEmail: string;
-  address: string;
-  note: string;
-  status: "거래중" | "거래 종료";
-};
 
 type BusinessPartnerDetailModalProps = {
   open: boolean;
@@ -60,7 +46,7 @@ export default function BusinessPartnerDetailModal({
   const [isEditing, setIsEditing] = React.useState(false);
   const [formData, setFormData] = React.useState<Company | null>(company);
   const [backupData, setBackupData] = React.useState<Company | null>(null);
-  const [confirmOpen, setConfirmOpen] = React.useState(false); // ✅ 확인 다이얼로그 상태
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   React.useEffect(() => {
     setFormData(company);
@@ -88,24 +74,28 @@ export default function BusinessPartnerDetailModal({
   };
 
   const handleCancel = () => {
-    // 수정 중이면 경고창 띄우기
     if (isEditing) {
-      setConfirmOpen(true);
+      // 🔍 변경사항 비교
+      const isChanged = JSON.stringify(formData) !== JSON.stringify(backupData);
+      if (isChanged) {
+        setConfirmOpen(true); // 변경사항 있을 시 다이얼로그 표시
+      } else {
+        setIsEditing(false); // 변경 없으면 그냥 종료
+      }
     } else {
-      setIsEditing(false);
-      onClose();
+      onClose(); // 수정 중 아님 → 그냥 닫기
     }
   };
 
   const confirmCancel = () => {
-    // 예 눌렀을 때
+    // ✅ 예: 변경사항 버리고 종료
     if (backupData) setFormData(backupData);
     setIsEditing(false);
     setConfirmOpen(false);
   };
 
   const cancelDialogClose = () => {
-    // 아니오 눌렀을 때
+    // ❌ 아니오: 다이얼로그 닫기
     setConfirmOpen(false);
   };
 
@@ -321,11 +311,9 @@ export default function BusinessPartnerDetailModal({
       {/* ✅ 취소 확인 다이얼로그 */}
       <Dialog open={confirmOpen} onClose={cancelDialogClose}>
         <DialogTitle>저장하지 않고 나가시겠습니까?</DialogTitle>
-        <DialogContent>
-          변경된 내용은 저장되지 않습니다.
-        </DialogContent>
+        <DialogContent>변경된 내용은 저장되지 않습니다.</DialogContent>
         <DialogActions>
-           <Button color="error" onClick={confirmCancel}>
+          <Button color="error" onClick={confirmCancel}>
             예
           </Button>
           <Button onClick={cancelDialogClose}>아니오</Button>
