@@ -152,8 +152,8 @@ export default function BusinessPartnerViewPage() {
               <TableCell align="center">주소</TableCell>
               <TableCell align="center">비고</TableCell>
               <TableCell align="center">거래 상태</TableCell>
-              <TableCell align="center">상태 변경</TableCell>
-              <TableCell align="center">삭제</TableCell>
+              <TableCell align="center"></TableCell>
+              
             </TableRow>
           </TableHead>
           <TableBody>
@@ -187,9 +187,7 @@ export default function BusinessPartnerViewPage() {
                   >
                     {row.status === "거래중" ? "거래 종료" : "거래 재개"}
                   </Button>
-                </TableCell>
-                <TableCell align="center">
-                  <Button
+                   <Button
                     variant="outlined"
                     size="small"
                     color="error"
@@ -198,6 +196,7 @@ export default function BusinessPartnerViewPage() {
                     삭제
                   </Button>
                 </TableCell>
+               
               </TableRow>
             ))}
           </TableBody>

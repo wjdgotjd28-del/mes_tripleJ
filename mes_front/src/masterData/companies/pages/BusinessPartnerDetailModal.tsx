@@ -324,10 +324,10 @@ export default function BusinessPartnerDetailModal({
           변경된 내용은 저장되지 않습니다.
         </DialogContent>
         <DialogActions>
-          <Button onClick={cancelDialogClose}>아니오</Button>
-          <Button color="error" onClick={confirmCancel}>
+           <Button color="error" onClick={confirmCancel}>
             예
           </Button>
+          <Button onClick={cancelDialogClose}>아니오</Button>
         </DialogActions>
       </Dialog>
     </>
