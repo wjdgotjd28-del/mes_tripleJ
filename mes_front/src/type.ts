@@ -1,7 +1,11 @@
 // 이미지 정보 타입
 export interface ImageData {
-  file: File;
-  url?: string; // 미리보기 URL
+  order_item_img_id?: number; // 이미지 ID (수정 시 사용)
+  order_item_id?: number; // 수주 품목 ID
+  file?: File; // 신규 업로드 시 사용
+  img_url: string; // 파일 경로 (필수)
+  img_ori_name: string; // 원본 파일 이름 (필수)
+  img_name: string; // 저장된 파일 이름 (필수)
 }
 
 // 공정 프로세스 타입

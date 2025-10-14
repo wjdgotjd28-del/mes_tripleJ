@@ -42,7 +42,7 @@ const sampleData = [
   },
 ];
 
-export default function OrderItemLookupPage() {
+export default function OrderInViewPage() {
   const [clientSearch, setClientSearch] = useState("");
   const [itemNoSearch, setItemNoSearch] = useState("");
   const [itemNameSearch, setItemNameSearch] = useState("");

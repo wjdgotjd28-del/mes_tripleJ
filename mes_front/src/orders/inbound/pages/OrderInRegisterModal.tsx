@@ -21,7 +21,7 @@ type Props = {
   }) => void;
 };
 
-export default function InboundRegisterModal({
+export default function OrderInRegisterModal({
   open,
   onClose,
   itemName,
