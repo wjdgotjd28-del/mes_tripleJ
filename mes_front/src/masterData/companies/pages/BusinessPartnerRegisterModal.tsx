@@ -32,9 +32,9 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
 
   const [formData, setFormData] = React.useState<Omit<Company, "id" | "status">>({
     type: "거래처",
-    businessNumber: "",
-    name: "",
-    ceo: "",
+    bizRegNo: "",
+    companyName: "",
+    ceoName: "",
     ceoPhone: "",
     managerName: "",
     managerPhone: "",
@@ -50,8 +50,8 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
 
   const handleSubmit = () => {
     const newCompany: Company = {
-      id: Date.now(), // 간단하게 유니크 id 생성
-      status: "거래중",
+      companyId: Date.now(), // 간단하게 유니크 id 생성
+      status: "Y",
       ...formData,
     };
     onAdd(newCompany); // 상위 상태에 추가
@@ -59,9 +59,9 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
     // 초기화
     setFormData({
       type: "거래처",
-      businessNumber: "",
-      name: "",
-      ceo: "",
+      bizRegNo: "",
+      companyName: "",
+      ceoName: "",
       ceoPhone: "",
       managerName: "",
       managerPhone: "",
@@ -102,13 +102,13 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
               fullWidth
               size="small"
               label="사업자등록번호"
-              name="businessNumber"
-              value={formData.businessNumber}
+              name="bizRegNo"
+              value={formData.bizRegNo}
               onChange={handleChange}
               sx={{ mb: 2 }}
             />
-            <TextField fullWidth size="small" label="업체명" name="name" value={formData.name} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="대표명" name="ceo" value={formData.ceo} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="업체명" name="companyName" value={formData.companyName} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="대표명" name="ceoName" value={formData.ceoName} onChange={handleChange} sx={{ mb: 2 }} />
             <TextField fullWidth size="small" label="대표전화번호" name="ceoPhone" value={formData.ceoPhone} onChange={handleChange} sx={{ mb: 2 }} />
             <TextField fullWidth size="small" label="담당자명" name="managerName" value={formData.managerName} onChange={handleChange} sx={{ mb: 2 }} />
             <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={formData.managerPhone} onChange={handleChange} sx={{ mb: 2 }} />

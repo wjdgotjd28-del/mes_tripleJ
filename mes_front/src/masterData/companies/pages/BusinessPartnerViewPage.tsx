@@ -21,28 +21,14 @@ import {
 import type { SelectChangeEvent } from "@mui/material";
 import BusinessPartnerDetailModal from "./BusinessPartnerDetailModal";
 import BusinessPartnerRegisterModal from "./BusinessPartnerRegisterModal";
-
-type Company = {
-  id: number;
-  type: "거래처" | "매입처";
-  name: string;
-  ceo: string;
-  businessNumber: string;
-  ceoPhone: string;
-  managerName: string;
-  managerPhone: string;
-  managerEmail: string;
-  address: string;
-  note: string;
-  status: "거래중" | "거래 종료";
-};
+import type { Company } from "../type";
 
 export default function BusinessPartnerViewPage() {
   const initialData: Company[] = [
-    { id: 1, type: "거래처", name: "한송상사", ceo: "김태준", businessNumber: "123-45-67890", ceoPhone: "010-1111-1111", managerName: "홍길동", managerPhone: "010-2222-2222", managerEmail: "manager@hansong.com", address: "경기도 안산시 단원구 산업로 124", note: "프라이머, 상도 도료 납품", status: "거래중" },
-    { id: 2, type: "매입처", name: "강남제비스", ceo: "김준형", businessNumber: "234-56-78901", ceoPhone: "010-3333-3333", managerName: "박영희", managerPhone: "010-4444-4444", managerEmail: "manager@gangnam.com", address: "경기도 화성시 남양읍 공단로 58", note: "도로, 에폭시 공급", status: "거래중" },
-    { id: 3, type: "매입처", name: "페인트메카", ceo: "박선희", businessNumber: "345-67-89012", ceoPhone: "010-5555-5555", managerName: "이철수", managerPhone: "010-6666-6666", managerEmail: "manager@paint.com", address: "충청남도 아산시 탕정면 산업단지로 102", note: "프라이머, 상도 도료 공급", status: "거래 종료" },
-    { id: 4, type: "거래처", name: "일도포장", ceo: "박선호", businessNumber: "456-78-90123", ceoPhone: "010-7777-7777", managerName: "최민수", managerPhone: "010-8888-8888", managerEmail: "manager@ildo.com", address: "경기도 시흥시 정왕동 산업로 11", note: "포장재 납품", status: "거래중" },
+    { companyId: 1, type: "거래처", companyName: "한송상사", ceoName: "김태준", bizRegNo: "123-45-67890", ceoPhone: "010-1111-1111", managerName: "홍길동", managerPhone: "010-2222-2222", managerEmail: "manager@hansong.com", address: "경기도 안산시 단원구 산업로 124", note: "프라이머, 상도 도료 납품", status: "Y" },
+    { companyId: 2, type: "매입처", companyName: "강남제비스", ceoName: "김준형", bizRegNo: "234-56-78901", ceoPhone: "010-3333-3333", managerName: "박영희", managerPhone: "010-4444-4444", managerEmail: "manager@gangnam.com", address: "경기도 화성시 남양읍 공단로 58", note: "도로, 에폭시 공급", status: "Y" },
+    { companyId: 3, type: "매입처", companyName: "페인트메카", ceoName: "박선희", bizRegNo: "345-67-89012", ceoPhone: "010-5555-5555", managerName: "이철수", managerPhone: "010-6666-6666", managerEmail: "manager@paint.com", address: "충청남도 아산시 탕정면 산업단지로 102", note: "프라이머, 상도 도료 공급", status: "N" },
+    { companyId: 4, type: "거래처", companyName: "일도포장", ceoName: "박선호", bizRegNo: "456-78-90123", ceoPhone: "010-7777-7777", managerName: "최민수", managerPhone: "010-8888-8888", managerEmail: "manager@ildo.com", address: "경기도 시흥시 정왕동 산업로 11", note: "포장재 납품", status: "Y" },
   ];
 
   const [allRows, setAllRows] = useState<Company[]>(initialData);
@@ -56,21 +42,21 @@ export default function BusinessPartnerViewPage() {
     setAllRows((prev) => [...prev, newCompany]);
   };
 
-  const handleDelete = (event: React.MouseEvent, id: number, name: string) => {
+  const handleDelete = (event: React.MouseEvent, companyId: number, companyName: string) => {
     event.stopPropagation();
-    if (window.confirm(`${name}을(를) 삭제하시겠습니까?`)) {
-      setAllRows((prev) => prev.filter((row) => row.id !== id));
+    if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
+      setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
     }
   };
 
-  const handleStatusToggle = (event: React.MouseEvent, id: number) => {
+  const handleStatusToggle = (event: React.MouseEvent, companyId: number) => {
     event.stopPropagation();
     setAllRows((prev) =>
       prev.map((row) =>
-        row.id === id
+        row.companyId === companyId
           ? {
               ...row,
-              status: row.status === "거래중" ? "거래 종료" : "거래중",
+              status: row.status === "Y" ? "N" : "Y",
             }
           : row
       )
@@ -88,14 +74,14 @@ export default function BusinessPartnerViewPage() {
 
   const handleSaveDetail = (updatedCompany: Company) => {
     setAllRows((prev) =>
-      prev.map((row) => (row.id === updatedCompany.id ? updatedCompany : row))
+      prev.map((row) => (row.companyId === updatedCompany.companyId ? updatedCompany : row))
     );
   };
 
   const filteredRows = allRows.filter((row) => {
     if (filterType !== "모든 업체" && row.type !== filterType) return false;
-    if (searchName && !row.name.includes(searchName)) return false;
-    if (searchCeo && !row.ceo.includes(searchCeo)) return false;
+    if (searchName && !row.companyName.includes(searchName)) return false;
+    if (searchCeo && !row.ceoName.includes(searchCeo)) return false;
     return true;
   });
 
@@ -153,27 +139,26 @@ export default function BusinessPartnerViewPage() {
               <TableCell align="center">비고</TableCell>
               <TableCell align="center">거래 상태</TableCell>
               <TableCell align="center"></TableCell>
-              
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredRows.map((row) => (
               <TableRow
-                key={row.id}
+                key={row.companyId}
                 hover
                 sx={{ cursor: "pointer" }}
                 onClick={() => handleRowClick(row)}
               >
-                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{row.companyId}</TableCell>
                 <TableCell align="center">{row.type}</TableCell>
-                <TableCell align="center">{row.name}</TableCell>
-                <TableCell align="center">{row.ceo}</TableCell>
+                <TableCell align="center">{row.companyName}</TableCell>
+                <TableCell align="center">{row.ceoName}</TableCell>
                 <TableCell align="center">{row.address}</TableCell>
                 <TableCell align="center">{row.note}</TableCell>
                 <TableCell align="center">
                   <Chip
-                    label={row.status}
-                    color={row.status === "거래중" ? "success" : "default"}
+                    label={row.status === "Y" ? "거래중" : "거래 종료"}
+                    color={row.status === "Y" ? "success" : "default"}
                     size="small"
                     sx={{ minWidth: 80 }}
                   />
@@ -182,24 +167,21 @@ export default function BusinessPartnerViewPage() {
                   <Button
                     variant="outlined"
                     size="small"
-                    color={row.status === "거래중" ? "warning" : "success"}
-                    onClick={(e) => handleStatusToggle(e, row.id)}
-                    sx={{ mr: "1px" }} // ✅ 오른쪽에 1px 간격
+                    color={row.status === "Y" ? "warning" : "success"}
+                    onClick={(e) => handleStatusToggle(e, row.companyId as number)}
+                    sx={{ mr: "1px" }}
                   >
-                    {row.status === "거래중" ? "거래 종료" : "거래 재개"}
+                    {row.status === "Y" ? "거래 종료" : "거래 재개"}
                   </Button>
                   <Button
                     variant="outlined"
                     size="small"
                     color="error"
-                    onClick={(e) => handleDelete(e, row.id, row.name)}
+                    onClick={(e) => handleDelete(e, row.companyId as number, row.companyName)}
                   >
                     삭제
                   </Button>
                 </TableCell>
-
-           
-               
               </TableRow>
             ))}
           </TableBody>

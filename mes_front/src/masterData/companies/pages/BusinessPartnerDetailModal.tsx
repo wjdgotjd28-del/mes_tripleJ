@@ -147,8 +147,8 @@ export default function BusinessPartnerDetailModal({
               fullWidth
               size="small"
               label="사업자등록번호"
-              name="businessNumber"
-              value={formData.businessNumber}
+              name="bizRegNo"
+              value={formData.bizRegNo}
               onChange={handleChange}
               InputProps={{ readOnly: !isEditing }}
               sx={{ mb: 2 }}
@@ -157,8 +157,8 @@ export default function BusinessPartnerDetailModal({
               fullWidth
               size="small"
               label="업체명"
-              name="name"
-              value={formData.name}
+              name="companyName"
+              value={formData.companyName}
               onChange={handleChange}
               InputProps={{ readOnly: !isEditing }}
               sx={{ mb: 2 }}
@@ -167,8 +167,8 @@ export default function BusinessPartnerDetailModal({
               fullWidth
               size="small"
               label="대표명"
-              name="ceo"
-              value={formData.ceo}
+              name="ceoName"
+              value={formData.ceoName}
               onChange={handleChange}
               InputProps={{ readOnly: !isEditing }}
               sx={{ mb: 2 }}
@@ -247,8 +247,8 @@ export default function BusinessPartnerDetailModal({
                 onChange={handleChange}
                 sx={{ mb: 2 }}
               >
-                <MenuItem value="거래중">거래중</MenuItem>
-                <MenuItem value="거래 종료">거래 종료</MenuItem>
+                <MenuItem value="Y">거래중</MenuItem>
+                <MenuItem value="N">거래 종료</MenuItem>
               </TextField>
             ) : (
               <TextField
@@ -256,7 +256,7 @@ export default function BusinessPartnerDetailModal({
                 size="small"
                 label="거래 상태"
                 name="status"
-                value={formData.status}
+                value={formData.status === "Y" ? "거래중" : "거래 종료"}
                 InputProps={{ readOnly: true }}
                 sx={{ mb: 2 }}
               />
