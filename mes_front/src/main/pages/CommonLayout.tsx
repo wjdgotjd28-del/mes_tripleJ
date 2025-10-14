@@ -125,22 +125,23 @@ export default function CommonLayout() {
     pageMap[currentPath] || <Typography>페이지를 선택하세요.</Typography>;
 
   // 2계층 메뉴 클릭 핸들러
-  const handleSubClick = (
-    mainText: string,
-    subText: string,
-    hasSubs: boolean
-  ) => {
-    setActiveSub(subText);
-    if (hasSubs) {
-      // 3계층이 있으면 첫 번째 항목 선택
-      const mainMenu = mainMenus.find((m) => m.text === mainText);
-      const subMenu = mainMenu?.subs.find((s) => s.text === subText);
-      setActiveThird(subMenu?.subs ? subMenu.subs[0].text : null);
-    } else {
-      // 3계층이 없으면 null
-      setActiveThird(null);
-    }
-  };
+  const handleSubClick = (mainText: string, subText: string, hasSubs: boolean) => {
+  setActiveMain(mainText);
+  setActiveSub(subText);
+
+  const mainMenu = mainMenus.find(m => m.text === mainText);
+  const subMenu = mainMenu?.subs.find(s => s.text === subText);
+
+  if (hasSubs && subMenu?.subs && subMenu.subs.length > 0) {
+    // 3계층이 있는 경우 → 첫 번째 3계층 자동 선택
+    const firstThird = subMenu.subs[0].text;
+    setActiveThird(firstThird);
+  } else {
+    // 3계층이 없는 경우 → 바로 페이지 렌더링
+    setActiveThird(null);
+  }
+};
+
 
   // ================= Drawer 내용 =================
   const drawerContent = (
