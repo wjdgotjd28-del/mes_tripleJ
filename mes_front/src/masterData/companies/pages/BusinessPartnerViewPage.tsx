@@ -18,7 +18,6 @@ import {
   Paper,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import CompanyRegister from "./BusinessPartnerRegisterModal";
 import BusinessPartnerRegisterModel from "./BusinessPartnerRegisterModal";
 
 type StatusType = "거래중" | "거래 종료";

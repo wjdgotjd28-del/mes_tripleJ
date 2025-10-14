@@ -16,6 +16,7 @@ import {
   InputLabel,
   Select,
   type SelectChangeEvent,
+  Chip,
 } from "@mui/material";
 import {
   FileDownload as FileDownloadIcon,
@@ -35,7 +36,6 @@ export default function OrderViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
   const [openModal, setOpenModal] = useState(false);
-  const [editingRowId, setEditingRowId] = useState<number | null>(null);
   const [searchValues, setSearchValues] = useState({
     companyName: "",
     itemCode: "",
@@ -49,14 +49,14 @@ export default function OrderViewPage() {
     itemName: "",
     useYn: "",
   });
-  const [OrderItems, setOrderItems] = useState<OrderItems[]>([
+  const [orderItems, setOrderItems] = useState<OrderItems[]>([
     {
       id: 1,
       company_name: "일도테크",
       item_code: "AD21700028",
       item_name: "핀걸이 스프링",
       category: "일반",
-      paint_type: "분체",
+      paint_type: "LIQUID",
       unit_price: 1000,
       color: "white",
       note: "품질 검사 필수\n납기일 엄수 요망",
@@ -82,7 +82,7 @@ export default function OrderViewPage() {
       item_code: "3044705",
       item_name: "FAN COVER",
       category: "조선",
-      paint_type: "액체",
+      paint_type: "POWDER",
       unit_price: 200,
       color: "red",
       note: "특수 코팅 필요",
@@ -103,7 +103,7 @@ export default function OrderViewPage() {
       item_code: "2M95059A",
       item_name: "FAN COVER",
       category: "방산",
-      paint_type: "분체",
+      paint_type: "LIQUID",
       unit_price: 100,
       color: "blue",
       note: "",
@@ -113,7 +113,6 @@ export default function OrderViewPage() {
       routing: [],
     },
   ]);
-  const [editData, setEditData] = useState<OrderItems>(OrderItems[0]);
 
   // 검색 로직
   const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -130,8 +129,8 @@ export default function OrderViewPage() {
     setAppliedSearchValues(searchValues);
   };
 
-  // appliedSearchValues를 기준으로 필터링
-  const filteredData: OrderItems[] = OrderItems.filter((item) => {
+  // 검색 조건 및 필터링
+  const filteredData: OrderItems[] = orderItems.filter((item) => {
     return (
       (appliedSearchValues.companyName === "" || 
         item.company_name.toLowerCase().includes(appliedSearchValues.companyName.toLowerCase())) &&
@@ -144,40 +143,38 @@ export default function OrderViewPage() {
   });
 
   // CRUD 로직
-  const handleEditRow = (row: OrderItems) => {
-    setEditingRowId(row.id);
-    setEditData(row);
-  };
-
-  const handleSaveRow = () => {
-    setOrderItems((prev) => prev.map((row) => (row.id === editingRowId ? editData : row)));
-    setEditingRowId(null);
-  };
-
-  const handleCancelRow = () => setEditingRowId(null);
-
-  const handleEditChange = (field: keyof OrderItems, value: string | number) => {
-    setEditData((prev) => ({ ...prev, [field]: value }));
-  };
-
   const handleDelete = (id: number, company_name: string, item_name: string) => {
-    if (window.confirm(`${company_name}의 ${item_name}을(를) 삭제하시겠습니까?`)) {
+    if (window.confirm(`${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`)) {
       setOrderItems((prev) => prev.filter((row) => row.id !== id));
     }
   };
 
   const handleExcelDownload = () => {
-    exportToExcel(filteredData, "수주대상_품목조회");
+    exportToExcel(filteredData, "기준정보_수주대상_품목관리조회");
   };
 
   const handleSubmitAdd = (data: OrderItems) => {
-    const newId = Math.max(...OrderItems.map((d) => d.id), 0) + 1;
-    setOrderItems([...OrderItems, { ...data, id: newId }]);
+    const newId = Math.max(... orderItems.map((d) => d.id), 0) + 1;
+    setOrderItems([... orderItems, { ...data, id: newId }]);
   };
 
   const handleItemClick = (item: OrderItems) => {
     setSelectedItem(item);
     setOpenDetailModal(true);
+  };
+
+  // 상세 모달 내 저장 로직 (업데이트)
+  const handleItemSave = (updatedItem: OrderItems) => {
+    setOrderItems(prev => prev.map(item => (item.id === updatedItem.id ? updatedItem : item)));
+  };
+
+  // 추가: use_yn 상태 토글 핸들러
+  const handleToggleUseYn = (id: number) => {
+    setOrderItems(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, use_yn: item.use_yn === "Y" ? "N" : "Y" } : item
+      )
+    );
   };
 
   return (
@@ -232,6 +229,7 @@ export default function OrderViewPage() {
           </Button>
         </Box>
       </Box>
+
       {/* 테이블 영역 */}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 900 }}>
@@ -245,91 +243,66 @@ export default function OrderViewPage() {
               <TableCell sx={{ whiteSpace: 'nowrap' }}>도장방식</TableCell>
               <TableCell sx={{ whiteSpace: 'nowrap' }}>단가</TableCell>
               <TableCell sx={{ whiteSpace: 'nowrap' }}>비고</TableCell>
-              <TableCell align="center">
-                {editingRowId !== null ? "저장 / 취소" : "수정 / 삭제"}
-              </TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>거래상태</TableCell>
+              <TableCell sx={{ whiteSpace: 'nowrap' }}>사용여부</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredData.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.id}</TableCell>
+                <TableCell>{row.company_name}</TableCell>
+                <TableCell>{row.item_code}</TableCell>
                 <TableCell>
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      value={editData.company_name}
-                      onChange={(e) => handleEditChange("company_name", e.target.value)}
-                      fullWidth
-                    />
-                  ) : (
-                    row.company_name
-                  )}
-                </TableCell>
-                <TableCell>
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      value={editData.item_code}
-                      onChange={(e) => handleEditChange("item_code", e.target.value)}
-                      fullWidth
-                    />
-                  ) : (
-                    row.item_code
-                  )}
-                </TableCell>
-                <TableCell>
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      value={editData.item_name}
-                      onChange={(e) => handleEditChange("item_name", e.target.value)}
-                      fullWidth
-                    />
-                  ) : (
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        textDecoration: 'underline',
-                        color: 'primary.main',
-                        cursor: 'pointer',
-                        '&:hover': {
-                          color: 'primary.dark',
-                          fontWeight: 'bold'
-                        }
-                      }}
-                      onClick={() => handleItemClick(row)}
-                    >
-                      {row.item_name}
-                    </Typography>
-                  )}
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        color: 'primary.dark',
+                        fontWeight: 'bold'
+                      }
+                    }}
+                    onClick={() => handleItemClick(row)}
+                  >
+                    {row.item_name}
+                  </Typography>
                 </TableCell>
                 <TableCell>{row.category}</TableCell>
                 <TableCell>{row.paint_type}</TableCell>
                 <TableCell>{row.unit_price}</TableCell>
                 <TableCell>{row.note}</TableCell>
-                <TableCell align="center" sx={{ padding: 1 }}>
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', whiteSpace: 'nowrap' }}>
-                    {editingRowId === row.id ? (
-                      <>
-                        <Button variant="outlined" size="small" onClick={handleSaveRow}>
-                          저장
-                        </Button>
-                        <Button variant="outlined" size="small" color="error" onClick={handleCancelRow}>
-                          취소
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="outlined" size="small" onClick={() => handleEditRow(row)}>
-                          수정
-                        </Button>
-                        <Button variant="outlined" size="small" color="error" onClick={() => handleDelete(row.id, row.company_name, row.item_name)}>
-                          삭제
-                        </Button>
-                      </>
-                    )}
-                  </Box>
+                <TableCell align="center">
+                  <Chip
+                    label={row.status === "Y" ? "거래중" : "거래종료"}
+                    color={row.status === "Y" ? "success" : "error"}
+                    size="small"
+                    sx={{ minWidth: 80 }}
+                  />
+                </TableCell>
+                <TableCell align="center">
+                  <Chip
+                    label={row.use_yn === "Y" ? "사용중" : "사용중지"}
+                    color={row.use_yn === "Y" ? "success" : "default"}
+                    size="small"
+                    sx={{ minWidth: 80 }}
+                  />
+                </TableCell>
+                <TableCell align="center">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color={row.use_yn === "Y" ? "error" : "success"}
+                    onClick={() => handleToggleUseYn(row.id)}
+                    sx={{mr:1}}
+                  >
+                    {row.use_yn === "Y" ? "사용 중지" : "사용"}
+                  </Button>
+                  <Button variant="outlined" size="small" color="error" onClick={() => handleDelete(row.id, row.company_name, row.item_name)}>
+                    삭제
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -343,11 +316,13 @@ export default function OrderViewPage() {
         onClose={() => setOpenModal(false)}
         onSubmit={handleSubmitAdd}
       />
-      {/* 상세 조회 모달 */}
+
+      {/* 상세 조회 및 수정 모달 */}
       <OrderDetailModal
         open={openDetailModal}
         onClose={() => setOpenDetailModal(false)}
         data={selectedItem}
+        onSave={handleItemSave}
       />
     </Box>
   );

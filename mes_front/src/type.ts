@@ -24,10 +24,35 @@ export interface OrderItems {
   category: string;
   color: string;
   unit_price: number;
-  paint_type: string;
+  paint_type: "LIQUID" | "POWDER";
   note: string;
   use_yn: string;
   status: string;
   image?: ImageData[];      // 다중 이미지
   routing?: RoutingData[];  // 공정 프로세스 배열
 }
+
+// 테이블 데이터 타입
+export interface RawItems {
+  id: number;
+  company_name: string;
+  item_code: string;
+  item_name: string;
+  category: string;
+  color: string;
+  spec_qty: number;
+  spec_unit: string;
+  manufacturer: string;
+  note: string;
+  use_yn: string;
+}
+
+export interface Company {
+  id: number;
+  type: "거래처" | "매입처";
+  name: string;
+  ceo: string;
+  address: string;
+  note: string;
+  status: "Y" | "N";
+};
