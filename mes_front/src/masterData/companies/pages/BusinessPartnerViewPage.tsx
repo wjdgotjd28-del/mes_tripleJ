@@ -1,202 +1,103 @@
+// BusinessPartnerRegisterModal.tsx
 import * as React from "react";
-import { useState } from "react";
-import {
-  Box,
-  Button,
-  Chip,
-  Typography,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TextField,
-} from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material";
-import BusinessPartnerRegisterModel from "./BusinessPartnerRegisterModal";
-import { searchData } from "../../../Common/SearchUtils";
-
-type StatusType = "거래중" | "거래 종료";
-type CompanyType = "거래처" | "매입처";
+import { Box, Button, Modal, TextField, MenuItem, Typography } from "@mui/material";
 
 type Company = {
   id: number;
-  type: CompanyType;
+  type: "거래처" | "매입처";
   name: string;
   ceo: string;
+  businessNumber: string;
+  ceoPhone: string;
+  managerName: string;
+  managerPhone: string;
+  managerEmail: string;
   address: string;
   note: string;
-  status: StatusType;
+  status: "거래중" | "거래 종료";
 };
 
-const initialData: Company[] = [
-  { id: 1, type: "거래처", name: "한송상사", ceo: "김태준", address: "경기도 안산시 단원구 산업로 124", note: "프라이머, 상도 도료 납품", status: "거래중" },
-  { id: 2, type: "매입처", name: "강남제비스", ceo: "김준형", address: "경기도 화성시 남양읍 공단로 58", note: "도로, 에폭시 공급", status: "거래중" },
-  { id: 3, type: "매입처", name: "페인트메카", ceo: "박선희", address: "충청남도 아산시 탕정면 산업단지로 102", note: "프라이머, 상도 도료 공급", status: "거래 종료" },
-  { id: 4, type: "거래처", name: "일도포장", ceo: "박선호", address: "경기도 시흥시 정왕동 2487-12", note: "포장재, 박스류 납품", status: "거래 종료" },
-  { id: 5, type: "거래처", name: "일도테크", ceo: "김성호", address: "경기도 안산시 반월공단로 77", note: "대전방지 무광 도료 납품", status: "거래중" },
-  { id: 6, type: "거래처", name: "일도정공", ceo: "최윤석", address: "경기도 안산시 원시로 210", note: "금속 시 필요한 제품 공급", status: "거래중" },
-  { id: 7, type: "매입처", name: "이도정밀", ceo: "이윤식", address: "경기도 시흥시 공단1대로 95", note: "스테인리스 공급", status: "거래중" },
-  { id: 8, type: "거래처", name: "세진테크", ceo: "박재우", address: "경기도 시흥시 공단2대로 83", note: "도막두께 측정기 납품", status: "거래중" },
-  { id: 9, type: "매입처", name: "세진테크", ceo: "이정훈", address: "인천광역시 남동구 고잔로 45", note: "포장재, 박스류 공급", status: "거래중" },
-  { id: 10, type: "매입처", name: "대명물류", ceo: "김성민", address: "인천광역시 연수구 동춘동 45", note: "지그, 고정장치 공급", status: "거래중" },
-];
+type RegisterProps = {
+  open: boolean;
+  onClose: () => void;
+  onAdd: (newCompany: Company) => void;
+};
 
-export default function BusinessPartnerViewPage() {
-  const [allRows, setAllRows] = useState<Company[]>(initialData);
-  const [filterType, setFilterType] = useState<string>("모든 업체");
-  const [companyNameSearch, setCompanyNameSearch] = useState("");
-  const [ceoNameSearch, setCeoNameSearch] = useState("");
+const style = {
+  position: "absolute" as const,
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 350,
+  maxHeight: "90%",
+  overflowY: "auto",
+  bgcolor: "background.paper",
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 4,
+  display: "flex",
+  flexDirection: "column",
+};
 
-  const [searchParams, setSearchParams] = useState({
-    companyName: "",
-    ceoName: "",
+export default function BusinessPartnerRegisterModal({ open, onClose, onAdd }: RegisterProps) {
+  const [formData, setFormData] = React.useState<Omit<Company, "id" | "status">>({
+    type: "거래처",
+    businessNumber: "",
+    name: "",
+    ceo: "",
+    ceoPhone: "",
+    managerName: "",
+    managerPhone: "",
+    managerEmail: "",
+    address: "",
+    note: "",
   });
 
-  // 거래 상태 변경
-  const handleStatusChange = (id: number) => {
-    setAllRows((prev) =>
-      prev.map((row) =>
-        row.id === id
-          ? { ...row, status: row.status === "거래중" ? "거래 종료" : "거래중" }
-          : row
-      )
-    );
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  // 검색 버튼 클릭 시 실행
-  const handleSearch = () => {
-    setSearchParams({
-      companyName: companyNameSearch,
-      ceoName: ceoNameSearch,
-    });
-  };
-
-  // 필터링
-  const typeFilteredRows = allRows.filter((row) => {
-    if (filterType === "모든 업체") return true;
-    return row.type === filterType;
-  });
-
-  const companyNameFilteredRows = searchData(typeFilteredRows, searchParams.companyName, ["name"]);
-  const filteredRows = searchData(companyNameFilteredRows, searchParams.ceoName, ["ceo"]);
-
-  // 필터 select 변경
-  const handleFilterChange = (event: SelectChangeEvent<string>) => {
-    setFilterType(event.target.value);
+  const handleAdd = () => {
+    const newCompany: Company = {
+      ...formData,
+      id: Date.now(), // 임시 id
+      status: "거래중",
+    };
+    onAdd(newCompany);
+    onClose();
   };
 
   return (
-    <Box sx={{ padding: 4, width: "100%" }}>
-      {/* 제목 */}
-      <Typography variant="h5" sx={{ mb: 1 }}>
-        거래처 관리
-      </Typography>
-
-      {/* 상단 필터 및 버튼 영역 */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        {/* 왼쪽: 필터 영역 */}
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            {/* 업체 유형 필터 */}
-            <FormControl sx={{ minWidth: 150 }} size="small">
-            <InputLabel id="company-type-filter-label">업체 유형</InputLabel>
-            <Select
-                labelId="company-type-filter-label"
-                id="company-type-filter"
-                value={filterType}
-                label="업체 유형"
-                onChange={handleFilterChange}
-            >
-                <MenuItem value="모든 업체">모든 업체</MenuItem>
-                <MenuItem value="거래처">거래처</MenuItem>
-                <MenuItem value="매입처">매입처</MenuItem>
-            </Select>
-            </FormControl>
-
-            {/* 검색창 - 업체명 */}
-            <TextField
-                size="small"
-                placeholder="업체명"
-                value={companyNameSearch}
-                onChange={(e) => setCompanyNameSearch(e.target.value)}
-                sx={{ width: 150 }}
-            />
-            {/* 검색창 - 대표명 */}
-            <TextField
-                size="small"
-                placeholder="대표명"
-                value={ceoNameSearch}
-                onChange={(e) => setCeoNameSearch(e.target.value)}
-                sx={{ width: 150 }}
-            />
-            <Button variant="contained" onClick={handleSearch}>
-                검색
-            </Button>
+    <Modal open={open} onClose={onClose}>
+      <Box sx={style}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}>
+          업체 등록
+        </Typography>
+        <Box sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}>
+          <TextField select fullWidth size="small" label="업체 유형" name="type" value={formData.type} onChange={handleChange} sx={{ mb: 2 }}>
+            <MenuItem value="거래처">거래처</MenuItem>
+            <MenuItem value="매입처">매입처</MenuItem>
+          </TextField>
+          <TextField fullWidth size="small" label="사업자등록번호" name="businessNumber" value={formData.businessNumber} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="업체명" name="name" value={formData.name} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="대표명" name="ceo" value={formData.ceo} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="대표전화번호" name="ceoPhone" value={formData.ceoPhone} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="담당자명" name="managerName" value={formData.managerName} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={formData.managerPhone} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="담당자 이메일" name="managerEmail" value={formData.managerEmail} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="주소" name="address" value={formData.address} onChange={handleChange} sx={{ mb: 2 }} />
+          <TextField fullWidth size="small" label="비고" name="note" value={formData.note} onChange={handleChange} multiline rows={2} />
         </Box>
-
-        {/* 오른쪽: 업체 등록 모달 버튼 */}
-        <BusinessPartnerRegisterModel />
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
+          <Button variant="contained" size="small" onClick={handleAdd}>
+            등록
+          </Button>
+          <Button variant="outlined" size="small" onClick={onClose} sx={{ ml: 1 }}>
+            취소
+          </Button>
+        </Box>
       </Box>
-
-      {/* 테이블 영역 */}
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 1000 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">번호</TableCell>
-              <TableCell align="center">업체 유형</TableCell>
-              <TableCell align="center">업체명</TableCell>
-              <TableCell align="center">대표명</TableCell>
-              <TableCell align="center">주소</TableCell>
-              <TableCell align="center">비고</TableCell>
-              <TableCell align="center">거래 상태</TableCell>
-              <TableCell align="center"></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredRows.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell align="center">{row.id}</TableCell>
-                <TableCell align="center">{row.type}</TableCell>
-                <TableCell align="center">{row.name}</TableCell>
-                <TableCell align="center">{row.ceo}</TableCell>
-                <TableCell align="center">{row.address}</TableCell>
-                <TableCell align="center">{row.note}</TableCell>
-                <TableCell align="center">
-                  <Chip
-                    label={row.status}
-                    color={row.status === "거래중" ? "success" : "default"}
-                    size="small"
-                    sx={{ minWidth: 80 }}
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => handleStatusChange(row.id)}
-                  >
-                    {row.status === "거래중" ? "거래 종료" : "거래 재개"}
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+    </Modal>
   );
 }
