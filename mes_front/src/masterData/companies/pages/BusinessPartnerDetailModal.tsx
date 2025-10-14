@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Box, Button, TextField, MenuItem, Typography, Modal } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 
 type Company = {
   id: number;
@@ -55,9 +56,9 @@ export default function BusinessPartnerDetailModal({
 
   if (!formData) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value } as Company);
+    setFormData({ ...formData, [name as string]: value } as Company);
   };
 
   const handleSave = () => {
@@ -193,14 +194,33 @@ export default function BusinessPartnerDetailModal({
             InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-          <TextField
-            fullWidth
-            size="small"
-            label="거래 상태"
-            name="status"
-            value={formData.status}
-            InputProps={{ readOnly: true }}
-          />
+
+          {/* 거래 상태 */}
+          {isEditing ? (
+            <TextField
+              select
+              fullWidth
+              size="small"
+              label="거래 상태"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            >
+              <MenuItem value="거래중">거래중</MenuItem>
+              <MenuItem value="거래 종료">거래 종료</MenuItem>
+            </TextField>
+          ) : (
+            <TextField
+              fullWidth
+              size="small"
+              label="거래 상태"
+              name="status"
+              value={formData.status}
+              InputProps={{ readOnly: true }}
+              sx={{ mb: 2 }}
+            />
+          )}
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
