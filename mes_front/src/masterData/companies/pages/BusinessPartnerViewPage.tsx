@@ -2,7 +2,6 @@ import * as React from "react";
 import { useState } from "react";
 import {
   Box,
-  Button,
   Chip,
   Typography,
   FormControl,
@@ -16,79 +15,84 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TextField,
+  Button,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import BusinessPartnerRegisterModel from "./BusinessPartnerRegisterModal";
-
-type StatusType = "거래중" | "거래 종료";
-type CompanyType = "거래처" | "매입처";
-
-type Company = {
-  id: number;
-  type: CompanyType;
-  name: string;
-  ceo: string;
-  address: string;
-  note: string;
-  status: StatusType;
-};
-
-const initialData: Company[] = [
-  { id: 1, type: "거래처", name: "한송상사", ceo: "김태준", address: "경기도 안산시 단원구 산업로 124", note: "프라이머, 상도 도료 납품", status: "거래중" },
-  { id: 2, type: "매입처", name: "강남제비스", ceo: "김준형", address: "경기도 화성시 남양읍 공단로 58", note: "도로, 에폭시 공급", status: "거래중" },
-  { id: 3, type: "매입처", name: "페인트메카", ceo: "박선희", address: "충청남도 아산시 탕정면 산업단지로 102", note: "프라이머, 상도 도료 공급", status: "거래 종료" },
-  { id: 4, type: "거래처", name: "일도포장", ceo: "박선호", address: "경기도 시흥시 정왕동 2487-12", note: "포장재, 박스류 납품", status: "거래 종료" },
-  { id: 5, type: "거래처", name: "일도테크", ceo: "김성호", address: "경기도 안산시 반월공단로 77", note: "대전방지 무광 도료 납품", status: "거래중" },
-  { id: 6, type: "거래처", name: "일도정공", ceo: "최윤석", address: "경기도 안산시 원시로 210", note: "금속 시 필요한 제품 공급", status: "거래중" },
-  { id: 7, type: "매입처", name: "이도정밀", ceo: "이윤식", address: "경기도 시흥시 공단1대로 95", note: "스테인리스 공급", status: "거래중" },
-  { id: 8, type: "거래처", name: "세진테크", ceo: "박재우", address: "경기도 시흥시 공단2대로 83", note: "도막두께 측정기 납품", status: "거래중" },
-  { id: 9, type: "매입처", name: "세진테크", ceo: "이정훈", address: "인천광역시 남동구 고잔로 45", note: "포장재, 박스류 공급", status: "거래중" },
-  { id: 10, type: "매입처", name: "대명물류", ceo: "김성민", address: "인천광역시 연수구 동춘동 45", note: "지그, 고정장치 공급", status: "거래중" },
-];
+import BusinessPartnerDetailModal from "./BusinessPartnerDetailModal";
+import BusinessPartnerRegisterModal from "./BusinessPartnerRegisterModal";
+import type { Company } from "../type";
 
 export default function BusinessPartnerViewPage() {
+  const initialData: Company[] = [
+    { companyId: 1, type: "거래처", companyName: "한송상사", ceoName: "김태준", bizRegNo: "123-45-67890", ceoPhone: "010-1111-1111", managerName: "홍길동", managerPhone: "010-2222-2222", managerEmail: "manager@hansong.com", address: "경기도 안산시 단원구 산업로 124", note: "프라이머, 상도 도료 납품", status: "Y" },
+    { companyId: 2, type: "매입처", companyName: "강남제비스", ceoName: "김준형", bizRegNo: "234-56-78901", ceoPhone: "010-3333-3333", managerName: "박영희", managerPhone: "010-4444-4444", managerEmail: "manager@gangnam.com", address: "경기도 화성시 남양읍 공단로 58", note: "도로, 에폭시 공급", status: "Y" },
+    { companyId: 3, type: "매입처", companyName: "페인트메카", ceoName: "박선희", bizRegNo: "345-67-89012", ceoPhone: "010-5555-5555", managerName: "이철수", managerPhone: "010-6666-6666", managerEmail: "manager@paint.com", address: "충청남도 아산시 탕정면 산업단지로 102", note: "프라이머, 상도 도료 공급", status: "N" },
+    { companyId: 4, type: "거래처", companyName: "일도포장", ceoName: "박선호", bizRegNo: "456-78-90123", ceoPhone: "010-7777-7777", managerName: "최민수", managerPhone: "010-8888-8888", managerEmail: "manager@ildo.com", address: "경기도 시흥시 정왕동 산업로 11", note: "포장재 납품", status: "Y" },
+  ];
+
   const [allRows, setAllRows] = useState<Company[]>(initialData);
   const [filterType, setFilterType] = useState<string>("모든 업체");
+  const [searchName, setSearchName] = useState("");
+  const [searchCeo, setSearchCeo] = useState("");
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-  // 거래 상태 변경
-  const handleStatusChange = (id: number) => {
+  const handleAddCompany = (newCompany: Company) => {
+    setAllRows((prev) => [...prev, newCompany]);
+  };
+
+  const handleDelete = (event: React.MouseEvent, companyId: number, companyName: string) => {
+    event.stopPropagation();
+    if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
+      setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
+    }
+  };
+
+  const handleStatusToggle = (event: React.MouseEvent, companyId: number) => {
+    event.stopPropagation();
     setAllRows((prev) =>
       prev.map((row) =>
-        row.id === id
-          ? { ...row, status: row.status === "거래중" ? "거래 종료" : "거래중" }
+        row.companyId === companyId
+          ? {
+              ...row,
+              status: row.status === "Y" ? "N" : "Y",
+            }
           : row
       )
     );
   };
 
-  // 필터링
-  const filteredRows = allRows.filter((row) => {
-    if (filterType === "모든 업체") return true;
-    return row.type === filterType;
-  });
-
-  // 필터 select 변경
   const handleFilterChange = (event: SelectChangeEvent<string>) => {
-    setFilterType(event.target.value);
+    setFilterType(event.target.value as string);
   };
+
+  const handleRowClick = (company: Company) => {
+    setSelectedCompany(company);
+    setDetailOpen(true);
+  };
+
+  const handleSaveDetail = (updatedCompany: Company) => {
+    setAllRows((prev) =>
+      prev.map((row) => (row.companyId === updatedCompany.companyId ? updatedCompany : row))
+    );
+  };
+
+  const filteredRows = allRows.filter((row) => {
+    if (filterType !== "모든 업체" && row.type !== filterType) return false;
+    if (searchName && !row.companyName.includes(searchName)) return false;
+    if (searchCeo && !row.ceoName.includes(searchCeo)) return false;
+    return true;
+  });
 
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
-      {/* 제목 */}
-      <Typography variant="h5" sx={{ mb: 1 }}>
+      <Typography variant="h5" sx={{ mb: 2 }}>
         업체 조회 페이지
       </Typography>
 
-      {/* 상단 필터 및 버튼 영역 */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        {/* 왼쪽: 업체 유형 필터 */}
+      {/* 상단 필터 영역 */}
+      <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
         <FormControl sx={{ minWidth: 150 }} size="small">
           <InputLabel id="company-type-filter-label">업체 유형</InputLabel>
           <Select
@@ -104,16 +108,30 @@ export default function BusinessPartnerViewPage() {
           </Select>
         </FormControl>
 
-        {/* 오른쪽: 업체 등록 모달 버튼 */}
-        <BusinessPartnerRegisterModel />
+        <TextField
+          size="small"
+          label="업체명 검색"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+        />
+        <TextField
+          size="small"
+          label="대표명 검색"
+          value={searchCeo}
+          onChange={(e) => setSearchCeo(e.target.value)}
+        />
+
+        <Box sx={{ ml: "auto" }}>
+          <BusinessPartnerRegisterModal onAdd={handleAddCompany} />
+        </Box>
       </Box>
 
-      {/* 테이블 영역 */}
+      {/* 테이블 */}
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 1000 }}>
+        <Table>
           <TableHead>
             <TableRow>
-              <TableCell align="center">번호</TableCell>
+              <TableCell align="center">ID</TableCell>
               <TableCell align="center">업체 유형</TableCell>
               <TableCell align="center">업체명</TableCell>
               <TableCell align="center">대표명</TableCell>
@@ -125,28 +143,43 @@ export default function BusinessPartnerViewPage() {
           </TableHead>
           <TableBody>
             {filteredRows.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell align="center">{row.id}</TableCell>
+              <TableRow
+                key={row.companyId}
+                hover
+                sx={{ cursor: "pointer" }}
+                onClick={() => handleRowClick(row)}
+              >
+                <TableCell align="center">{row.companyId}</TableCell>
                 <TableCell align="center">{row.type}</TableCell>
-                <TableCell align="center">{row.name}</TableCell>
-                <TableCell align="center">{row.ceo}</TableCell>
+                <TableCell align="center">{row.companyName}</TableCell>
+                <TableCell align="center">{row.ceoName}</TableCell>
                 <TableCell align="center">{row.address}</TableCell>
                 <TableCell align="center">{row.note}</TableCell>
                 <TableCell align="center">
                   <Chip
-                    label={row.status}
-                    color={row.status === "거래중" ? "success" : "default"}
+                    label={row.status === "Y" ? "거래중" : "거래 종료"}
+                    color={row.status === "Y" ? "success" : "default"}
                     size="small"
                     sx={{ minWidth: 80 }}
                   />
                 </TableCell>
                 <TableCell align="center">
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     size="small"
-                    onClick={() => handleStatusChange(row.id)}
+                    color={row.status === "Y" ? "warning" : "success"}
+                    onClick={(e) => handleStatusToggle(e, row.companyId as number)}
+                    sx={{ mr: "1px" }}
                   >
-                    {row.status === "거래중" ? "거래 종료" : "거래 재개"}
+                    {row.status === "Y" ? "거래 종료" : "거래 재개"}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={(e) => handleDelete(e, row.companyId as number, row.companyName)}
+                  >
+                    삭제
                   </Button>
                 </TableCell>
               </TableRow>
@@ -154,6 +187,14 @@ export default function BusinessPartnerViewPage() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* 상세 모달 */}
+      <BusinessPartnerDetailModal
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        company={selectedCompany}
+        onSave={handleSaveDetail}
+      />
     </Box>
   );
 }
