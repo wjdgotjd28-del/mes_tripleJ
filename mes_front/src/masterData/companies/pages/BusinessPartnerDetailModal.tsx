@@ -68,8 +68,13 @@ export default function BusinessPartnerDetailModal({
     }
   };
 
+  const handleCloseModal = () => {
+    setIsEditing(false); // 모달이 닫힐 때 편집 상태 초기화
+    onClose(); // 부모 컴포넌트의 onClose 핸들러 호출
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleCloseModal}>
       <Box sx={style}>
         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}>
           업체 상세 조회
@@ -243,7 +248,7 @@ export default function BusinessPartnerDetailModal({
               저장
             </Button>
           )}
-          <Button variant="contained" size="small" onClick={onClose}>
+          <Button variant="contained" size="small" onClick={handleCloseModal}>
             닫기
           </Button>
         </Box>
