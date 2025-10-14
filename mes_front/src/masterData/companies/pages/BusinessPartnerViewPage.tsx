@@ -51,38 +51,9 @@ export default function BusinessPartnerViewPage() {
   const [searchCeo, setSearchCeo] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [editingRowId, setEditingRowId] = useState<number | null>(null);
-  const [editData, setEditData] = useState<Company | null>(null);
 
   const handleAddCompany = (newCompany: Company) => {
     setAllRows((prev) => [...prev, newCompany]);
-  };
-
-  const handleEditRow = (event: React.MouseEvent, company: Company) => {
-    event.stopPropagation();
-    setEditingRowId(company.id);
-    setEditData(company);
-  };
-
-  const handleSaveRow = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    if (editData) {
-      setAllRows((prev) =>
-        prev.map((row) => (row.id === editData.id ? editData : row))
-      );
-      setEditingRowId(null);
-      setEditData(null);
-    }
-  };
-
-  const handleCancelRow = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    setEditingRowId(null);
-    setEditData(null);
-  };
-
-  const handleEditChange = (field: keyof Company, value: string) => {
-    setEditData((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
   const handleDelete = (event: React.MouseEvent, id: number, name: string) => {
@@ -92,13 +63,25 @@ export default function BusinessPartnerViewPage() {
     }
   };
 
+  const handleStatusToggle = (event: React.MouseEvent, id: number) => {
+    event.stopPropagation();
+    setAllRows((prev) =>
+      prev.map((row) =>
+        row.id === id
+          ? {
+              ...row,
+              status: row.status === "거래중" ? "거래 종료" : "거래중",
+            }
+          : row
+      )
+    );
+  };
+
   const handleFilterChange = (event: SelectChangeEvent<string>) => {
     setFilterType(event.target.value as string);
   };
 
   const handleRowClick = (company: Company) => {
-    // 편집 중이면 상세 모달 열지 않음
-    if (editingRowId !== null) return;
     setSelectedCompany(company);
     setDetailOpen(true);
   };
@@ -122,7 +105,7 @@ export default function BusinessPartnerViewPage() {
         업체 조회 페이지
       </Typography>
 
-      {/* 상단 영역 */}
+      {/* 상단 필터 영역 */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
         <FormControl sx={{ minWidth: 150 }} size="small">
           <InputLabel id="company-type-filter-label">업체 유형</InputLabel>
@@ -152,7 +135,7 @@ export default function BusinessPartnerViewPage() {
           onChange={(e) => setSearchCeo(e.target.value)}
         />
 
-        <Box sx={{ ml: 'auto' }}>
+        <Box sx={{ ml: "auto" }}>
           <BusinessPartnerRegisterModal onAdd={handleAddCompany} />
         </Box>
       </Box>
@@ -169,7 +152,8 @@ export default function BusinessPartnerViewPage() {
               <TableCell align="center">주소</TableCell>
               <TableCell align="center">비고</TableCell>
               <TableCell align="center">거래 상태</TableCell>
-              <TableCell align="center">수정/삭제</TableCell>
+              <TableCell align="center">상태 변경</TableCell>
+              <TableCell align="center">삭제</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -182,26 +166,8 @@ export default function BusinessPartnerViewPage() {
               >
                 <TableCell align="center">{row.id}</TableCell>
                 <TableCell align="center">{row.type}</TableCell>
-                <TableCell align="center">
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      value={editData?.name}
-                      onChange={(e) => handleEditChange("name", e.target.value)}
-                      fullWidth
-                    />
-                  ) : row.name}
-                </TableCell>
-                <TableCell align="center">
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      value={editData?.ceo}
-                      onChange={(e) => handleEditChange("ceo", e.target.value)}
-                      fullWidth
-                    />
-                  ) : row.ceo}
-                </TableCell>
+                <TableCell align="center">{row.name}</TableCell>
+                <TableCell align="center">{row.ceo}</TableCell>
                 <TableCell align="center">{row.address}</TableCell>
                 <TableCell align="center">{row.note}</TableCell>
                 <TableCell align="center">
@@ -213,27 +179,24 @@ export default function BusinessPartnerViewPage() {
                   />
                 </TableCell>
                 <TableCell align="center">
-                  <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                    {editingRowId === row.id ? (
-                      <>
-                        <Button variant="outlined" size="small" onClick={handleSaveRow}>
-                          저장
-                        </Button>
-                        <Button variant="outlined" size="small" color="error" onClick={handleCancelRow}>
-                          취소
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="outlined" size="small" onClick={(e) => handleEditRow(e, row)}>
-                          수정
-                        </Button>
-                        <Button variant="outlined" size="small" color="error" onClick={(e) => handleDelete(e, row.id, row.name)}>
-                          삭제
-                        </Button>
-                      </>
-                    )}
-                  </Box>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color={row.status === "거래중" ? "warning" : "success"}
+                    onClick={(e) => handleStatusToggle(e, row.id)}
+                  >
+                    {row.status === "거래중" ? "거래 종료" : "거래 재개"}
+                  </Button>
+                </TableCell>
+                <TableCell align="center">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={(e) => handleDelete(e, row.id, row.name)}
+                  >
+                    삭제
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

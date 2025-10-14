@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Box, Button, TextField, MenuItem, Typography, Modal } from "@mui/material";
 
-
 type Company = {
   id: number;
   type: "거래처" | "매입처";
@@ -21,7 +20,7 @@ type BusinessPartnerDetailModalProps = {
   open: boolean;
   onClose: () => void;
   company: Company | null;
-  onSave: (updatedCompany: Company) => void; // 상위에서 상태 업데이트
+  onSave: (updatedCompany: Company) => void;
 };
 
 const style = {
@@ -48,39 +47,57 @@ export default function BusinessPartnerDetailModal({
 }: BusinessPartnerDetailModalProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [formData, setFormData] = React.useState<Company | null>(company);
+  const [backupData, setBackupData] = React.useState<Company | null>(null);
 
   React.useEffect(() => {
     setFormData(company);
-    setIsEditing(false); // 모달 열 때 읽기 전용으로 초기화
+    setBackupData(company);
+    setIsEditing(false);
   }, [company]);
 
   if (!formData) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name as string]: value } as Company);
   };
 
   const handleSave = () => {
     if (formData) {
-      onSave(formData); // 상위 컴포넌트로 수정된 데이터 전달
+      onSave(formData);
+      setBackupData(formData); // 저장 시 최신 데이터 백업
       setIsEditing(false);
     }
   };
 
+  const handleCancel = () => {
+    // 수정 취소 시 원래 데이터로 복구
+    if (backupData) setFormData(backupData);
+    setIsEditing(false);
+  };
+
   const handleCloseModal = () => {
-    setIsEditing(false); // 모달이 닫힐 때 편집 상태 초기화
-    onClose(); // 부모 컴포넌트의 onClose 핸들러 호출
+    setIsEditing(false);
+    onClose();
   };
 
   return (
     <Modal open={open} onClose={handleCloseModal}>
       <Box sx={style}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}>
+        <Typography
+          variant="h6"
+          sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}
+        >
           업체 상세 조회
         </Typography>
 
-        <Box sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}>
+        <Box
+          sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}
+        >
           {/* 업체 유형 */}
           {isEditing ? (
             <TextField
@@ -228,29 +245,47 @@ export default function BusinessPartnerDetailModal({
           )}
         </Box>
 
+        {/* 하단 버튼 영역 */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
           {!isEditing ? (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => setIsEditing(true)}
-              sx={{ mr: 1 }}
-            >
-              수정
-            </Button>
+            <>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setIsEditing(true)}
+                sx={{ mr: 1 }}
+              >
+                수정
+              </Button>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleCloseModal}
+              >
+                닫기
+              </Button>
+            </>
           ) : (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={handleSave}
-              sx={{ mr: 1 }}
-            >
-              저장
-            </Button>
+            <>
+              <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                onClick={handleSave}
+                sx={{ mr: 1 }}
+              >
+                저장
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                color="inherit"
+                onClick={handleCancel}
+              >
+                취소
+              </Button>
+            </>
           )}
-          <Button variant="contained" size="small" onClick={handleCloseModal}>
-            닫기
-          </Button>
         </Box>
       </Box>
     </Modal>
