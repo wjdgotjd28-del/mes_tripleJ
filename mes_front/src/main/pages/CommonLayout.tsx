@@ -17,7 +17,6 @@ import {
 import { Menu as MenuIcon, Layers, Inventory } from "@mui/icons-material";
 
 import RoutingViewPage from "../../masterData/routings/pages/RoutingViewPage";
-import OrderItemViewPage from "../../orders/inbound/pages/OrderItemViewPage";
 import InboundHistoryPage from "../../orders/inbound/pages/InboundHistoryPage";
 import OrderInViewPage from "../../orders/inbound/pages/OrderInViewPage";
 import OrderOutViewPage from "../../orders/outbound/pages/OrderOutViewPage";
@@ -43,7 +42,7 @@ const mainMenus: {
     text: "수주 대상 관리",
     icon: <Inventory />,
     subs: [
-      { text: "입고", subMenus: ["입고 품목 조회/등록", "입고된 수주 정보"] },
+      { text: "입고", subMenus: ["입고 품목 조회/등록", "입고된 수주 이력"] },
       { text: "출고", subMenus: ["등록", "조회"] },
     ],
   },
@@ -95,9 +94,9 @@ export default function CommonLayout() {
   };
 
   const renderPage = () => {
-    if (activeThird === "입고 품목 조회/등록") return <OrderItemViewPage />;
-    if (activeThird === "입고된 수주 정보") return <InboundHistoryPage />;
-    if (activeSub === "입고") return <OrderInViewPage />;
+    if (activeThird === "입고 품목 조회/등록") return <OrderInViewPage />;
+    if (activeThird === "입고된 수주 이력") return <InboundHistoryPage />;
+    // if (activeSub === "입고") return <OrderInViewPage />;
     if (activeSub === "출고") return <OrderOutViewPage />;
     if (activeSub === "입고" && activeMain === "원자재 관리")
       return <RawInViewPage />;
@@ -132,14 +131,32 @@ export default function CommonLayout() {
             {activeMain === main.text && (
               <List sx={{ pl: 2 }}>
                 {main.subs.map((sub) => (
-                  <ListItem disablePadding key={sub.text}>
-                    <ListItemButton
-                      selected={activeSub === sub.text}
-                      onClick={() => handleSubClick(sub.text, sub.subMenus)}
-                    >
-                      <ListItemText primary={`- ${sub.text}`} />
-                    </ListItemButton>
-                  </ListItem>
+                  <React.Fragment key={sub.text}>
+                    <ListItem disablePadding>
+                      <ListItemButton
+                        selected={activeSub === sub.text}
+                        onClick={() => handleSubClick(sub.text, sub.subMenus)}
+                      >
+                        <ListItemText primary={`- ${sub.text}`} />
+                      </ListItemButton>
+                    </ListItem>
+
+                    {/* ✅ 하위 메뉴 표시 */}
+                    {activeSub === sub.text && sub.subMenus && (
+                      <List sx={{ pl: 4 }}>
+                        {sub.subMenus.map((third) => (
+                          <ListItem disablePadding key={third}>
+                            <ListItemButton
+                              selected={activeThird === third}
+                              onClick={() => setActiveThird(third)}
+                            >
+                              <ListItemText primary={`-- ${third}`} />
+                            </ListItemButton>
+                          </ListItem>
+                        ))}
+                      </List>
+                    )}
+                  </React.Fragment>
                 ))}
               </List>
             )}
