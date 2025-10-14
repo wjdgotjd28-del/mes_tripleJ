@@ -42,6 +42,13 @@ export default function OrderViewPage() {
     itemName: "",
     useYn: "",
   });
+  // 실제 적용된 검색 조건 (검색 버튼 클릭 시 업데이트)
+  const [appliedSearchValues, setAppliedSearchValues] = useState({
+    companyName: "",
+    itemCode: "",
+    itemName: "",
+    useYn: "",
+  });
   const [OrderItems, setOrderItems] = useState<OrderItems[]>([
     {
       id: 1,
@@ -120,15 +127,19 @@ export default function OrderViewPage() {
   };
 
   const handleSearch = () => {
-    console.log("검색 실행:", searchValues);
+    setAppliedSearchValues(searchValues);
   };
 
+  // appliedSearchValues를 기준으로 필터링
   const filteredData: OrderItems[] = OrderItems.filter((item) => {
     return (
-      (searchValues.companyName === "" || item.company_name.toLowerCase().includes(searchValues.companyName.toLowerCase())) &&
-      (searchValues.itemCode === "" || item.item_code.toLowerCase().includes(searchValues.itemCode.toLowerCase())) &&
-      (searchValues.itemName === "" || item.item_name.toLowerCase().includes(searchValues.itemName.toLowerCase())) &&
-      (searchValues.useYn === "" || item.use_yn === searchValues.useYn)
+      (appliedSearchValues.companyName === "" || 
+        item.company_name.toLowerCase().includes(appliedSearchValues.companyName.toLowerCase())) &&
+      (appliedSearchValues.itemCode === "" || 
+        item.item_code.toLowerCase().includes(appliedSearchValues.itemCode.toLowerCase())) &&
+      (appliedSearchValues.itemName === "" || 
+        item.item_name.toLowerCase().includes(appliedSearchValues.itemName.toLowerCase())) &&
+      (appliedSearchValues.useYn === "" || item.use_yn === appliedSearchValues.useYn)
     );
   });
 
@@ -203,6 +214,7 @@ export default function OrderViewPage() {
           <FormControl size="small" sx={{ width: 120 }}>
             <InputLabel>사용여부</InputLabel>
             <Select name="useYn" value={searchValues.useYn} label="사용여부" onChange={handleSelectChange}>
+              <MenuItem value="">선택안함</MenuItem>
               <MenuItem value="Y">Y</MenuItem>
               <MenuItem value="N">N</MenuItem>
             </Select>
