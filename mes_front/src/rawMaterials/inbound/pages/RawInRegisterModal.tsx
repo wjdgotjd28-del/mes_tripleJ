@@ -1,6 +1,6 @@
 import { Box, TextField, Button, Typography } from "@mui/material";
 
-export default function RegisterPage() {
+export default function RawInRegisterPage() {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: 400 }}>
       <Typography variant="h6" gutterBottom>
