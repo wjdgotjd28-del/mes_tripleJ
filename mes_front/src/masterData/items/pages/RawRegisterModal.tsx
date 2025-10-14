@@ -6,14 +6,16 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   MenuItem,
   FormControl,
   FormLabel,
   RadioGroup,
   Radio,
   FormControlLabel,
+  Typography,
+  IconButton,
 } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
 import type { RawItems } from "../../../type";
 
 interface RawRegisterModalProps {
@@ -80,7 +82,17 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle>원자재 품목 등록</DialogTitle>
+      <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Typography variant="h6">원자재 품목 등록</Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Button onClick={handleSubmit} variant="contained" color="primary">
+            등록
+          </Button>
+          <IconButton onClick={handleClose} size="small">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      </DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
           <TextField
@@ -166,12 +178,6 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
           />
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>취소</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
-          등록
-        </Button>
-      </DialogActions>
     </Dialog>
   );
 }
