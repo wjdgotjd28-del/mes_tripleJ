@@ -12,6 +12,7 @@ import {
   DialogActions,
 } from "@mui/material";
 
+
 type Company = {
   id: number;
   type: "거래처" | "매입처";

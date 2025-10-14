@@ -184,10 +184,11 @@ export default function BusinessPartnerViewPage() {
                     size="small"
                     color={row.status === "거래중" ? "warning" : "success"}
                     onClick={(e) => handleStatusToggle(e, row.id)}
+                    sx={{ mr: "1px" }} // ✅ 오른쪽에 1px 간격
                   >
                     {row.status === "거래중" ? "거래 종료" : "거래 재개"}
                   </Button>
-                   <Button
+                  <Button
                     variant="outlined"
                     size="small"
                     color="error"
@@ -196,6 +197,8 @@ export default function BusinessPartnerViewPage() {
                     삭제
                   </Button>
                 </TableCell>
+
+           
                
               </TableRow>
             ))}
