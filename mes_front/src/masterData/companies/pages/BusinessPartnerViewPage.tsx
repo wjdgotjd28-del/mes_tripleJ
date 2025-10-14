@@ -16,10 +16,11 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TextField,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import CompanyRegister from "./BusinessPartnerRegisterModal";
 import BusinessPartnerRegisterModel from "./BusinessPartnerRegisterModal";
+import { searchData } from "../../../Common/SearchUtils";
 
 type StatusType = "거래중" | "거래 종료";
 type CompanyType = "거래처" | "매입처";
@@ -50,6 +51,13 @@ const initialData: Company[] = [
 export default function BusinessPartnerViewPage() {
   const [allRows, setAllRows] = useState<Company[]>(initialData);
   const [filterType, setFilterType] = useState<string>("모든 업체");
+  const [companyNameSearch, setCompanyNameSearch] = useState("");
+  const [ceoNameSearch, setCeoNameSearch] = useState("");
+
+  const [searchParams, setSearchParams] = useState({
+    companyName: "",
+    ceoName: "",
+  });
 
   // 거래 상태 변경
   const handleStatusChange = (id: number) => {
@@ -62,11 +70,22 @@ export default function BusinessPartnerViewPage() {
     );
   };
 
+  // 검색 버튼 클릭 시 실행
+  const handleSearch = () => {
+    setSearchParams({
+      companyName: companyNameSearch,
+      ceoName: ceoNameSearch,
+    });
+  };
+
   // 필터링
-  const filteredRows = allRows.filter((row) => {
+  const typeFilteredRows = allRows.filter((row) => {
     if (filterType === "모든 업체") return true;
     return row.type === filterType;
   });
+
+  const companyNameFilteredRows = searchData(typeFilteredRows, searchParams.companyName, ["name"]);
+  const filteredRows = searchData(companyNameFilteredRows, searchParams.ceoName, ["ceo"]);
 
   // 필터 select 변경
   const handleFilterChange = (event: SelectChangeEvent<string>) => {
@@ -77,7 +96,7 @@ export default function BusinessPartnerViewPage() {
     <Box sx={{ padding: 4, width: "100%" }}>
       {/* 제목 */}
       <Typography variant="h5" sx={{ mb: 1 }}>
-        업체 조회 페이지
+        거래처 관리
       </Typography>
 
       {/* 상단 필터 및 버튼 영역 */}
@@ -89,21 +108,44 @@ export default function BusinessPartnerViewPage() {
           mb: 2,
         }}
       >
-        {/* 왼쪽: 업체 유형 필터 */}
-        <FormControl sx={{ minWidth: 150 }} size="small">
-          <InputLabel id="company-type-filter-label">업체 유형</InputLabel>
-          <Select
-            labelId="company-type-filter-label"
-            id="company-type-filter"
-            value={filterType}
-            label="업체 유형"
-            onChange={handleFilterChange}
-          >
-            <MenuItem value="모든 업체">모든 업체</MenuItem>
-            <MenuItem value="거래처">거래처</MenuItem>
-            <MenuItem value="매입처">매입처</MenuItem>
-          </Select>
-        </FormControl>
+        {/* 왼쪽: 필터 영역 */}
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            {/* 업체 유형 필터 */}
+            <FormControl sx={{ minWidth: 150 }} size="small">
+            <InputLabel id="company-type-filter-label">업체 유형</InputLabel>
+            <Select
+                labelId="company-type-filter-label"
+                id="company-type-filter"
+                value={filterType}
+                label="업체 유형"
+                onChange={handleFilterChange}
+            >
+                <MenuItem value="모든 업체">모든 업체</MenuItem>
+                <MenuItem value="거래처">거래처</MenuItem>
+                <MenuItem value="매입처">매입처</MenuItem>
+            </Select>
+            </FormControl>
+
+            {/* 검색창 - 업체명 */}
+            <TextField
+                size="small"
+                placeholder="업체명"
+                value={companyNameSearch}
+                onChange={(e) => setCompanyNameSearch(e.target.value)}
+                sx={{ width: 150 }}
+            />
+            {/* 검색창 - 대표명 */}
+            <TextField
+                size="small"
+                placeholder="대표명"
+                value={ceoNameSearch}
+                onChange={(e) => setCeoNameSearch(e.target.value)}
+                sx={{ width: 150 }}
+            />
+            <Button variant="contained" onClick={handleSearch}>
+                검색
+            </Button>
+        </Box>
 
         {/* 오른쪽: 업체 등록 모달 버튼 */}
         <BusinessPartnerRegisterModel />
