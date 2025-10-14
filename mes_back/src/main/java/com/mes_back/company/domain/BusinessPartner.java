@@ -2,7 +2,7 @@ package com.mes_back.company.domain;
 
 import jakarta.persistence.*;
 
-public class Company {
+public class BusinessPartner {
 
     // 업체 id
     @Id
