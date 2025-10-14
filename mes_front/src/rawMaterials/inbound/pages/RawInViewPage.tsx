@@ -22,7 +22,7 @@ interface TableData {
 }
 
 // ===== ViewPage =====
-export default function ViewPage() {
+export default function RawInViewPage() {
   const [searchText, setSearchText] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [editingRowId, setEditingRowId] = useState<number | null>(null);
