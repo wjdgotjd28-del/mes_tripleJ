@@ -13,22 +13,18 @@ import {
 type Props = {
   open: boolean;
   onClose: () => void;
-  itemName: string;
-  onSubmit: (data: {
-    itemName: string;
-    quantity: string;
-    date: string;
-  }) => void;
+  item_name: string;
+  onSubmit: (data: { item_name: string; qty: string; date: string }) => void;
 };
 
 export default function OrderInRegisterModal({
   open,
   onClose,
-  itemName,
+  item_name,
   onSubmit,
 }: Props) {
   const [form, setForm] = useState({
-    quantity: "",
+    qty: "",
     date: new Date().toISOString().split("T")[0],
   });
 
@@ -37,9 +33,9 @@ export default function OrderInRegisterModal({
   };
 
   const handleSubmit = () => {
-    onSubmit({ itemName, ...form }); // ✅ itemName은 props에서 직접 사용
+    onSubmit({ item_name, ...form });
     onClose();
-    setForm({ quantity: "", date: "" });
+    setForm({ qty: "", date: "" });
   };
 
   return (
@@ -47,12 +43,12 @@ export default function OrderInRegisterModal({
       <DialogTitle>수주대상 입고 등록</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-          <Typography variant="subtitle1">{itemName}</Typography>
+          <Typography variant="subtitle1">{item_name}</Typography>
 
           <TextField
             label="입고 수량"
-            value={form.quantity}
-            onChange={(e) => handleChange("quantity", e.target.value)}
+            value={form.qty}
+            onChange={(e) => handleChange("qty", e.target.value)}
           />
           <TextField
             label="입고 일자"

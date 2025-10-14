@@ -13,8 +13,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import InboundRegisterModal from "./OrderInRegisterModal";
-import { exportToExcel } from "../../../Common/ExcelUtils";
+import { exportToExcel } from "../../Common/ExcelUtils";
 
 const sampleData = [
   {
@@ -23,8 +22,7 @@ const sampleData = [
     item_code: "AD217000",
     item_name: "품목 A",
     qty: 10,
-    category: "방산",
-    note: "입고 예정",
+    spec_unit: "EA",
   },
   {
     id: 2,
@@ -32,8 +30,7 @@ const sampleData = [
     item_code: "AD217002",
     item_name: "품목 B",
     qty: 30,
-    category: "자동차",
-    note: "검수 완료",
+    spec_unit: "kg",
   },
   {
     id: 3,
@@ -41,12 +38,11 @@ const sampleData = [
     item_code: "AD217005",
     item_name: "품목 C",
     qty: 30,
-    category: "조선",
-    note: "긴급 입고",
+    spec_unit: "EA",
   },
 ];
 
-export default function OrderInViewPage() {
+export default function RawMaterialInventoryStatus() {
   const [clientSearch, setClientSearch] = useState("");
   const [itemNoSearch, setItemNoSearch] = useState("");
   const [itemNameSearch, setItemNameSearch] = useState("");
@@ -75,17 +71,11 @@ export default function OrderInViewPage() {
       row.item_name.includes(searchParams.item_name)
   );
 
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<{
-    item_name: string;
-    qty: number;
-  } | null>(null);
-
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
       {/* 제목 */}
       <Typography variant="h5" sx={{ mb: 1 }}>
-        수주대상 품목 조회
+        원자재 재고 현황
       </Typography>
 
       {/* 검색창 박스: 제목 아래에 따로 배치 */}
@@ -141,58 +131,29 @@ export default function OrderInViewPage() {
         <Table sx={{ minWidth: 800 }}>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>거래처명</TableCell>
-              <TableCell>품목 번호</TableCell>
-              <TableCell>품목명</TableCell>
-              <TableCell>수량</TableCell>
-              <TableCell>분류</TableCell>
-              <TableCell>비고</TableCell>
-              <TableCell></TableCell>
+              <TableCell align="center">ID</TableCell>
+              <TableCell align="center">거래처명</TableCell>
+              <TableCell align="center">품목 번호</TableCell>
+              <TableCell align="center">품목명</TableCell>
+              <TableCell align="center">수량</TableCell>
+              <TableCell align="center">단위</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
             {filteredData.map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.customer_name}</TableCell>
-                <TableCell>{row.item_code}</TableCell>
-                <TableCell>{row.item_name}</TableCell>
-                <TableCell>{row.qty}</TableCell>
-                <TableCell>{row.category}</TableCell>
-                <TableCell>{row.note}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => {
-                      setSelectedItem({
-                        item_name: row.item_name,
-                        qty: row.qty,
-                      });
-                      setOpenModal(true);
-                    }}
-                  >
-                    입고 등록
-                  </Button>
-                </TableCell>
+                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{row.customer_name}</TableCell>
+                <TableCell align="center">{row.item_code}</TableCell>
+                <TableCell align="center">{row.item_name}</TableCell>
+                <TableCell align="center">{row.qty}</TableCell>
+                <TableCell align="center">{row.spec_unit}</TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
-      {selectedItem && (
-        <InboundRegisterModal
-          open={openModal}
-          onClose={() => setOpenModal(false)}
-          item_name={selectedItem.item_name}
-          onSubmit={(data) => {
-            console.log("입고 등록됨:", data);
-            setOpenModal(false);
-          }}
-        />
-      )}
     </Box>
   );
 }

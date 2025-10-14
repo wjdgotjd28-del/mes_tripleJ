@@ -16,10 +16,10 @@ type Props = {
   onClose: () => void; // 모달 닫기 함수
   existingCodes: string[]; // 중복 체크용 기존 공정 코드 목록
   onRegister: (data: {
-    code: string;
-    name: string;
-    time: string;
-    remark: string;
+    process_code: string;
+    process_name: string;
+    process_time: string;
+    note: string;
   }) => void; // 등록 처리 함수
 };
 
@@ -32,10 +32,10 @@ export default function RoutingRegisterModal({
 }: Props) {
   // 입력 폼 상태
   const [form, setForm] = useState({
-    code: "",
-    name: "",
-    time: "",
-    remark: "",
+    process_code: "",
+    process_name: "",
+    process_time: "",
+    note: "",
   });
 
   // 에러 메시지 상태 (중복 코드 등)
@@ -49,56 +49,49 @@ export default function RoutingRegisterModal({
 
   // 등록 버튼 클릭 시 처리
   const handleSubmit = () => {
-    // 중복 코드 체크
-    if (existingCodes.includes(form.code)) {
+    if (existingCodes.includes(form.process_code)) {
       setError("중복된 공정코드가 있습니다.");
       return;
     }
 
-    // 등록 처리 후 모달 닫기 및 폼 초기화
     onRegister(form);
     onClose();
-    setForm({ code: "", name: "", time: "", remark: "" });
+    setForm({
+      process_code: "",
+      process_name: "",
+      process_time: "",
+      note: "",
+    });
   };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      {/* 모달 제목 */}
       <DialogTitle>라우팅 등록</DialogTitle>
-
-      {/* 모달 본문: 입력 폼 */}
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
-          {/* 공정 코드 입력 */}
           <TextField
             label="공정 코드"
-            value={form.code}
-            onChange={(e) => handleChange("code", e.target.value)}
+            value={form.process_code}
+            onChange={(e) => handleChange("process_code", e.target.value)}
           />
-          {/* 공정 명 입력 */}
           <TextField
             label="공정 명"
-            value={form.name}
-            onChange={(e) => handleChange("name", e.target.value)}
+            value={form.process_name}
+            onChange={(e) => handleChange("process_name", e.target.value)}
           />
-          {/* 공정 시간 입력 */}
           <TextField
             label="공정 시간"
-            value={form.time}
-            onChange={(e) => handleChange("time", e.target.value)}
+            value={form.process_time}
+            onChange={(e) => handleChange("process_time", e.target.value)}
           />
-          {/* 비고 입력 */}
           <TextField
             label="비고"
-            value={form.remark}
-            onChange={(e) => handleChange("remark", e.target.value)}
+            value={form.note}
+            onChange={(e) => handleChange("note", e.target.value)}
           />
-          {/* 에러 메시지 표시 */}
           {error && <Typography color="error">{error}</Typography>}
         </Box>
       </DialogContent>
-
-      {/* 모달 하단 버튼 영역 */}
       <DialogActions>
         <Button onClick={onClose}>취소</Button>
         <Button variant="contained" onClick={handleSubmit}>
