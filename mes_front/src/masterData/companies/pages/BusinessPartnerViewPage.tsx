@@ -4,7 +4,7 @@ import { Box, Button, Chip, Typography, FormControl, Select, MenuItem, InputLabe
 import type { SelectChangeEvent } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import type { GridColDef } from "@mui/x-data-grid";
-import CompanyRegister from "./CompanyRegister";
+import CompanyRegister from "./BusinessPartnerRegisterModal";
 
 type StatusType = "거래중" | "거래 종료";
 type CompanyType = "거래처" | "매입처";
