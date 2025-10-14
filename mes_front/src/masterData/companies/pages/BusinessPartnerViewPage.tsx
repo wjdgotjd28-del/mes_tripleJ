@@ -97,6 +97,8 @@ export default function BusinessPartnerViewPage() {
   };
 
   const handleRowClick = (company: Company) => {
+    // 편집 중이면 상세 모달 열지 않음
+    if (editingRowId !== null) return;
     setSelectedCompany(company);
     setDetailOpen(true);
   };
@@ -245,7 +247,6 @@ export default function BusinessPartnerViewPage() {
         onClose={() => setDetailOpen(false)}
         company={selectedCompany}
         onSave={handleSaveDetail}
-        isEditing={editingRowId === selectedCompany?.id} // 편집 중이면 모달 수정 불가
       />
     </Box>
   );
