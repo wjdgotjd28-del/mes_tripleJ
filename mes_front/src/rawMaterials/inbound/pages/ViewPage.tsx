@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Table,
   TableBody,
@@ -31,7 +30,7 @@ export default function ViewPage() {
             <TableCell>수량</TableCell>
             <TableCell>날짜</TableCell>
             </TableRow>
-          </TableHead>
+        </TableHead>
           <TableBody>
             {tableData.map((row) => (
               <TableRow key={row.id}>

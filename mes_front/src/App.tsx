@@ -1,19 +1,8 @@
-import './App.css'
-import CommonLayout from './main/pages/CommonLayout'
-import BusinessPartner from './masterData/companies/BusinessPartner'
-import CompanyRegister from './masterData/companies/CompanyRegister'
-
+import "./App.css";
+import CommonLayout from "./main/pages/CommonLayout";
 
 function App() {
-
-  return (
-    <>
-      {/* <CommonLayout /> */}
-      {/* <BusinessPartner /> */}
-      <CompanyRegister />
-      
-    </>
-  )
+  return <CommonLayout />;
 }
 
-export default App
+export default App;
