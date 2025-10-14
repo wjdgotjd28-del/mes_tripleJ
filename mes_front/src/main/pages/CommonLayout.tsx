@@ -26,6 +26,7 @@ import RawViewPage from "../../masterData/items/pages/RawViewPage";
 import RoutingLookupPage from "../../masterData/routings/pages/RoutingViewPage";
 import BusinessPartnerViewPage from "../../masterData/companies/pages/BusinessPartnerViewPage";
 import InboundHistoryPage from "../../orders/inbound/pages/InboundHistoryPage";
+import RawMaterialInventoryStatus from "../../rawMaterials/inventory/RawMaterialInventoryStatus";
 
 const drawerWidth = 260;
 
@@ -95,7 +96,7 @@ export default function CommonLayout() {
     "수주 대상 관리 > 출고": <OrderOutViewPage />,
     "원자재 관리 > 입고": <RawInViewPage />,
     "원자재 관리 > 출고": <RawOutViewPage />,
-    "원자재 관리 > 재고현황": <RawOutViewPage />,
+    "원자재 관리 > 재고현황": <RawMaterialInventoryStatus />,
     "기준 정보 관리 > 수주 대상 품목 관리": <OrderViewPage />,
     "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
     "기준 정보 관리 > 라우팅 관리": <RoutingLookupPage />,

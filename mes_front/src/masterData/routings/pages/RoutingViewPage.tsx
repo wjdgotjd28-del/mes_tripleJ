@@ -16,154 +16,249 @@ import RoutingRegisterModal from "./RoutingRegisterModal"; // 라우팅 등록 �
 // 초기 라우팅 데이터 (임시 하드코딩된 샘플)
 const initialData = [
   {
-    code: "PC-10",
-    name: "입고/수입검사",
-    time: "0.5h",
-    remark: "외관 검사, LOT 부여",
+    id: 1,
+    process_code: "PC-10",
+    process_name: "입고/수입검사",
+    process_time: "0.5h",
+    note: "외관 검사, LOT 부여",
   },
   {
-    code: "PC-20",
-    name: "세척 1",
-    time: "0.8h",
-    remark: "세척기 사용 - 유분 제거",
+    id: 2,
+    process_code: "PC-20",
+    process_name: "세척 1",
+    process_time: "0.8h",
+    note: "세척기 사용 - 유분 제거",
   },
   {
-    code: "PC-30",
-    name: "탈지 2",
-    time: "0.8h",
-    remark: "세척기 사용 - 이물 제거",
+    id: 3,
+    process_code: "PC-30",
+    process_name: "탈지 2",
+    process_time: "0.8h",
+    note: "세척기 사용 - 이물 제거",
   },
   {
-    code: "PC-40",
-    name: "LOADING",
-    time: "0.5h",
-    remark: "지그 안착, 클램프 및 마스킹",
-  },
-  { code: "PC-50", name: "COATING", time: "1.0h", remark: "도장, 장칼질 제거" },
-  {
-    code: "PC-60",
-    name: "AIR BLOWING",
-    time: "0.2h",
-    remark: "표면 이물질 제거",
+    id: 4,
+    process_code: "PC-40",
+    process_name: "LOADING",
+    process_time: "0.5h",
+    note: "지그 안착, 클램프 및 마스킹",
   },
   {
-    code: "PC-70",
-    name: "PAINTING",
-    time: "1.0h",
-    remark: "분체도장 (정전 도장)",
-  },
-  { code: "PC-80", name: "건조", time: "0.2h", remark: "270°C 20분 건조" },
-  {
-    code: "PC-90",
-    name: "LOT NO MARKING",
-    time: "0.2h",
-    remark: "LOT 번호 마킹",
+    id: 5,
+    process_code: "PC-50",
+    process_name: "COATING",
+    process_time: "1.0h",
+    note: "도장, 장칼질 제거",
   },
   {
-    code: "PC-100",
-    name: "UNLOADING",
-    time: "0.5h",
-    remark: "지그에서 제품 탈착",
+    id: 1,
+    process_code: "PC-10",
+    process_name: "입고/수입검사",
+    process_time: "0.5h",
+    note: "외관 검사, LOT 부여",
   },
   {
-    code: "PC-10",
-    name: "입고/수입검사",
-    time: "0.5h",
-    remark: "외관 검사, LOT 부여",
+    id: 2,
+    process_code: "PC-20",
+    process_name: "세척 1",
+    process_time: "0.8h",
+    note: "세척기 사용 - 유분 제거",
   },
   {
-    code: "PC-20",
-    name: "세척 1",
-    time: "0.8h",
-    remark: "세척기 사용 - 유분 제거",
+    id: 3,
+    process_code: "PC-30",
+    process_name: "탈지 2",
+    process_time: "0.8h",
+    note: "세척기 사용 - 이물 제거",
   },
   {
-    code: "PC-30",
-    name: "탈지 2",
-    time: "0.8h",
-    remark: "세척기 사용 - 이물 제거",
+    id: 4,
+    process_code: "PC-40",
+    process_name: "LOADING",
+    process_time: "0.5h",
+    note: "지그 안착, 클램프 및 마스킹",
   },
   {
-    code: "PC-40",
-    name: "LOADING",
-    time: "0.5h",
-    remark: "지그 안착, 클램프 및 마스킹",
-  },
-  { code: "PC-50", name: "COATING", time: "1.0h", remark: "도장, 장칼질 제거" },
-  {
-    code: "PC-60",
-    name: "AIR BLOWING",
-    time: "0.2h",
-    remark: "표면 이물질 제거",
+    id: 5,
+    process_code: "PC-50",
+    process_name: "COATING",
+    process_time: "1.0h",
+    note: "도장, 장칼질 제거",
   },
   {
-    code: "PC-70",
-    name: "PAINTING",
-    time: "1.0h",
-    remark: "분체도장 (정전 도장)",
-  },
-  { code: "PC-80", name: "건조", time: "0.2h", remark: "270°C 20분 건조" },
-  {
-    code: "PC-90",
-    name: "LOT NO MARKING",
-    time: "0.2h",
-    remark: "LOT 번호 마킹",
+    id: 1,
+    process_code: "PC-10",
+    process_name: "입고/수입검사",
+    process_time: "0.5h",
+    note: "외관 검사, LOT 부여",
   },
   {
-    code: "PC-100",
-    name: "UNLOADING",
-    time: "0.5h",
-    remark: "지그에서 제품 탈착",
+    id: 2,
+    process_code: "PC-20",
+    process_name: "세척 1",
+    process_time: "0.8h",
+    note: "세척기 사용 - 유분 제거",
   },
   {
-    code: "PC-10",
-    name: "입고/수입검사",
-    time: "0.5h",
-    remark: "외관 검사, LOT 부여",
+    id: 3,
+    process_code: "PC-30",
+    process_name: "탈지 2",
+    process_time: "0.8h",
+    note: "세척기 사용 - 이물 제거",
   },
   {
-    code: "PC-20",
-    name: "세척 1",
-    time: "0.8h",
-    remark: "세척기 사용 - 유분 제거",
+    id: 4,
+    process_code: "PC-40",
+    process_name: "LOADING",
+    process_time: "0.5h",
+    note: "지그 안착, 클램프 및 마스킹",
   },
   {
-    code: "PC-30",
-    name: "탈지 2",
-    time: "0.8h",
-    remark: "세척기 사용 - 이물 제거",
+    id: 5,
+    process_code: "PC-50",
+    process_name: "COATING",
+    process_time: "1.0h",
+    note: "도장, 장칼질 제거",
   },
   {
-    code: "PC-40",
-    name: "LOADING",
-    time: "0.5h",
-    remark: "지그 안착, 클램프 및 마스킹",
-  },
-  { code: "PC-50", name: "COATING", time: "1.0h", remark: "도장, 장칼질 제거" },
-  {
-    code: "PC-60",
-    name: "AIR BLOWING",
-    time: "0.2h",
-    remark: "표면 이물질 제거",
+    id: 1,
+    process_code: "PC-10",
+    process_name: "입고/수입검사",
+    process_time: "0.5h",
+    note: "외관 검사, LOT 부여",
   },
   {
-    code: "PC-70",
-    name: "PAINTING",
-    time: "1.0h",
-    remark: "분체도장 (정전 도장)",
-  },
-  { code: "PC-80", name: "건조", time: "0.2h", remark: "270°C 20분 건조" },
-  {
-    code: "PC-90",
-    name: "LOT NO MARKING",
-    time: "0.2h",
-    remark: "LOT 번호 마킹",
+    id: 2,
+    process_code: "PC-20",
+    process_name: "세척 1",
+    process_time: "0.8h",
+    note: "세척기 사용 - 유분 제거",
   },
   {
-    code: "PC-100",
-    name: "UNLOADING",
-    time: "0.5h",
-    remark: "지그에서 제품 탈착",
+    id: 3,
+    process_code: "PC-30",
+    process_name: "탈지 2",
+    process_time: "0.8h",
+    note: "세척기 사용 - 이물 제거",
+  },
+  {
+    id: 4,
+    process_code: "PC-40",
+    process_name: "LOADING",
+    process_time: "0.5h",
+    note: "지그 안착, 클램프 및 마스킹",
+  },
+  {
+    id: 5,
+    process_code: "PC-50",
+    process_name: "COATING",
+    process_time: "1.0h",
+    note: "도장, 장칼질 제거",
+  },
+  {
+    id: 1,
+    process_code: "PC-10",
+    process_name: "입고/수입검사",
+    process_time: "0.5h",
+    note: "외관 검사, LOT 부여",
+  },
+  {
+    id: 2,
+    process_code: "PC-20",
+    process_name: "세척 1",
+    process_time: "0.8h",
+    note: "세척기 사용 - 유분 제거",
+  },
+  {
+    id: 3,
+    process_code: "PC-30",
+    process_name: "탈지 2",
+    process_time: "0.8h",
+    note: "세척기 사용 - 이물 제거",
+  },
+  {
+    id: 4,
+    process_code: "PC-40",
+    process_name: "LOADING",
+    process_time: "0.5h",
+    note: "지그 안착, 클램프 및 마스킹",
+  },
+  {
+    id: 5,
+    process_code: "PC-50",
+    process_name: "COATING",
+    process_time: "1.0h",
+    note: "도장, 장칼질 제거",
+  },
+  {
+    id: 1,
+    process_code: "PC-10",
+    process_name: "입고/수입검사",
+    process_time: "0.5h",
+    note: "외관 검사, LOT 부여",
+  },
+  {
+    id: 2,
+    process_code: "PC-20",
+    process_name: "세척 1",
+    process_time: "0.8h",
+    note: "세척기 사용 - 유분 제거",
+  },
+  {
+    id: 3,
+    process_code: "PC-30",
+    process_name: "탈지 2",
+    process_time: "0.8h",
+    note: "세척기 사용 - 이물 제거",
+  },
+  {
+    id: 4,
+    process_code: "PC-40",
+    process_name: "LOADING",
+    process_time: "0.5h",
+    note: "지그 안착, 클램프 및 마스킹",
+  },
+  {
+    id: 5,
+    process_code: "PC-50",
+    process_name: "COATING",
+    process_time: "1.0h",
+    note: "도장, 장칼질 제거",
+  },
+  {
+    id: 1,
+    process_code: "PC-10",
+    process_name: "입고/수입검사",
+    process_time: "0.5h",
+    note: "외관 검사, LOT 부여",
+  },
+  {
+    id: 2,
+    process_code: "PC-20",
+    process_name: "세척 1",
+    process_time: "0.8h",
+    note: "세척기 사용 - 유분 제거",
+  },
+  {
+    id: 3,
+    process_code: "PC-30",
+    process_name: "탈지 2",
+    process_time: "0.8h",
+    note: "세척기 사용 - 이물 제거",
+  },
+  {
+    id: 4,
+    process_code: "PC-40",
+    process_name: "LOADING",
+    process_time: "0.5h",
+    note: "지그 안착, 클램프 및 마스킹",
+  },
+  {
+    id: 5,
+    process_code: "PC-50",
+    process_name: "COATING",
+    process_time: "1.0h",
+    note: "도장, 장칼질 제거",
   },
 ];
 
@@ -181,13 +276,17 @@ export default function RoutingLookupPage() {
   const itemsPerPage = 20;
 
   // 등록 처리 함수 (모달에서 새 항목 등록 시 호출)
-  const handleRegister = (newItem: (typeof initialData)[0]) => {
-    setRoutingData([...routingData, newItem]);
+  const handleRegister = (newItem: Omit<(typeof initialData)[0], "id">) => {
+    const nextId =
+      routingData.length > 0
+        ? Math.max(...routingData.map((r) => r.id ?? 0)) + 1
+        : 1;
+    setRoutingData([...routingData, { ...newItem, id: nextId }]);
   };
 
   // 삭제 처리 함수 (해당 공정 코드 삭제)
   const handleDelete = (code: string) => {
-    setRoutingData(routingData.filter((item) => item.code !== code));
+    setRoutingData(routingData.filter((item) => item.process_code !== code));
   };
 
   // 현재 페이지에 해당하는 데이터 추출
@@ -225,6 +324,7 @@ export default function RoutingLookupPage() {
         <Table sx={{ width: "100%" }}>
           <TableHead>
             <TableRow>
+              <TableCell>ID</TableCell>
               <TableCell>공정 코드</TableCell>
               <TableCell>공정 명</TableCell>
               <TableCell>공정 시간</TableCell>
@@ -236,15 +336,17 @@ export default function RoutingLookupPage() {
             {/* 현재 페이지에 해당하는 데이터만 렌더링 */}
             {paginatedData.map((row, index) => (
               <TableRow key={index}>
-                <TableCell>{row.code}</TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.time}</TableCell>
-                <TableCell>{row.remark}</TableCell>
+                <TableCell>{row.id}</TableCell>
+                <TableCell>{row.process_code}</TableCell>
+                <TableCell>{row.process_name}</TableCell>
+                <TableCell>{row.process_time}</TableCell>
+                <TableCell>{row.note}</TableCell>
+
                 <TableCell align="center">
                   <Button
                     variant="outlined"
                     color="error"
-                    onClick={() => handleDelete(row.code)} // 삭제 처리
+                    onClick={() => handleDelete(row.process_code)}
                   >
                     삭제
                   </Button>
@@ -285,8 +387,8 @@ export default function RoutingLookupPage() {
       <RoutingRegisterModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        existingCodes={routingData.map((r) => r.code)} // 중복 코드 체크용
-        onRegister={handleRegister} // 등록 처리 함수 전달
+        existingCodes={routingData.map((r) => r.process_code)}
+        onRegister={handleRegister}
       />
     </Box>
   );
