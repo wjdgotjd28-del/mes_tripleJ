@@ -22,8 +22,9 @@ import {
 } from "@mui/icons-material";
 import RegisterPage from "../../rawMaterials/inbound/pages/RegisterPage";
 import ViewPage from "../../rawMaterials/inbound/pages/ViewPage";
-import RoutingLookupPage from "../../masterData/routings/pages/RoutingLookupPage";
-import OrderItemLookupPage from "../../orders/inbound/pages/OrderItemLookupPage";
+import RoutingViewPage from "../../masterData/routings/pages/RoutingViewPage";
+import OrderItemViewPage from "../../orders/inbound/pages/OrderItemViewPage";
+import InboundHistoryPage from "../../orders/inbound/pages/InboundHistoryPage";
 
 const drawerWidth = 260;
 
@@ -38,7 +39,7 @@ const mainMenus = [
     text: "수주 대상 관리",
     icon: <Inventory />,
     subs: [
-      { text: "입고", subMenus: ["입고 품목 조회/등록"] },
+      { text: "입고", subMenus: ["입고 품목 조회/등록", "입고된 수주 정보"] },
       { text: "출고", subMenus: ["등록", "조회"] },
     ],
   },
@@ -90,22 +91,16 @@ export default function CommonLayout() {
   const currentPath = `${activeMain} > ${activeSub} > ${activeThird}`;
 
   const renderPage = () => {
-    if (
-      activeMain === "기준정보" &&
-      activeSub === "라우팅 조회/등록" &&
-      activeThird === "조회/등록"
-    ) {
-      return <RoutingLookupPage />;
+    if (activeSub === "라우팅 조회/등록" && activeThird === "조회/등록") {
+      return <RoutingViewPage />;
     }
 
-    if (
-      activeMain === "수주 대상 관리" &&
-      activeSub === "입고" &&
-      activeThird === "입고 품목 조회/등록"
-    ) {
-      return <OrderItemLookupPage />;
+    if (activeThird === "입고 품목 조회/등록") {
+      return <OrderItemViewPage />;
     }
-
+    if (activeThird === "입고된 수주 정보") {
+      return <InboundHistoryPage />;
+    }
     if (activeThird === "조회") return <ViewPage />;
     if (activeThird === "등록") return <RegisterPage />;
     return <Typography>페이지를 선택하세요.</Typography>;
