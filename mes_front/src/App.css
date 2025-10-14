@@ -40,3 +40,9 @@
 .read-the-docs {
   color: #888;
 }
+
+.companyRegister {
+  display: flex;
+  justify-content: right;
+  margin: 10px;
+}

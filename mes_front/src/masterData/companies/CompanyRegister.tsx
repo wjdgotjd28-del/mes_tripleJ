@@ -6,7 +6,6 @@ import {
   TextField,
   MenuItem,
   Typography,
-  Grid,
 } from "@mui/material";
 
 // 모달 너비(width: 350px)는 그대로 유지합니다.
