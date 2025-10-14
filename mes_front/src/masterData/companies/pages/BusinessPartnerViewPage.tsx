@@ -17,6 +17,7 @@ import {
   Paper,
   TextField,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import BusinessPartnerDetailModal from "./BusinessPartnerDetailModal";
 import BusinessPartnerRegisterModal from "./BusinessPartnerRegisterModal";
 
@@ -50,7 +51,11 @@ export default function BusinessPartnerViewPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-  const handleFilterChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleAddCompany = (newCompany: Company) => {
+    setAllRows((prev) => [...prev, newCompany]);
+  };
+
+  const handleFilterChange = (event: SelectChangeEvent<string>) => {
     setFilterType(event.target.value as string);
   };
 
@@ -79,38 +84,39 @@ export default function BusinessPartnerViewPage() {
       </Typography>
 
       {/* 상단 영역: 업체 유형 필터 + 검색창 + 등록 버튼 */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
-        <FormControl sx={{ minWidth: 150 }} size="small">
-          <InputLabel id="company-type-filter-label">업체 유형</InputLabel>
-          <Select
-            labelId="company-type-filter-label"
-            id="company-type-filter"
-            value={filterType}
-            label="업체 유형"
-            onChange={handleFilterChange}
-          >
-            <MenuItem value="모든 업체">모든 업체</MenuItem>
-            <MenuItem value="거래처">거래처</MenuItem>
-            <MenuItem value="매입처">매입처</MenuItem>
-          </Select>
-        </FormControl>
-
-        <TextField
-          size="small"
-          label="업체명 검색"
-          value={searchName}
-          onChange={(e) => setSearchName(e.target.value)}
-        />
-        <TextField
-          size="small"
-          label="대표명 검색"
-          value={searchCeo}
-          onChange={(e) => setSearchCeo(e.target.value)}
-        />
-
-        <BusinessPartnerRegisterModal />
-      </Box>
-
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 2 }}>
+                <FormControl sx={{ minWidth: 150 }} size="small">
+                  <InputLabel id="company-type-filter-label">업체 유형</InputLabel>
+                  <Select
+                    labelId="company-type-filter-label"
+                    id="company-type-filter"
+                    value={filterType}
+                    label="업체 유형"
+                    onChange={handleFilterChange}
+                  >
+                    <MenuItem value="모든 업체">모든 업체</MenuItem>
+                    <MenuItem value="거래처">거래처</MenuItem>
+                    <MenuItem value="매입처">매입처</MenuItem>
+                  </Select>
+                </FormControl>
+      
+                <TextField
+                  size="small"
+                  label="업체명 검색"
+                  value={searchName}
+                  onChange={(e) => setSearchName(e.target.value)}
+                />
+                <TextField
+                  size="small"
+                  label="대표명 검색"
+                  value={searchCeo}
+                  onChange={(e) => setSearchCeo(e.target.value)}
+                />
+      
+                <Box sx={{ ml: 'auto' }}>
+                  <BusinessPartnerRegisterModal onAdd={handleAddCompany} />
+                </Box>
+              </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
