@@ -20,7 +20,9 @@ import {
 import {
   FileDownload as FileDownloadIcon,
 } from "@mui/icons-material";
+
 import OrderRegisterModal from "./OrderRegisterModal";
+import OrderDetailModal from "./OrderDetailModal";
 
 // utils
 import { exportToExcel } from "../../../Common/ExcelUtils";
@@ -29,9 +31,9 @@ import { exportToExcel } from "../../../Common/ExcelUtils";
 import type { OrderItems } from "../../../type";
 
 export default function OrderViewPage() {
-  // ======================
-  // ✅ State 정의
-  // ======================
+  // State 정의
+  const [openDetailModal, setOpenDetailModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [editingRowId, setEditingRowId] = useState<number | null>(null);
   const [searchValues, setSearchValues] = useState({
@@ -50,10 +52,21 @@ export default function OrderViewPage() {
       paint_type: "분체",
       unit_price: 1000,
       color: "white",
-      note: "",
+      note: "품질 검사 필수\n납기일 엄수 요망",
       use_yn: "Y",
       status: "Y",
-      image: [],
+      image: [
+        {
+          img_url: "https://via.placeholder.com/300x300?text=Product+1",
+          img_ori_name: "product1.jpg",
+          img_name: "1234567890_abc123.jpg"
+        },
+        {
+          img_url: "https://via.placeholder.com/300x300?text=Product+1-2",
+          img_ori_name: "product1_detail.jpg",
+          img_name: "1234567891_def456.jpg"
+        }
+      ],
       routing: [],
     },
     {
@@ -65,10 +78,16 @@ export default function OrderViewPage() {
       paint_type: "액체",
       unit_price: 200,
       color: "red",
-      note: "",
+      note: "특수 코팅 필요",
       use_yn: "N",
       status: "Y",
-      image: [],
+      image: [
+        {
+          img_url: "https://via.placeholder.com/300x300?text=Fan+Cover",
+          img_ori_name: "fan_cover.jpg",
+          img_name: "1234567892_ghi789.jpg"
+        }
+      ],
       routing: [],
     },
     {
@@ -143,6 +162,11 @@ export default function OrderViewPage() {
   const handleSubmitAdd = (data: OrderItems) => {
     const newId = Math.max(...OrderItems.map((d) => d.id), 0) + 1;
     setOrderItems([...OrderItems, { ...data, id: newId }]);
+  };
+
+  const handleItemClick = (item: OrderItems) => {
+    setSelectedItem(item);
+    setOpenDetailModal(true);
   };
 
   return (
@@ -251,7 +275,21 @@ export default function OrderViewPage() {
                       fullWidth
                     />
                   ) : (
-                    row.item_name
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        textDecoration: 'underline',
+                        color: 'primary.main',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          color: 'primary.dark',
+                          fontWeight: 'bold'
+                        }
+                      }}
+                      onClick={() => handleItemClick(row)}
+                    >
+                      {row.item_name}
+                    </Typography>
                   )}
                 </TableCell>
                 <TableCell>{row.category}</TableCell>
@@ -292,6 +330,12 @@ export default function OrderViewPage() {
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSubmit={handleSubmitAdd}
+      />
+      {/* 상세 조회 모달 */}
+      <OrderDetailModal
+        open={openDetailModal}
+        onClose={() => setOpenDetailModal(false)}
+        data={selectedItem}
       />
     </Box>
   );

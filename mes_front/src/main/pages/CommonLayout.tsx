@@ -31,22 +31,40 @@ import BusinessPartnerViewPage from "../../masterData/companies/pages/BusinessPa
 
 const drawerWidth = 260;
 
-const mainMenus = [
+// 서브메뉴 타입 정의
+interface SubMenu {
+  text: string;
+  subs?: { text: string }[]; // 3계층을 위한 선택적 하위 메뉴
+}
+
+interface MainMenu {
+  text: string;
+  icon: React.ReactNode;
+  subs: SubMenu[];
+}
+
+const mainMenus: MainMenu[] = [
   {
     text: "수주 대상 관리",
     icon: <Layers />,
     subs: [
-      { text: "입고"},
-      { text: "출고"},
+      { 
+        text: "입고",
+        subs: [
+          { text: "수주 대상 품목 입고" },
+          { text: "수주 이력 조회" },
+        ]
+      },
+      { text: "출고" },
     ]
   },
   {
     text: "원자재 관리",
     icon: <Layers />,
     subs: [
-      { text: "입고"},
-      { text: "출고"},
-      { text: "재고현황"},
+      { text: "입고" },
+      { text: "출고" },
+      { text: "재고현황" },
     ]
   },
   {
@@ -59,34 +77,57 @@ const mainMenus = [
       { text: "업체 관리" },
     ]
   },
-  // 필요하면 다른 메뉴 추가
 ];
 
 export default function CommonLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMain, setActiveMain] = useState(mainMenus[0].text);
   const [activeSub, setActiveSub] = useState(mainMenus[0].subs[0].text);
+  const [activeThird, setActiveThird] = useState<string | null>(
+    mainMenus[0].subs[0].subs ? mainMenus[0].subs[0].subs[0].text : null
+  );
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
-  const currentPath = `${activeMain} > ${activeSub}`;
-//   const currentPath = `${activeMain} > ${activeSub} > ${activeThird}`;
+  // 현재 경로 생성
+  const currentPath = activeThird 
+    ? `${activeMain} > ${activeSub} > ${activeThird}`
+    : `${activeMain} > ${activeSub}`;
 
   // ================= 페이지 매핑 =================
   const pageMap: Record<string, React.ReactNode> = {
-    "수주 대상 관리 > 입고": <OrderInViewPage />,
+    // 3계층
+    "수주 대상 관리 > 입고 > 수주 대상 품목 입고": <OrderInViewPage />,
+    "수주 대상 관리 > 입고 > 수주 이력 조회": <OrderInViewPage />,
+    
+    // 2계층
     "수주 대상 관리 > 출고": <OrderOutViewPage />,
     "원자재 관리 > 입고": <RawInViewPage />,
     "원자재 관리 > 출고": <RawOutViewPage />,
+    "원자재 관리 > 재고현황": <RawOutViewPage />,
     "기준 정보 관리 > 수주 대상 품목 관리": <OrderViewPage />,
     "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
     "기준 정보 관리 > 라우팅 관리": <RoutingLookupPage />,
     "기준 정보 관리 > 업체 관리": <BusinessPartnerViewPage />,
   };
 
-  const renderPage = () => pageMap[`${activeMain} > ${activeSub}`] || (
+  const renderPage = () => pageMap[currentPath] || (
     <Typography>페이지를 선택하세요.</Typography>
   );
+
+  // 2계층 메뉴 클릭 핸들러
+  const handleSubClick = (mainText: string, subText: string, hasSubs: boolean) => {
+    setActiveSub(subText);
+    if (hasSubs) {
+      // 3계층이 있으면 첫 번째 항목 선택
+      const mainMenu = mainMenus.find(m => m.text === mainText);
+      const subMenu = mainMenu?.subs.find(s => s.text === subText);
+      setActiveThird(subMenu?.subs ? subMenu.subs[0].text : null);
+    } else {
+      // 3계층이 없으면 null
+      setActiveThird(null);
+    }
+  };
 
   // ================= Drawer 내용 =================
   const drawerContent = (
@@ -95,37 +136,62 @@ export default function CommonLayout() {
       <Divider />
       <List>
         {mainMenus.map(main => (
-            <React.Fragment key={main.text}>
+          <React.Fragment key={main.text}>
+            {/* 1계층 메뉴 */}
             <ListItem disablePadding>
-                <ListItemButton
+              <ListItemButton
                 selected={activeMain === main.text}
                 onClick={() => {
-                    setActiveMain(main.text);
-                    setActiveSub(main.subs[0].text);
+                  setActiveMain(main.text);
+                  const firstSub = main.subs[0];
+                  setActiveSub(firstSub.text);
+                  setActiveThird(firstSub.subs ? firstSub.subs[0].text : null);
                 }}
-                >
+              >
                 <ListItemIcon>{main.icon}</ListItemIcon>
                 <ListItemText primary={main.text} />
-                </ListItemButton>
+              </ListItemButton>
             </ListItem>
 
+            {/* 2계층 메뉴 */}
             {activeMain === main.text && (
-                <List sx={{ pl: 2 }}>
+              <List sx={{ pl: 2 }}>
                 {main.subs.map(sub => (
-                    <ListItem disablePadding key={sub.text}>
-                    <ListItemButton
-                        selected={activeSub === sub.text}
-                        onClick={() => setActiveSub(sub.text)}
-                    >
+                  <React.Fragment key={sub.text}>
+                    <ListItem disablePadding>
+                      <ListItemButton
+                        selected={activeSub === sub.text && !sub.subs}
+                        onClick={() => handleSubClick(main.text, sub.text, !!sub.subs)}
+                      >
                         <ListItemText primary={`- ${sub.text}`} />
-                    </ListItemButton>
+                      </ListItemButton>
                     </ListItem>
+
+                    {/* 3계층 메뉴 */}
+                    {sub.subs && activeSub === sub.text && (
+                      <List sx={{ pl: 2 }}>
+                        {sub.subs.map(third => (
+                          <ListItem disablePadding key={third.text}>
+                            <ListItemButton
+                              selected={activeThird === third.text}
+                              onClick={() => setActiveThird(third.text)}
+                            >
+                              <ListItemText 
+                                primary={`• ${third.text}`}
+                                primaryTypographyProps={{ fontSize: '0.9rem' }}
+                              />
+                            </ListItemButton>
+                          </ListItem>
+                        ))}
+                      </List>
+                    )}
+                  </React.Fragment>
                 ))}
-                </List>
+              </List>
             )}
-            </React.Fragment>
+          </React.Fragment>
         ))}
-        </List>
+      </List>
     </Box>
   );
 
