@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Box, Button, TextField, MenuItem, Typography, Modal } from "@mui/material";
-import type { SelectChangeEvent } from "@mui/material";
+
 
 type Company = {
   id: number;
