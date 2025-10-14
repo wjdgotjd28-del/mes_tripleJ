@@ -1,3 +1,4 @@
+// src/main/pages/CommonLayout.tsx
 import React, { useState } from "react";
 import {
   AppBar,
@@ -16,245 +17,138 @@ import {
 } from "@mui/material";
 import {
   Menu as MenuIcon,
-  Inventory,
   Layers,
-  Settings,
 } from "@mui/icons-material";
-import RegisterPage from "../../rawMaterials/inbound/pages/RegisterPage";
-import ViewPage from "../../rawMaterials/inbound/pages/ViewPage";
-import RoutingLookupPage from "../../masterData/routings/pages/RoutingLookupPage";
-import OrderItemLookupPage from "../../orders/inbound/pages/OrderItemLookupPage";
+
+import OrderInViewPage from "../../orders/inbound/pages/OrderInViewPage";
+import OrderOutViewPage from "../../orders/outbound/pages/OrderOutViewPage";
+import RawInViewPage from "../../rawMaterials/inbound/pages/RawInViewPage";
+import RawOutViewPage from "../../rawMaterials/outbound/pages/RawOutViewPage";
+import OrderViewPage from "../../masterData/items/pages/OrderViewPage";
+import RawViewPage from "../../masterData/items/pages/RawViewPage";
+import RoutingLookupPage from "../../masterData/routings/pages/RoutingViewPage";
+import BusinessPartner from "../../masterData/companies/pages/BusinessPartnerViewPage";
 
 const drawerWidth = 260;
-
-// 메뉴 데이터 (기존과 동일)
-type SubMenuType = {
-  text: string;
-  subMenus: string[];
-};
 
 const mainMenus = [
   {
     text: "수주 대상 관리",
-    icon: <Inventory />,
-    subs: [
-      { text: "입고", subMenus: ["입고 품목 조회/등록"] },
-      { text: "출고", subMenus: ["등록", "조회"] },
-    ],
-  },
-  {
-    text: "원자재 품목 관리",
     icon: <Layers />,
     subs: [
-      { text: "입고", subMenus: ["등록", "조회"] },
-      { text: "출고", subMenus: ["등록", "조회"] },
-    ],
+      { text: "입고"},
+      { text: "출고"},
+    ]
   },
   {
-    text: "기준정보",
+    text: "원자재 관리",
     icon: <Layers />,
-    subs: [{ text: "라우팅 조회/등록", subMenus: ["조회/등록"] }],
+    subs: [
+      { text: "입고"},
+      { text: "출고"},
+      { text: "재고현황"},
+    ]
   },
   {
-    text: "시스템 설정",
-    icon: <Settings />,
-    subs: [{ text: "권한 관리", subMenus: ["등록", "조회"] }],
+    text: "기준 정보 관리",
+    icon: <Layers />,
+    subs: [
+      { text: "수주대상 품목 관리" },
+      { text: "원자재 품목 관리" },
+      { text: "라우팅 관리" },
+      { text: "업체 관리" },
+    ]
   },
+  // 필요하면 다른 메뉴 추가
 ];
 
 export default function CommonLayout() {
-  // ✅ 1. 모바일 사이드바 열림/닫힘 상태 추가
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMain, setActiveMain] = useState(mainMenus[0].text);
   const [activeSub, setActiveSub] = useState(mainMenus[0].subs[0].text);
-  const [activeThird, setActiveThird] = useState(
-    mainMenus[0].subs[0].subMenus[0]
+
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+
+  const currentPath = `${activeMain} > ${activeSub}`;
+//   const currentPath = `${activeMain} > ${activeSub} > ${activeThird}`;
+
+  // ================= 페이지 매핑 =================
+  const pageMap: Record<string, React.ReactNode> = {
+    "수주 대상 관리 > 입고": <OrderInViewPage />,
+    "수주 대상 관리 > 출고": <OrderOutViewPage />,
+    "원자재 관리 > 입고": <RawInViewPage />,
+    "원자재 관리 > 출고": <RawOutViewPage />,
+    "기준 정보 관리 > 수주대상 품목 관리": <OrderViewPage />,
+    "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
+    "기준 정보 관리 > 라우팅 관리": <RoutingLookupPage />,
+    "기준 정보 관리 > 업체 관리": <BusinessPartner />,
+  };
+
+  const renderPage = () => pageMap[`${activeMain} > ${activeSub}`] || (
+    <Typography>페이지를 선택하세요.</Typography>
   );
 
-  // ✅ 2. 모바일 사이드바 토글 핸들러 추가
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleMainClick = (main: string, subList: SubMenuType[]) => {
-    setActiveMain(main);
-    setActiveSub(subList[0].text);
-    setActiveThird(subList[0].subMenus[0]);
-  };
-
-  const handleSubClick = (sub: string, thirdList: string[]) => {
-    setActiveSub(sub);
-    setActiveThird(thirdList[0]);
-  };
-
-  const currentPath = `${activeMain} > ${activeSub} > ${activeThird}`;
-
-  const renderPage = () => {
-    if (
-      activeMain === "기준정보" &&
-      activeSub === "라우팅 조회/등록" &&
-      activeThird === "조회/등록"
-    ) {
-      return <RoutingLookupPage />;
-    }
-
-    if (
-      activeMain === "수주 대상 관리" &&
-      activeSub === "입고" &&
-      activeThird === "입고 품목 조회/등록"
-    ) {
-      return <OrderItemLookupPage />;
-    }
-
-    if (activeThird === "조회") return <ViewPage />;
-    if (activeThird === "등록") return <RegisterPage />;
-    return <Typography>페이지를 선택하세요.</Typography>;
-  };
-
-  // ✅ 사이드바 UI를 별도 컴포넌트로 분리 (재사용을 위해)
+  // ================= Drawer 내용 =================
   const drawerContent = (
     <Box>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          MES System
-        </Typography>
-      </Toolbar>
+      <Toolbar><Typography variant="h6">MES System</Typography></Toolbar>
       <Divider />
       <List>
-        {mainMenus.map((main) => (
-          <React.Fragment key={main.text}>
+        {mainMenus.map(main => (
+            <React.Fragment key={main.text}>
             <ListItem disablePadding>
-              <ListItemButton
+                <ListItemButton
                 selected={activeMain === main.text}
-                onClick={() => handleMainClick(main.text, main.subs)}
-              >
+                onClick={() => {
+                    setActiveMain(main.text);
+                    setActiveSub(main.subs[0].text);
+                }}
+                >
                 <ListItemIcon>{main.icon}</ListItemIcon>
                 <ListItemText primary={main.text} />
-              </ListItemButton>
+                </ListItemButton>
             </ListItem>
+
             {activeMain === main.text && (
-              <List sx={{ pl: 2, bgcolor: "#fafafa" }}>
-                {main.subs.map((sub) => (
-                  <React.Fragment key={sub.text}>
-                    <ListItem disablePadding>
-                      <ListItemButton
+                <List sx={{ pl: 2 }}>
+                {main.subs.map(sub => (
+                    <ListItem disablePadding key={sub.text}>
+                    <ListItemButton
                         selected={activeSub === sub.text}
-                        onClick={() => handleSubClick(sub.text, sub.subMenus)}
-                      >
+                        onClick={() => setActiveSub(sub.text)}
+                    >
                         <ListItemText primary={`- ${sub.text}`} />
-                      </ListItemButton>
+                    </ListItemButton>
                     </ListItem>
-                    {activeSub === sub.text && (
-                      <List sx={{ pl: 3, bgcolor: "#f5f5f5" }}>
-                        {sub.subMenus.map((third) => (
-                          <ListItem disablePadding key={third}>
-                            <ListItemButton
-                              selected={activeThird === third}
-                              onClick={() => {
-                                setActiveThird(third);
-                                // ✅ 모바일에서 메뉴 선택 시 사이드바 닫기
-                                if (mobileOpen) handleDrawerToggle();
-                              }}
-                            >
-                              <ListItemText primary={third} />
-                            </ListItemButton>
-                          </ListItem>
-                        ))}
-                      </List>
-                    )}
-                  </React.Fragment>
                 ))}
-              </List>
+                </List>
             )}
-          </React.Fragment>
+            </React.Fragment>
         ))}
-      </List>
+        </List>
     </Box>
   );
 
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-          backgroundColor: "white",
-          color: "black",
-          boxShadow: 0,
-          borderBottom: "1px solid #e0e0e0",
-        }}
-      >
+      <AppBar position="fixed" sx={{ width: { sm: `calc(100% - ${drawerWidth}px)` }, ml: { sm: `${drawerWidth}px` } }}>
         <Toolbar>
-          {/* ✅ 3. 메뉴 아이콘(햄버거 버튼)에 토글 핸들러 연결 */}
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: "none" } }} // sm 사이즈 이상에서는 안보임
-          >
+          <IconButton color="inherit" edge="start" onClick={handleDrawerToggle} sx={{ mr: 2, display: { sm: "none" } }}>
             <MenuIcon />
           </IconButton>
-          <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-            {currentPath}
-          </Typography>
+          <Typography>{currentPath}</Typography>
         </Toolbar>
       </AppBar>
-
-      {/* ✅ 4. 반응형 사이드바를 위해 Box로 감싸기 */}
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
-        {/* 모바일용 Drawer (Temporary) */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: "block", sm: "none" }, // xs 사이즈에서만 보임
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-        >
+      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
+        <Drawer variant="temporary" open={mobileOpen} onClose={handleDrawerToggle} ModalProps={{ keepMounted: true }} sx={{ display: { xs: "block", sm: "none" }, "& .MuiDrawer-paper": { width: drawerWidth } }}>
           {drawerContent}
         </Drawer>
-
-        {/* 데스크탑용 Drawer (Permanent) */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: "none", sm: "block" }, // sm 사이즈 이상에서만 보임
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-          open
-        >
+        <Drawer variant="permanent" sx={{ display: { xs: "none", sm: "block" }, "& .MuiDrawer-paper": { width: drawerWidth } }} open>
           {drawerContent}
         </Drawer>
       </Box>
-
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 2,
-          maxWidth: "100%",
-          backgroundColor: "#f7f9fb",
-          minHeight: "100vh",
-          overflow: "auto",
-        }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, p: 2, width: { sm: `calc(100% - ${drawerWidth}px)` }, minHeight: "100vh" }}>
         <Toolbar />
         {renderPage()}
       </Box>
