@@ -1,12 +1,5 @@
 import * as React from "react";
-import {
-  Box,
-  Button,
-  Modal,
-  TextField,
-  MenuItem,
-  Typography,
-} from "@mui/material";
+import { Box, Button, TextField, MenuItem, Typography, Modal } from "@mui/material";
 
 type Company = {
   id: number;
@@ -27,7 +20,7 @@ type BusinessPartnerDetailModalProps = {
   open: boolean;
   onClose: () => void;
   company: Company | null;
-  onSave: (updatedCompany: Company) => void;
+  onSave: (updatedCompany: Company) => void; // 상위에서 상태 업데이트
 };
 
 const style = {
@@ -52,10 +45,12 @@ export default function BusinessPartnerDetailModal({
   company,
   onSave,
 }: BusinessPartnerDetailModalProps) {
+  const [isEditing, setIsEditing] = React.useState(false);
   const [formData, setFormData] = React.useState<Company | null>(company);
 
   React.useEffect(() => {
     setFormData(company);
+    setIsEditing(false); // 모달 열 때 읽기 전용으로 초기화
   }, [company]);
 
   if (!formData) return null;
@@ -66,34 +61,45 @@ export default function BusinessPartnerDetailModal({
   };
 
   const handleSave = () => {
-    if (formData) onSave(formData);
-    onClose();
+    if (formData) {
+      onSave(formData); // 상위 컴포넌트로 수정된 데이터 전달
+      setIsEditing(false);
+    }
   };
 
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
-        <Typography
-          variant="h6"
-          sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}
-        >
-          업체 상세 조회 / 수정
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}>
+          업체 상세 조회
         </Typography>
 
         <Box sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}>
-          <TextField
-            select
-            fullWidth
-            size="small"
-            label="업체 유형"
-            name="type"
-            value={formData.type}
-            onChange={handleChange}
-            sx={{ mb: 2 }}
-          >
-            <MenuItem value="거래처">거래처</MenuItem>
-            <MenuItem value="매입처">매입처</MenuItem>
-          </TextField>
+          {/* 업체 유형 */}
+          {isEditing ? (
+            <TextField
+              select
+              fullWidth
+              size="small"
+              label="업체 유형"
+              name="type"
+              value={formData.type}
+              onChange={handleChange}
+              sx={{ mb: 2 }}
+            >
+              <MenuItem value="거래처">거래처</MenuItem>
+              <MenuItem value="매입처">매입처</MenuItem>
+            </TextField>
+          ) : (
+            <TextField
+              fullWidth
+              size="small"
+              label="업체 유형"
+              value={formData.type}
+              InputProps={{ readOnly: true }}
+              sx={{ mb: 2 }}
+            />
+          )}
 
           <TextField
             fullWidth
@@ -102,9 +108,9 @@ export default function BusinessPartnerDetailModal({
             name="businessNumber"
             value={formData.businessNumber}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
@@ -112,9 +118,9 @@ export default function BusinessPartnerDetailModal({
             name="name"
             value={formData.name}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
@@ -122,9 +128,9 @@ export default function BusinessPartnerDetailModal({
             name="ceo"
             value={formData.ceo}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
@@ -132,9 +138,9 @@ export default function BusinessPartnerDetailModal({
             name="ceoPhone"
             value={formData.ceoPhone}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
@@ -142,9 +148,9 @@ export default function BusinessPartnerDetailModal({
             name="managerName"
             value={formData.managerName}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
@@ -152,9 +158,9 @@ export default function BusinessPartnerDetailModal({
             name="managerPhone"
             value={formData.managerPhone}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
@@ -162,9 +168,9 @@ export default function BusinessPartnerDetailModal({
             name="managerEmail"
             value={formData.managerEmail}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
@@ -172,37 +178,52 @@ export default function BusinessPartnerDetailModal({
             name="address"
             value={formData.address}
             onChange={handleChange}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
             label="비고"
             name="note"
-            multiline
-            rows={2}
             value={formData.note}
             onChange={handleChange}
+            multiline
+            rows={2}
+            InputProps={{ readOnly: !isEditing }}
             sx={{ mb: 2 }}
           />
-
           <TextField
             fullWidth
             size="small"
             label="거래 상태"
             name="status"
             value={formData.status}
-            onChange={handleChange}
-            sx={{ mb: 2 }}
+            InputProps={{ readOnly: true }}
           />
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
-          <Button variant="contained" size="small" onClick={handleSave}>
-            수정
-          </Button>
-          <Button variant="outlined" size="small" onClick={onClose} sx={{ ml: 1 }}>
+          {!isEditing ? (
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setIsEditing(true)}
+              sx={{ mr: 1 }}
+            >
+              수정
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleSave}
+              sx={{ mr: 1 }}
+            >
+              저장
+            </Button>
+          )}
+          <Button variant="contained" size="small" onClick={onClose}>
             닫기
           </Button>
         </Box>
