@@ -2,8 +2,13 @@ package com.mes_back.entity;
 import com.mes_back.constant.OrderCategory;
 import com.mes_back.constant.PaintType;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "order_item")
+@Getter
+@Setter
 public class OrderItem {
 
     @Id

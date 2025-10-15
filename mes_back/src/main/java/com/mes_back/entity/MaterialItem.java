@@ -2,9 +2,13 @@ package com.mes_back.entity;
 
 import com.mes_back.constant.MaterialCategory;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "material_item")
+@Getter
+@Setter
 public class MaterialItem {
 
     @Id

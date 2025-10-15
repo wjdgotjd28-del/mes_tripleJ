@@ -1,5 +1,10 @@
 package com.mes_back.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class MaterialItemDTO {
     private Long materialItemId;
     private Long companyId;

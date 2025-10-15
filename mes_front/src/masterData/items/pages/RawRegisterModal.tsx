@@ -1,3 +1,4 @@
+// RawRegisterModal.tsx
 import { useState } from "react";
 import {
   Box,
@@ -17,11 +18,12 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import type { RawItems } from "../../../type";
+import { createRawItems } from "../api/RawApi";
 
 interface RawRegisterModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: RawItems) => void;
+  onSubmit: () => void; // 등록 후 부모에게 알리기
 }
 
 export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegisterModalProps) {
@@ -30,29 +32,29 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
     item_code: "",
     item_name: "",
     category: "",
-    color: "",
     spec_qty: 0,
     spec_unit: "",
+    color: "",
     manufacturer: "",
     note: "",
     use_yn: "Y",
   });
 
+  // 한글 ↔ 영어 카테고리 매핑
+  const categoryMap: Record<string, string> = {
+    페인트: "PAINT",
+    신나: "THINNER",
+    세척제: "CLEANER",
+    경화제: "HARDENER",
+  };
+
   const handleChange = (field: keyof RawItems, value: string | number) => {
     setNewData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
-    if (!newData.company_name) {
-      alert("업체명을 입력하세요.");
-      return;
-    }
-    if (!newData.item_code || !newData.item_name) {
-      alert("품목번호와 품목명을 입력하세요.");
-      return;
-    }
-    if (!newData.category) {
-      alert("분류를 선택하세요.");
+  const handleSubmit = async () => {
+    if (!newData.company_name || !newData.item_code || !newData.item_name || !newData.category) {
+      alert("필수 항목을 모두 입력하세요.");
       return;
     }
     if (!newData.spec_qty || !newData.spec_unit) {
@@ -60,7 +62,14 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
       return;
     }
 
-    onSubmit(newData as RawItems);
+    // 카테고리 한글 → 영어로 변환
+    const payload: RawItems = {
+      ...(newData as RawItems),
+      category: categoryMap[newData.category as string] || newData.category!,
+    };
+
+    await createRawItems(payload);
+    onSubmit();
     handleClose();
   };
 
@@ -70,9 +79,9 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
       item_code: "",
       item_name: "",
       category: "",
-      color: "",
       spec_qty: 0,
       spec_unit: "",
+      color: "",
       manufacturer: "",
       note: "",
       use_yn: "Y",
@@ -85,14 +94,11 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
       <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <Typography variant="h6">원자재 품목 등록</Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Button onClick={handleSubmit} variant="contained" color="primary">
-            등록
-          </Button>
-          <IconButton onClick={handleClose} size="small">
-            <CloseIcon />
-          </IconButton>
+          <Button onClick={handleSubmit} variant="contained" color="primary">등록</Button>
+          <IconButton onClick={handleClose} size="small"><CloseIcon /></IconButton>
         </Box>
       </DialogTitle>
+
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
           <TextField
@@ -117,19 +123,25 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
             required
           />
           <TextField
+            label="제조사"
+            value={newData.manufacturer}
+            onChange={(e) => handleChange("manufacturer", e.target.value)}
+            fullWidth
+          />
+
+          <TextField
             label="분류"
             select
-            value={newData.category || ""}
-            onChange={(e) => handleChange("category", e.target.value)}
             fullWidth
+            value={Object.keys(categoryMap).find(k => categoryMap[k] === newData.category) || ""}
+            onChange={(e) => handleChange("category", e.target.value)}
             required
           >
-            {["페인트", "신나", "세척제", "경화제"].map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
+            {Object.keys(categoryMap).map((v) => (
+              <MenuItem key={v} value={v}>{v}</MenuItem>
             ))}
           </TextField>
+
           <Box sx={{ display: "flex", gap: 1 }}>
             <TextField
               label="규격(양)"
@@ -137,28 +149,26 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
               value={newData.spec_qty ?? ""}
               onChange={(e) => handleChange("spec_qty", parseInt(e.target.value) || 0)}
               fullWidth
+              required
             />
             <TextField
               label="규격(단위)"
               value={newData.spec_unit}
               onChange={(e) => handleChange("spec_unit", e.target.value)}
               fullWidth
+              required
             />
           </Box>
+
           <TextField
             label="색상"
             value={newData.color}
             onChange={(e) => handleChange("color", e.target.value)}
             fullWidth
           />
-          <TextField
-            label="제조사"
-            value={newData.manufacturer}
-            onChange={(e) => handleChange("manufacturer", e.target.value)}
-            fullWidth
-          />
+
           <FormControl component="fieldset">
-            <FormLabel component="legend">사용여부</FormLabel>
+            <FormLabel>사용여부</FormLabel>
             <RadioGroup
               row
               value={newData.use_yn || "Y"}
@@ -168,6 +178,7 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
               <FormControlLabel value="N" control={<Radio />} label="N" />
             </RadioGroup>
           </FormControl>
+
           <TextField
             label="비고"
             value={newData.note}

@@ -34,7 +34,7 @@ export interface OrderItems {
 
 // 테이블 데이터 타입
 export interface RawItems {
-  id: number;
+  material_item_id: number;
   company_name: string;
   item_code: string;
   item_name: string;

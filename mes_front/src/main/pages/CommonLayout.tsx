@@ -1,5 +1,5 @@
 // src/main/pages/CommonLayout.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Box,
@@ -16,24 +16,14 @@ import {
   Typography,
 } from "@mui/material";
 import { Menu as MenuIcon, Layers } from "@mui/icons-material";
-
-import OrderInViewPage from "../../orders/inbound/pages/OrderInViewPage";
-import OrderOutViewPage from "../../orders/outbound/pages/OrderOutViewPage";
-import RawInViewPage from "../../rawMaterials/inbound/pages/RawInViewPage";
-import RawOutViewPage from "../../rawMaterials/outbound/pages/RawOutViewPage";
-import OrderViewPage from "../../masterData/items/pages/OrderViewPage";
-import RawViewPage from "../../masterData/items/pages/RawViewPage";
-import RoutingLookupPage from "../../masterData/routings/pages/RoutingViewPage";
-import BusinessPartnerViewPage from "../../masterData/companies/pages/BusinessPartnerViewPage";
-import InboundHistoryPage from "../../orders/inbound/pages/InboundHistoryPage";
-import RawMaterialInventoryStatus from "../../rawMaterials/inventory/RawMaterialInventoryStatus";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 const drawerWidth = 260;
 
 // 서브메뉴 타입 정의
 interface SubMenu {
   text: string;
-  subs?: { text: string }[]; // 3계층을 위한 선택적 하위 메뉴
+  subs?: { text: string }[];
 }
 
 interface MainMenu {
@@ -72,16 +62,19 @@ const mainMenus: MainMenu[] = [
 ];
 
 export default function CommonLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMain, setActiveMain] = useState(mainMenus[0].text);
   const [activeSub, setActiveSub] = useState(mainMenus[0].subs[0].text);
   const [activeThird, setActiveThird] = useState<string | null>(
     mainMenus[0].subs[0].subs ? mainMenus[0].subs[0].subs[0].text : null
   );
-
+  
   // 메뉴별 열림 상태 관리
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
-    [mainMenus[0].text]: true, // 처음엔 첫 메뉴 열림 상태로 시작
+    [mainMenus[0].text]: true,
   });
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
@@ -90,7 +83,7 @@ export default function CommonLayout() {
   const toggleMainMenu = (mainText: string) => {
     setOpenMenus((prev) => ({
       ...prev,
-      [mainText]: !prev[mainText], // 같은 메뉴 클릭 시 토글
+      [mainText]: !prev[mainText],
     }));
 
     setActiveMain(mainText);
@@ -104,44 +97,78 @@ export default function CommonLayout() {
     ? `${activeMain} > ${activeSub} > ${activeThird}`
     : `${activeMain} > ${activeSub}`;
 
-  // ================= 페이지 매핑 =================
-  const pageMap: Record<string, React.ReactNode> = {
+  // ================= 페이지 라우트 매핑 =================
+  const routeMap: Record<string, string> = {
     // 3계층
-    "수주 대상 관리 > 수주 입고 > 수주 대상 품목 입고": <OrderInViewPage />,
-    "수주 대상 관리 > 수주 입고 > 수주 이력 조회": <InboundHistoryPage />,
+    "수주 대상 관리 > 수주 입고 > 수주 대상 품목 입고": "/orders/inbound/items",
+    "수주 대상 관리 > 수주 입고 > 수주 이력 조회": "/orders/inbound/history",
 
     // 2계층
-    "수주 대상 관리 > 수주 출고": <OrderOutViewPage />,
-    "원자재 관리 > 원자재 입고": <RawInViewPage />,
-    "원자재 관리 > 원자재 출고": <RawOutViewPage />,
-    "원자재 관리 > 재고현황": <RawMaterialInventoryStatus />,
-    "기준 정보 관리 > 수주 대상 품목 관리": <OrderViewPage />,
-    "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
-    "기준 정보 관리 > 라우팅 관리": <RoutingLookupPage />,
-    "기준 정보 관리 > 업체 관리": <BusinessPartnerViewPage />,
+    "수주 대상 관리 > 수주 출고": "/orders/outbound",
+    "원자재 관리 > 원자재 입고": "/raw-materials/inbound",
+    "원자재 관리 > 원자재 출고": "/raw-materials/outbound",
+    "원자재 관리 > 재고현황": "/raw-materials/inventory",
+    "기준 정보 관리 > 수주 대상 품목 관리": "/items/order/view",
+    "기준 정보 관리 > 원자재 품목 관리": "/items/raw/view",
+    "기준 정보 관리 > 라우팅 관리": "/routings",
+    "기준 정보 관리 > 업체 관리": "/companies",
   };
 
-  const renderPage = () =>
-    pageMap[currentPath] || <Typography>페이지를 선택하세요.</Typography>;
+  // 라우트 -> 메뉴 경로 역매핑
+  const pathToMenuMap: Record<string, { main: string; sub: string; third: string | null }> = {
+    "/orders/inbound/items": { main: "수주 대상 관리", sub: "수주 입고", third: "수주 대상 품목 입고" },
+    "/orders/inbound/history": { main: "수주 대상 관리", sub: "수주 입고", third: "수주 이력 조회" },
+    "/orders/outbound": { main: "수주 대상 관리", sub: "수주 출고", third: null },
+    "/raw-materials/inbound": { main: "원자재 관리", sub: "원자재 입고", third: null },
+    "/raw-materials/outbound": { main: "원자재 관리", sub: "원자재 출고", third: null },
+    "/raw-materials/inventory": { main: "원자재 관리", sub: "재고현황", third: null },
+    "/items/order/view": { main: "기준 정보 관리", sub: "수주 대상 품목 관리", third: null },
+    "/items/raw/view": { main: "기준 정보 관리", sub: "원자재 품목 관리", third: null },
+    "/routings": { main: "기준 정보 관리", sub: "라우팅 관리", third: null },
+    "/companies": { main: "기준 정보 관리", sub: "업체 관리", third: null },
+  };
+
+  // URL 변경 시 메뉴 상태 동기화
+  useEffect(() => {
+    const menuState = pathToMenuMap[location.pathname];
+    if (menuState) {
+      setActiveMain(menuState.main);
+      setActiveSub(menuState.sub);
+      setActiveThird(menuState.third);
+      
+      // 해당 메뉴 열기
+      setOpenMenus((prev) => ({
+        ...prev,
+        [menuState.main]: true,
+      }));
+    }
+  }, [location.pathname]);
+
+  // 메뉴 선택 시 네비게이션
+  useEffect(() => {
+    const targetRoute = routeMap[currentPath];
+    if (targetRoute && location.pathname !== targetRoute) {
+      navigate(targetRoute);
+    }
+  }, [currentPath, navigate, location.pathname]);
 
   // 2계층 메뉴 클릭 핸들러
   const handleSubClick = (mainText: string, subText: string, hasSubs: boolean) => {
-  setActiveMain(mainText);
-  setActiveSub(subText);
+    setActiveMain(mainText);
+    setActiveSub(subText);
 
-  const mainMenu = mainMenus.find(m => m.text === mainText);
-  const subMenu = mainMenu?.subs.find(s => s.text === subText);
+    const mainMenu = mainMenus.find((m) => m.text === mainText);
+    const subMenu = mainMenu?.subs.find((s) => s.text === subText);
 
-  if (hasSubs && subMenu?.subs && subMenu.subs.length > 0) {
-    // 3계층이 있는 경우 → 첫 번째 3계층 자동 선택
-    const firstThird = subMenu.subs[0].text;
-    setActiveThird(firstThird);
-  } else {
-    // 3계층이 없는 경우 → 바로 페이지 렌더링
-    setActiveThird(null);
-  }
-};
-
+    if (hasSubs && subMenu?.subs && subMenu.subs.length > 0) {
+      // 3계층이 있는 경우 → 첫 번째 3계층 자동 선택
+      const firstThird = subMenu.subs[0].text;
+      setActiveThird(firstThird);
+    } else {
+      // 3계층이 없는 경우 → 바로 페이지 렌더링
+      setActiveThird(null);
+    }
+  };
 
   // ================= Drawer 내용 =================
   const drawerContent = (
@@ -267,7 +294,7 @@ export default function CommonLayout() {
         }}
       >
         <Toolbar />
-        {renderPage()}
+        <Outlet />
       </Box>
     </Box>
   );
