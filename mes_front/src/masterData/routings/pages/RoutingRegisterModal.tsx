@@ -52,6 +52,10 @@ export default function RoutingRegisterModal({
       setError("중복된 공정코드가 있습니다.");
       return;
     }
+    if (!form.processCode || !form.processName || !form.processTime) {
+      alert("필수 항목을 모두 입력하세요.");
+      return;
+    }
 
     try {
       const saved = await registerRouting(form); // 등록된 데이터 받아오기
@@ -92,16 +96,19 @@ export default function RoutingRegisterModal({
             label="공정 코드"
             value={form.processCode}
             onChange={(e) => handleChange("processCode", e.target.value)}
+            required
           />
           <TextField
             label="공정 명"
             value={form.processName}
             onChange={(e) => handleChange("processName", e.target.value)}
+            required
           />
           <TextField
             label="공정 시간"
             value={form.processTime}
             onChange={(e) => handleChange("processTime", e.target.value)}
+            required
           />
           <TextField
             label="비고"

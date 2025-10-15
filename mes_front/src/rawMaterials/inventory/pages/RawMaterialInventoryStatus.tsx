@@ -1,4 +1,3 @@
-import { useState } from "react";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import {
   Box,
@@ -12,55 +11,46 @@ import {
   Paper,
   Button,
   TextField,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import {
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
-import { Tooltip, IconButton } from "@mui/material";
 
-import { exportToExcel } from "../../Common/ExcelUtils";
+import { exportToExcel } from "../../../Common/ExcelUtils";
+import { usePagination } from "../../../Common/usePagination";
+import type { RawMaterialInventoryStatus } from "../../../type";
 
-const sampleData = [
-  {
-    id: 1,
-    customer_name: "거래처 A",
-    item_code: "AD217000",
-    item_name: "품목 A",
-    qty: 10,
-    spec_unit: "EA",
-  },
-  {
-    id: 2,
-    customer_name: "거래처 B",
-    item_code: "AD217002",
-    item_name: "품목 B",
-    qty: 30,
-    spec_unit: "kg",
-  },
-  {
-    id: 3,
-    customer_name: "거래처 C",
-    item_code: "AD217005",
-    item_name: "품목 C",
-    qty: 30,
-    spec_unit: "EA",
-  },
-];
+import { useEffect, useState } from "react";
+import { fetchRawMaterialInventory } from "../api/RawMaterialApi";
 
 export default function RawMaterialInventoryStatus() {
   const [clientSearch, setClientSearch] = useState("");
   const [itemNoSearch, setItemNoSearch] = useState("");
   const [itemNameSearch, setItemNameSearch] = useState("");
 
-  // 검색 실행 상태
   const [searchParams, setSearchParams] = useState({
     customer_name: "",
     item_code: "",
     item_name: "",
   });
 
-  // 검색 버튼 클릭 시 실행
+  const [rawData, setRawData] = useState<RawMaterialInventoryStatus[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchRawMaterialInventory();
+        setRawData(data);
+      } catch (err) {
+        console.error("재고 데이터 불러오기 실패", err);
+      }
+    };
+    loadData();
+  }, []);
+
   const handleSearch = () => {
     setSearchParams({
       customer_name: clientSearch,
@@ -74,25 +64,28 @@ export default function RawMaterialInventoryStatus() {
     setSortAsc((prev) => !prev);
   };
 
-  const sortedData = [...sampleData].sort((a, b) =>
-    sortAsc ? a.id - b.id : b.id - a.id
-  );
+  // ✅ 정렬
+  const sortedData = Array.isArray(rawData)
+    ? [...rawData].sort((a, b) => (sortAsc ? a.id - b.id : b.id - a.id))
+    : [];
 
   const filteredData = sortedData.filter(
-    (row) =>
-      row.customer_name.includes(searchParams.customer_name) &&
-      row.item_code.includes(searchParams.item_code) &&
-      row.item_name.includes(searchParams.item_name)
+    (item) =>
+      (item.customer_name ?? "").includes(searchParams.customer_name) &&
+      (item.item_code ?? "").includes(searchParams.item_code) &&
+      (item.item_name ?? "").includes(searchParams.item_name)
   );
+
+  // ✅ 페이지네이션
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(filteredData, 10);
 
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
-      {/* 제목 */}
       <Typography variant="h5" sx={{ mb: 1 }}>
         원자재 재고 현황
       </Typography>
 
-      {/* 검색창 박스: 제목 아래에 따로 배치 */}
       <Box
         sx={{
           display: "flex",
@@ -101,7 +94,6 @@ export default function RawMaterialInventoryStatus() {
           mb: 2,
         }}
       >
-        {/* 왼쪽: 검색창들 */}
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
@@ -134,18 +126,16 @@ export default function RawMaterialInventoryStatus() {
           </Tooltip>
         </Box>
 
-        {/* 오른쪽: Excel 버튼 */}
         <Button
           color="success"
           variant="outlined"
           endIcon={<FileDownloadIcon />}
-          onClick={() => exportToExcel(filteredData, "입고이력")}
+          onClick={() => exportToExcel(filteredData, "원자재재고")}
         >
           엑셀 다운로드
         </Button>
       </Box>
 
-      {/* 테이블 영역 */}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 800 }}>
           <TableHead>
@@ -158,9 +148,8 @@ export default function RawMaterialInventoryStatus() {
               <TableCell align="center">단위</TableCell>
             </TableRow>
           </TableHead>
-
           <TableBody>
-            {filteredData.map((row) => (
+            {paginatedData.map((row) => (
               <TableRow key={row.id}>
                 <TableCell align="center">{row.id}</TableCell>
                 <TableCell align="center">{row.customer_name}</TableCell>
@@ -173,6 +162,32 @@ export default function RawMaterialInventoryStatus() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          mt: 2,
+          gap: 1,
+        }}
+      >
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography variant="body2" sx={{ px: 2 }}>
+          페이지 {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
     </Box>
   );
 }

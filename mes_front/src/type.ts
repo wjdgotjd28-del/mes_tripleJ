@@ -47,6 +47,7 @@ export interface RawItems {
   use_yn: string;
 }
 
+// 업체 정보 타입
 export interface Company {
   id: number;
   type: "거래처" | "매입처";
@@ -55,8 +56,9 @@ export interface Company {
   address: string;
   note: string;
   status: "Y" | "N";
-};
+}
 
+// 라우팅 등록 타입
 export type RoutingCreateData = {
   processCode: string;
   processName: string;
@@ -64,10 +66,20 @@ export type RoutingCreateData = {
   note: string;
 };
 
-
+// 라우팅 조회 타입
 export type RoutingFormData = RoutingCreateData & {
   routingId: number;
 };
 
+
+// 원자재 재고 현황 테이블 타입
+export type RawMaterialInventoryStatus = {
+  id: number;
+  companyName: string;
+  item_code: string;
+  item_name: string;
+  qty: number;
+  spec_unit: string;
+};
 
 

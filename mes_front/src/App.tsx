@@ -9,7 +9,7 @@ import InboundHistoryPage from "./orders/inbound/pages/InboundHistoryPage";
 import OrderOutViewPage from "./orders/outbound/pages/OrderOutViewPage";
 import RawInViewPage from "./rawMaterials/inbound/pages/RawInViewPage";
 import RawOutViewPage from "./rawMaterials/outbound/pages/RawOutViewPage";
-import RawMaterialInventoryStatus from "./rawMaterials/inventory/RawMaterialInventoryStatus";
+import RawMaterialInventoryStatus from "./rawMaterials/inventory/pages/RawMaterialInventoryStatus";
 
 function App() {
   return (

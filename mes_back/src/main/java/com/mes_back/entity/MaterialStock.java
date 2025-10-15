@@ -1,8 +1,14 @@
 package com.mes_back.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Table(name = "material_stock")
 public class MaterialStock {
 
@@ -15,7 +21,7 @@ public class MaterialStock {
     private MaterialItem materialItem;
 
     @Column(name = "total_qty", nullable = false)
-    private Long totalQty;
+    private Integer totalQty;
 
     @Column(nullable = false, length = 5)
     private String unit;

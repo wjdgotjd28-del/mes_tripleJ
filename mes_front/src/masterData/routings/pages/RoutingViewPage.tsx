@@ -21,11 +21,12 @@ import {
 } from "@mui/icons-material";
 import type { RoutingFormData } from "../../../type";
 
-export default function RoutingLookupPage() {
+export default function RoutingViewPage() {
   const [routingData, setRoutingData] = useState<RoutingFormData[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,25 +46,16 @@ export default function RoutingLookupPage() {
   };
 
   const handleDelete = async (routingId: number) => {
-    const confirmDelete = window.confirm("정말 삭제하시겠습니까?");
-    if (!confirmDelete) return;
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
     try {
       await deleteRouting(routingId);
       setRoutingData((prev) =>
         prev.filter((item) => item.routingId !== routingId)
       );
-      console.log("삭제 완료:", routingId);
     } catch (err) {
       console.error("삭제 실패:", err);
     }
-  };
-
-  const totalPages = Math.ceil(routingData.length / itemsPerPage);
-
-  const [sortAsc, setSortAsc] = useState(true);
-  const toggleSortOrder = () => {
-    setSortAsc((prev) => !prev);
   };
 
   const sortedData = [...routingData].sort((a, b) =>
@@ -88,7 +80,7 @@ export default function RoutingLookupPage() {
         <Typography variant="h5">라우팅 조회</Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
-            <IconButton onClick={toggleSortOrder}>
+            <IconButton onClick={() => setSortAsc((prev) => !prev)}>
               {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
             </IconButton>
           </Tooltip>
@@ -98,8 +90,8 @@ export default function RoutingLookupPage() {
         </Box>
       </Box>
 
-      <TableContainer component={Paper} sx={{ width: "100%" }}>
-        <Table sx={{ width: "100%" }}>
+      <TableContainer component={Paper}>
+        <Table>
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
@@ -111,8 +103,8 @@ export default function RoutingLookupPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row, index) => (
-              <TableRow key={index}>
+            {paginatedData.map((row) => (
+              <TableRow key={row.routingId}>
                 <TableCell>{row.routingId}</TableCell>
                 <TableCell>{row.processCode}</TableCell>
                 <TableCell>{row.processName}</TableCell>
@@ -141,12 +133,10 @@ export default function RoutingLookupPage() {
           〈
         </Button>
         <Box sx={{ px: 2, display: "flex", alignItems: "center" }}>
-          <Typography variant="body2">
-            페이지 {currentPage} / {totalPages}
-          </Typography>
+          <Typography variant="body2">페이지 {currentPage}</Typography>
         </Box>
         <Button
-          disabled={currentPage === totalPages}
+          disabled={currentPage * itemsPerPage >= routingData.length}
           onClick={() => setCurrentPage((prev) => prev + 1)}
         >
           〉
