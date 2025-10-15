@@ -323,6 +323,7 @@ export default function OrderViewPage() {
         onClose={() => setOpenDetailModal(false)}
         data={selectedItem}
         onSave={handleItemSave}
+        routingList={[]}
       />
     </Box>
   );
