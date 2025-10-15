@@ -3,13 +3,13 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import RawViewPage from "./masterData/items/pages/RawViewPage";
 import OrderViewPage from "./masterData/items/pages/OrderViewPage";
 import RoutingLookupPage from "./masterData/routings/pages/RoutingViewPage";
-import BusinessPartnerViewPage from "./masterData/companies/pages/BusinessPartnerViewPage";
 import OrderInViewPage from "./orders/inbound/pages/OrderInViewPage";
 import InboundHistoryPage from "./orders/inbound/pages/InboundHistoryPage";
 import OrderOutViewPage from "./orders/outbound/pages/OrderOutViewPage";
 import RawInViewPage from "./rawMaterials/inbound/pages/RawInViewPage";
 import RawOutViewPage from "./rawMaterials/outbound/pages/RawOutViewPage";
 import RawMaterialInventoryStatus from "./rawMaterials/inventory/RawMaterialInventoryStatus";
+import CompanyViewPage from "./masterData/companies/pages/CompanyViewPage";
 
 function App() {
   return (
@@ -39,7 +39,7 @@ function App() {
             <Route path="items/order/view" element={<OrderViewPage />} />
             <Route path="items/raw/view" element={<RawViewPage />} />
             <Route path="routings" element={<RoutingLookupPage />} />
-            <Route path="companies" element={<BusinessPartnerViewPage />} />
+            <Route path="companies" element={<CompanyViewPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
