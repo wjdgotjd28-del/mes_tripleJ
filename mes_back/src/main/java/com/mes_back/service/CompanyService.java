@@ -2,7 +2,7 @@ package com.mes_back.service;
 
 import com.mes_back.dto.CompanyDto;
 import com.mes_back.entity.Company;
-import com.mes_back.entity.repository.CompanyRepository;
+import com.mes_back.repository.CompanyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
