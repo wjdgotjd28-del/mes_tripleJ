@@ -33,5 +33,7 @@ public class CompanyDto {
     private String managerEmail;
 
     private String status; // Y / N
+
+
 }
 

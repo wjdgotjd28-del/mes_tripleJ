@@ -42,5 +42,31 @@ public class CompanyController {
          return ResponseEntity.ok(newStatus);
     }
 
+    // 일반 페이지용 (거래중 & 삭제 안된 업체)
+    @GetMapping("/active")
+    public List<CompanyDto> getActiveCompanies() {
+        return companyService.findAllActive();
+    }
+
+    // 삭제된 업체 조회
+    @GetMapping("/deleted")
+    public List<CompanyDto> getDeletedCompanies() {
+        return companyService.findAllDeleted();
+    }
+
+    // 업체 삭제 (소프트)
+    @DeleteMapping("/{companyId}")
+    public ResponseEntity<Void> deleteCompany(@PathVariable Long companyId) {
+        companyService.deleteCompany(companyId);
+        return ResponseEntity.ok().build();
+    }
+
+    // 업체 복구
+    @PostMapping("/{companyId}/restore")
+    public ResponseEntity<Void> restoreCompany(@PathVariable Long companyId) {
+        companyService.restoreCompany(companyId);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

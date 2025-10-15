@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "company")
@@ -14,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLDelete(sql = "UPDATE company SET deleted_at = NOW() WHERE company_id = ?")
 public class Company {
 
     @Id
@@ -72,5 +76,12 @@ public class Company {
 
     public void updateStatus(String status) {
         this.status = status;
+    }
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public void restore() {
+        this.deletedAt = null;
     }
 }
