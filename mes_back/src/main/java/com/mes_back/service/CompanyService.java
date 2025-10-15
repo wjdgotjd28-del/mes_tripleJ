@@ -3,6 +3,7 @@ package com.mes_back.service;
 import com.mes_back.dto.CompanyDto;
 import com.mes_back.entity.Company;
 import com.mes_back.entity.repository.CompanyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,7 @@ public class CompanyService {
         return companyDto;
     }
 
+    // 회사 전체 조회
     public List<CompanyDto> findAll() {
         List<CompanyDto> companyDtos = new ArrayList<>();
         for (Company company : companyRepository.findAll()) {
@@ -59,9 +61,14 @@ public class CompanyService {
         return companyDtos;
     }
 
-    // 회사 조회
-
-
-
     // 회사 수정
+    public CompanyDto updateCompany(CompanyDto companyDto) {
+        Company company = companyRepository.findById(companyDto.getCompanyId())
+                .orElseThrow(EntityNotFoundException::new);
+        company.updateCompany(companyDto);
+        return companyDto;
+
+    }
+
+
 }

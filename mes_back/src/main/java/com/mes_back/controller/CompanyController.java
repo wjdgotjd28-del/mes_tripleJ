@@ -27,5 +27,10 @@ public class CompanyController {
         return companyService.findAll();
     }
 
+    @PutMapping("")
+    public CompanyDto updateCompany(@RequestBody CompanyDto companyDto) {
+        return companyService.updateCompany(companyDto);
+    }
+
 
 }
