@@ -38,7 +38,7 @@ const style = {
   flexDirection: "column",
 };
 
-export default function BusinessPartnerDetailModal({
+export default function CompanyDetailModal({
   open,
   onClose,
   company,

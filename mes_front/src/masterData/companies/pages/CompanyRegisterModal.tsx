@@ -26,7 +26,7 @@ const style = {
   flexDirection: "column",
 };
 
-export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
+export default function CompanyRegisterModal({ onAdd }: Props) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);

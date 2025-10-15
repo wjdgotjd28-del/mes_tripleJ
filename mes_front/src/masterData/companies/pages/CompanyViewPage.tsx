@@ -19,12 +19,12 @@ import {
   Button,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import BusinessPartnerDetailModal from "./BusinessPartnerDetailModal";
-import BusinessPartnerRegisterModal from "./BusinessPartnerRegisterModal";
 import type { Company } from "../../../type";
 import { getCompany } from "../api/companyApi";
+import CompanyRegisterModal from "./CompanyRegisterModal";
+import CompanyDetailModal from "./CompanyDetailModal";
 
-export default function BusinessPartnerViewPage() {
+export default function CompanyViewPage() {
   const [allRows, setAllRows] = useState<Company[]>([]);
   const [filterType, setFilterType] = useState<string>("모든 업체");
   const [searchName, setSearchName] = useState("");
@@ -126,7 +126,7 @@ export default function BusinessPartnerViewPage() {
         />
 
         <Box sx={{ ml: "auto" }}>
-          <BusinessPartnerRegisterModal onAdd={handleAddCompany} />
+          <CompanyRegisterModal onAdd={handleAddCompany} />
         </Box>
       </Box>
 
@@ -193,7 +193,7 @@ export default function BusinessPartnerViewPage() {
       </TableContainer>
 
       {/* 상세 모달 */}
-      <BusinessPartnerDetailModal
+      <CompanyDetailModal
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
         company={selectedCompany}
