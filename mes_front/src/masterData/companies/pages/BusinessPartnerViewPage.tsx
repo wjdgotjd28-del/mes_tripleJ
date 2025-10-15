@@ -21,7 +21,7 @@ import {
 import type { SelectChangeEvent } from "@mui/material";
 import BusinessPartnerDetailModal from "./BusinessPartnerDetailModal";
 import BusinessPartnerRegisterModal from "./BusinessPartnerRegisterModal";
-import type { Company } from "../type";
+import type { Company } from "../../../type";
 
 export default function BusinessPartnerViewPage() {
   const initialData: Company[] = [

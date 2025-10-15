@@ -2,9 +2,17 @@ package com.mes_back.entity;
 
 import com.mes_back.constant.CompanyType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "company")
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Company {
 
     @Id

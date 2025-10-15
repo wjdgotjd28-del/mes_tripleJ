@@ -1,6 +1,7 @@
 import { Box, Button, Modal, TextField, MenuItem, Typography } from "@mui/material";
-import type { Company } from "../type";
 import * as React from "react";
+import { addCompany } from "../api/companyApi";
+import type { Company } from "../../../type";
 
 
 
@@ -30,7 +31,7 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const [formData, setFormData] = React.useState<Omit<Company, "id" | "status">>({
+  const [company, setCompany] = React.useState<Omit<Company, "companyId" | "status">>({
     type: "거래처",
     bizRegNo: "",
     companyName: "",
@@ -45,30 +46,30 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setCompany(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = () => {
-    const newCompany: Company = {
-      companyId: Date.now(), // 간단하게 유니크 id 생성
-      status: "Y",
-      ...formData,
-    };
-    onAdd(newCompany); // 상위 상태에 추가
-    handleClose();
-    // 초기화
-    setFormData({
-      type: "거래처",
-      bizRegNo: "",
-      companyName: "",
-      ceoName: "",
-      ceoPhone: "",
-      managerName: "",
-      managerPhone: "",
-      managerEmail: "",
-      address: "",
-      note: "",
-    });
+  const handleSubmit = async () => {
+    try {
+      const newCompany = await addCompany(company);
+      onAdd(newCompany);
+      handleClose();
+      // 초기화
+      setCompany({
+        type: "거래처",
+        bizRegNo: "",
+        companyName: "",
+        ceoName: "",
+        ceoPhone: "",
+        managerName: "",
+        managerPhone: "",
+        managerEmail: "",
+        address: "",
+        note: "",
+      });
+    } catch (error) {
+      console.error("회사 등록 실패:", error);
+    }
   };
 
   return (
@@ -90,7 +91,7 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
               size="small"
               label="업체 유형"
               name="type"
-              value={formData.type}
+              value={company.type}
               onChange={handleChange}
               sx={{ mb: 2 }}
             >
@@ -103,18 +104,18 @@ export default function BusinessPartnerRegisterModal({ onAdd }: Props) {
               size="small"
               label="사업자등록번호"
               name="bizRegNo"
-              value={formData.bizRegNo}
+              value={company.bizRegNo}
               onChange={handleChange}
               sx={{ mb: 2 }}
             />
-            <TextField fullWidth size="small" label="업체명" name="companyName" value={formData.companyName} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="대표명" name="ceoName" value={formData.ceoName} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="대표전화번호" name="ceoPhone" value={formData.ceoPhone} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="담당자명" name="managerName" value={formData.managerName} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={formData.managerPhone} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="담당자 이메일" name="managerEmail" value={formData.managerEmail} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="주소" name="address" value={formData.address} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="비고" name="note" value={formData.note} onChange={handleChange} multiline rows={2} />
+            <TextField fullWidth size="small" label="업체명" name="companyName" value={company.companyName} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="대표명" name="ceoName" value={company.ceoName} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="대표전화번호" name="ceoPhone" value={company.ceoPhone} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="담당자명" name="managerName" value={company.managerName} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={company.managerPhone} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="담당자 이메일" name="managerEmail" value={company.managerEmail} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="주소" name="address" value={company.address} onChange={handleChange} sx={{ mb: 2 }} />
+            <TextField fullWidth size="small" label="비고" name="note" value={company.note} onChange={handleChange} multiline rows={2} />
           </Box>
 
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
