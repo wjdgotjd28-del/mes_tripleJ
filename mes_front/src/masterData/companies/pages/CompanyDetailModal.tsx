@@ -12,6 +12,7 @@ import {
   DialogActions,
 } from "@mui/material";
 import type { Company } from "../../../type";
+import { updateCompany } from "../api/companyApi";
 
 
 
@@ -66,12 +67,15 @@ export default function CompanyDetailModal({
     setFormData({ ...formData, [name as string]: value } as Company);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    await updateCompany(formData);
+ 
     if (formData) {
       onSave(formData);
       setBackupData(formData);
       setIsEditing(false);
     }
+
   };
 
   const handleCancel = () => {
