@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "order_item")
 @Getter
@@ -48,4 +51,11 @@ public class OrderItem {
 
     @Column(nullable = false, length = 1)
     private String status;
+
+    @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItemImg> images = new ArrayList<>();
+
+    @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItemRouting> routings = new ArrayList<>();
+
 }

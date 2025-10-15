@@ -9,11 +9,9 @@ console.log("BASE_URL:", BASE_URL);
 // 조회
 export const getRawItems = async (): Promise<RawItems[]> => {
   const url = `${BASE_URL}/items/raw`;
-  console.log("getRawItems 호출 URL:", url);
   const res = await axios.get(url, {
     headers: { "Content-Type": "application/json" },
   });
-  console.log("getRawItems 응답 데이터:", res.data);
   return res.data;
 };
 
@@ -51,9 +49,7 @@ export const updateRawItems = async (id: number, rawItems: RawItems) => {
 export const deleteRawItems = async (id: number): Promise<number> => {
   const url = `${BASE_URL}/items/raw/delete/${id}`;
   console.log("deleteRawItems 호출 URL:", url);
-  const res = await axios.post(url, null, {
-    headers: { "Content-Type": "application/json" },
-  });
+  const res = await axios.delete(url);
   return res.data;
 };
 

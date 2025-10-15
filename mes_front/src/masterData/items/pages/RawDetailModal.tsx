@@ -71,10 +71,11 @@ export default function RawDetailModal({ open, onClose, data, onSave }: RawDetai
       return;
     }
 
-    const payload = {
+    const payload: RawItems = {
       ...editData,
-      category: categoryMap[editData.category] || editData.category,
+      category: (categoryMap[editData.category] || editData.category) as RawItems["category"],
     };
+
 
     await updateRawItems(editData.material_item_id, payload);
     setIsEditing(false);

@@ -5,15 +5,15 @@ import {
   DialogTitle,
   DialogContent,
   Button,
+  Typography,
+  Divider,
   TextField,
-  MenuItem,
   FormControl,
   RadioGroup,
-  Radio,
   FormControlLabel,
-  Typography,
+  Radio,
   IconButton,
-  Divider,
+  MenuItem,
   Checkbox,
   Table,
   TableBody,
@@ -24,26 +24,29 @@ import {
   Paper,
 } from "@mui/material";
 import { Close as CloseIcon, Add as AddIcon } from "@mui/icons-material";
-import type { OrderItems } from "../../../type";
+import type { OrderItemImage, OrderItems } from "../../../type";
+import { getOrderItemsdtl, updateOrderItems } from "../api/OrderApi";
 
+// 라우팅 타입 정의
 interface RoutingInfo {
   id: number;
   process_code: string;
   process_name: string;
   process_time: string;
-  note?: string;
+  note?: string; // 비고 필드 optional
 }
 
 interface SelectedRouting extends RoutingInfo {
   order: number;
+  routingId?: number;
 }
 
 interface OrderDetailModalProps {
   open: boolean;
   onClose: () => void;
   data: OrderItems | null;
-  onSave: (updated: OrderItems) => void;
-  routingList: RoutingInfo[];
+  onSave: () => void; // 저장 후 부모에게 알리기
+  routingList?: RoutingInfo[];
 }
 
 export default function OrderDetailModal({
@@ -51,144 +54,170 @@ export default function OrderDetailModal({
   onClose,
   data,
   onSave,
-  routingList = [
-    {
-      id: 1,
-      process_code: "PC-10",
-      process_name: "입고/수입검사",
-      process_time: "0.5h",
-      note: "외관 검사, LOT 부여",
-    },
-    {
-      id: 2,
-      process_code: "PC-20",
-      process_name: "세척 1",
-      process_time: "0.8h",
-      note: "세척기 사용 - 유분 제거",
-    },
-    {
-      id: 3,
-      process_code: "PC-30",
-      process_name: "탈지 2",
-      process_time: "0.8h",
-      note: "세척기 사용 - 이물 제거",
-    },
-    {
-      id: 4,
-      process_code: "PC-40",
-      process_name: "LOADING",
-      process_time: "0.5h",
-      note: "지그 안착, 클램프 및 마스킹",
-    },
-    {
-      id: 5,
-      process_code: "PC-50",
-      process_name: "COATING",
-      process_time: "1.0h",
-      note: "도장, 장칼질 제거",
-    },
-  ],
+  routingList = [],
 }: OrderDetailModalProps) {
-  const [editData, setEditData] = useState<OrderItems | null>(data);
+  const [editData, setEditData] = useState<OrderItems | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-
   const [selectedRouting, setSelectedRouting] = useState<SelectedRouting[]>([]);
 
   useEffect(() => {
-    setEditData(data ? { ...data } : null);
-    setIsEditing(false);
-    setSelectedRouting([]);
+    if (data?.order_item_id) {
+      fetchDetail(data.order_item_id);
+    } else {
+      setEditData(data);
+      setSelectedRouting(
+        data?.routing?.map((r, i) => ({
+          id: i + 1,
+          order: i + 1,
+          process_code: r.step,
+          process_name: r.description || "",
+          process_time: (r.duration ?? 0).toString(),
+          routingId: r.routingId,
+        })) ?? []
+      );
+    }
   }, [data]);
+
+  const fetchDetail = async (id: number) => {
+    const res: OrderItems = await getOrderItemsdtl(id);
+    setEditData(res);
+    setSelectedRouting(
+      (res.routing ?? []).map((r, i) => ({
+        id: i + 1,
+        order: i + 1,
+        process_code: r.step,
+        process_name: r.description || "",
+        process_time: (r.duration ?? 0).toString(),
+        routingId: r.routingId,
+      }))
+    );
+    setIsEditing(false);
+  };
 
   if (!editData) return null;
 
-  // 기존 handleChange 유지
   const handleChange = (field: keyof OrderItems, value: string | number) => {
     if (!isEditing) return;
     setEditData((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
-  // 이미지 삭제 함수
-  const handleImageDelete = (index: number) => {
-    if (!isEditing || !editData?.image) return;
-    setEditData((prev) => {
-      if (!prev?.image) return prev;
-      const updatedImages = [...prev.image];
-      if (updatedImages[index]?.img_url.startsWith("blob:")) {
-        URL.revokeObjectURL(updatedImages[index].img_url);
-      }
-      updatedImages.splice(index, 1);
-      return { ...prev, image: updatedImages };
-    });
-  };
-
-  // 이미지 추가 함수
   const handleImageAdd = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!isEditing || !e.target.files || e.target.files.length === 0) return;
-
+    if (!isEditing || !e.target.files) return;
     const filesArray = Array.from(e.target.files);
-    const newImages = filesArray.map((file) => ({
+    const newImages: OrderItemImage[] = filesArray.map((file) => ({
       img_url: URL.createObjectURL(file),
       img_ori_name: file.name,
       img_name: file.name,
       file,
     }));
-
-    setEditData((prev) => {
-      if (!prev) return null;
-      const currentImages = prev.image ?? [];
-      return { ...prev, image: [...currentImages, ...newImages] };
-    });
-
+    setEditData((prev) =>
+      prev ? { ...prev, image: [...(prev.image ?? []), ...newImages] } : prev
+    );
     e.target.value = "";
   };
 
-  // 저장 버튼 핸들러
-  const handleSubmit = () => {
-    if (!editData.company_name || !editData.item_code || !editData.item_name) {
-      alert("필수 값을 모두 입력하세요.");
-      return;
-    }
-    onSave(editData);
-    setIsEditing(false);
-  };
-
-  // 편집모드 토글
-  const toggleEditMode = () => setIsEditing((prev) => !prev);
-
-  // 닫을때 편집모드 해제
-  const handleClose = () => {
-    setIsEditing(false);
-    onClose();
-  };
-
-  // 라우팅 선택 토글
-  const handleRoutingToggle = (routing: RoutingInfo) => {
-    setSelectedRouting((prev) => {
-      const exists = prev.find((r) => r.id === routing.id);
-      if (exists) {
-        return prev.filter((r) => r.id !== routing.id);
-      } else {
-        return [...prev, { ...routing, order: prev.length + 1 }];
-      }
+  const handleImageDelete = (index: number) => {
+    if (!isEditing || !editData?.image) return;
+    setEditData((prev) => {
+      if (!prev?.image) return prev;
+      const updated = [...prev.image];
+      if (updated[index]?.img_url.startsWith("blob:"))
+        URL.revokeObjectURL(updated[index].img_url);
+      updated.splice(index, 1);
+      return { ...prev, image: updated };
     });
   };
 
-  // 선택 라우팅 순서 변경
+  const handleRoutingToggle = (routing: RoutingInfo) => {
+    if (!isEditing) return;
+    setSelectedRouting((prev) => {
+      const exists = prev.find((r) => r.id === routing.id);
+      if (exists) return prev.filter((r) => r.id !== routing.id);
+      return [...prev, { ...routing, order: prev.length + 1 }];
+    });
+  };
+
   const handleOrderChange = (id: number, newOrder: number) => {
+    if (!isEditing) return;
     if (newOrder < 1) newOrder = 1;
     setSelectedRouting((prev) =>
       prev.map((r) => (r.id === id ? { ...r, order: newOrder } : r))
     );
   };
 
+  // process_time를 분 단위 숫자로 변환
+  const parseDuration = (timeStr: string): number => {
+    const match = timeStr.match(/([\d.]+)h/);
+    if (match) return Math.round(parseFloat(match[1]) * 60);
+    return parseInt(timeStr) || 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!editData) return;
+    if (!editData.company_name || !editData.item_code || !editData.item_name) {
+      alert("필수 값을 모두 입력하세요.");
+      return;
+    }
+
+    const formData = new FormData();
+
+    // 기본/상세 정보 JSON
+    const itemData = {
+      companyName: editData.company_name,
+      itemName: editData.item_name,
+      itemCode: editData.item_code,
+      category: editData.category,
+      color: editData.color || "",
+      unitPrice: editData.unit_price,
+      paintType: editData.paint_type,
+      note: editData.note || "",
+      useYn: editData.use_yn,
+      status: editData.status,
+    };
+    formData.append("orderItem", new Blob([JSON.stringify(itemData)], { type: "application/json" }));
+
+    // 라우팅 정보 JSON
+    if (selectedRouting.length > 0) {
+      const routingData = selectedRouting
+        .sort((a, b) => a.order - b.order)
+        .map((r) => ({
+          routingId: r.routingId,
+          step: r.process_code,
+          description: r.process_name,
+          duration: parseDuration(r.process_time),
+          note: r.note || "",
+        }));
+      formData.append("routing", new Blob([JSON.stringify(routingData)], { type: "application/json" }));
+    }
+
+    // 이미지 파일 추가
+    editData.image?.forEach((img) => {
+      if (img.file) formData.append("images", img.file);
+    });
+
+    try {
+      await updateOrderItems(editData.order_item_id, formData);
+      setIsEditing(false);
+      onSave();
+    } catch (err) {
+      console.error(err);
+      alert("저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  const toggleEditMode = () => setIsEditing((prev) => !prev);
+  const handleClose = () => {
+    setIsEditing(false);
+    onClose();
+  };
+
   const sortedSelectedRouting = [...selectedRouting].sort((a, b) => a.order - b.order);
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h6">품목 상세 정보</Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Button
             onClick={isEditing ? handleSubmit : toggleEditMode}
             color="primary"
@@ -204,13 +233,10 @@ export default function OrderDetailModal({
       </DialogTitle>
 
       <DialogContent dividers>
-        {/* 좌우 분할: 왼쪽 필수, 오른쪽 상세+라디오 */}
+        {/* 기본/상세 정보 */}
         <Box sx={{ display: "flex", gap: 4, mb: 3 }}>
-          {/* 왼쪽 필수 정보 */}
           <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle2" color="primary" gutterBottom>
-              기본정보
-            </Typography>
+            <Typography variant="subtitle2" color="primary" gutterBottom>기본정보</Typography>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 2 }}>
               <Typography color="text.secondary" alignSelf="center">업체명</Typography>
@@ -219,7 +245,7 @@ export default function OrderDetailModal({
                 onChange={(e) => handleChange("company_name", e.target.value)}
                 size="small"
                 fullWidth
-                InputProps={{ readOnly: !isEditing, sx: { cursor: isEditing ? "text" : "default" } }}
+                InputProps={{ readOnly: !isEditing }}
               />
               <Typography color="text.secondary" alignSelf="center">품목번호</Typography>
               <TextField
@@ -227,7 +253,7 @@ export default function OrderDetailModal({
                 onChange={(e) => handleChange("item_code", e.target.value)}
                 size="small"
                 fullWidth
-                InputProps={{ readOnly: !isEditing, sx: { cursor: isEditing ? "text" : "default" } }}
+                InputProps={{ readOnly: !isEditing }}
               />
               <Typography color="text.secondary" alignSelf="center">품목명</Typography>
               <TextField
@@ -235,7 +261,7 @@ export default function OrderDetailModal({
                 onChange={(e) => handleChange("item_name", e.target.value)}
                 size="small"
                 fullWidth
-                InputProps={{ readOnly: !isEditing, sx: { cursor: isEditing ? "text" : "default" } }}
+                InputProps={{ readOnly: !isEditing }}
               />
               <Typography color="text.secondary" alignSelf="center">분류</Typography>
               <TextField
@@ -247,28 +273,23 @@ export default function OrderDetailModal({
                 disabled={!isEditing}
               >
                 {["일반", "방산", "자동차", "조선"].map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
                 ))}
               </TextField>
             </Box>
           </Box>
 
-          {/* 오른쪽 상세정보 + 라디오 */}
           <Box sx={{ flex: 1 }}>
-            <Typography variant="subtitle2" color="primary" gutterBottom>
-              상세정보
-            </Typography>
+            <Typography variant="subtitle2" color="primary" gutterBottom>상세정보</Typography>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 2 }}>
               <Typography color="text.secondary" alignSelf="center">색상</Typography>
               <TextField
-                value={editData.color}
+                value={editData.color || ""}
                 onChange={(e) => handleChange("color", e.target.value)}
                 size="small"
                 fullWidth
-                InputProps={{ readOnly: !isEditing, sx: { cursor: isEditing ? "text" : "default" } }}
+                InputProps={{ readOnly: !isEditing }}
               />
               <Typography color="text.secondary" alignSelf="center">단가</Typography>
               <TextField
@@ -277,33 +298,10 @@ export default function OrderDetailModal({
                 onChange={(e) => handleChange("unit_price", parseInt(e.target.value) || 0)}
                 size="small"
                 fullWidth
-                InputProps={{ readOnly: !isEditing, sx: { cursor: isEditing ? "text" : "default" } }}
+                InputProps={{ readOnly: !isEditing }}
               />
-
-              <Typography color="text.secondary" alignSelf="center">도장방식</Typography>
-              <FormControl component="fieldset">
-                <RadioGroup
-                  row
-                  value={editData.paint_type}
-                  onChange={(e) => handleChange("paint_type", e.target.value)}
-                >
-                  <FormControlLabel
-                    value="LIQUID"
-                    control={<Radio />}
-                    label="액체 (LIQUID)"
-                    disabled={!isEditing}
-                  />
-                  <FormControlLabel
-                    value="POWDER"
-                    control={<Radio />}
-                    label="분체 (POWDER)"
-                    disabled={!isEditing}
-                  />
-                </RadioGroup>
-              </FormControl>
-
               <Typography color="text.secondary" alignSelf="center">사용여부</Typography>
-              <FormControl component="fieldset" >
+              <FormControl>
                 <RadioGroup
                   row
                   value={editData.use_yn}
@@ -313,48 +311,25 @@ export default function OrderDetailModal({
                   <FormControlLabel value="N" control={<Radio />} label="N" disabled={!isEditing} />
                 </RadioGroup>
               </FormControl>
-
-              <Typography color="text.secondary" alignSelf="center">거래상태</Typography>
-              <FormControl component="fieldset">
-                <RadioGroup
-                  row
-                  value={editData.status}
-                  onChange={(e) => handleChange("status", e.target.value)}
-                >
-                  <FormControlLabel value="Y" control={<Radio />} label="Y" disabled={!isEditing} />
-                  <FormControlLabel value="N" control={<Radio />} label="N" disabled={!isEditing} />
-                </RadioGroup>
-              </FormControl>
             </Box>
           </Box>
         </Box>
 
-        {/* 라우팅 정보 섹션 */}
+        {/* 라우팅 */}
         <Box>
-          <Typography variant="subtitle2" color="primary" gutterBottom>
-            라우팅 정보
-          </Typography>
+          <Typography variant="subtitle2" color="primary" gutterBottom>라우팅 정보</Typography>
           <Divider sx={{ mb: 2 }} />
-
-          {/* 라우팅 리스트 (체크박스 포함) */}
           <TableContainer component={Paper} sx={{ maxHeight: 280, mb: 3 }}>
             <Table stickyHeader size="small">
               <TableHead>
                 <TableRow>
                   <TableCell padding="checkbox">
                     <Checkbox
-                      indeterminate={
-                        selectedRouting.length > 0 && selectedRouting.length < routingList.length
-                      }
-                      checked={selectedRouting.length === (routingList?.length ?? 0) && (routingList?.length ?? 0) > 0}
+                      indeterminate={selectedRouting.length > 0 && selectedRouting.length < routingList.length}
+                      checked={selectedRouting.length === routingList.length && routingList.length > 0}
                       onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedRouting(
-                            routingList.map((r, i) => ({ ...r, order: i + 1 }))
-                          );
-                        } else {
-                          setSelectedRouting([]);
-                        }
+                        if (e.target.checked) setSelectedRouting(routingList.map((r, i) => ({ ...r, order: i + 1 })));
+                        else setSelectedRouting([]);
                       }}
                       disabled={!isEditing}
                     />
@@ -367,16 +342,12 @@ export default function OrderDetailModal({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(routingList ?? []).map((r, index) => {
+                {routingList.map((r, index) => {
                   const checked = selectedRouting.some((sr) => sr.id === r.id);
                   return (
                     <TableRow key={r.id} hover>
                       <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={checked}
-                          onChange={() => handleRoutingToggle(r)}
-                          disabled={!isEditing}
-                        />
+                        <Checkbox checked={checked} onChange={() => handleRoutingToggle(r)} disabled={!isEditing} />
                       </TableCell>
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>{r.process_code}</TableCell>
@@ -391,14 +362,10 @@ export default function OrderDetailModal({
           </TableContainer>
 
           {/* 선택 라우팅 */}
-          <Typography variant="subtitle2" color="primary" gutterBottom>
-            선택 라우팅
-          </Typography>
+          <Typography variant="subtitle2" color="primary" gutterBottom>선택 라우팅</Typography>
           <Divider sx={{ mb: 2 }} />
           {sortedSelectedRouting.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ p: 2 }}>
-              선택된 라우팅 정보가 없습니다.
-            </Typography>
+            <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ p: 2 }}>선택된 라우팅 정보가 없습니다.</Typography>
           ) : (
             <TableContainer component={Paper} sx={{ mb: 3 }}>
               <Table size="small">
@@ -437,134 +404,34 @@ export default function OrderDetailModal({
               </Table>
             </TableContainer>
           )}
-
         </Box>
 
-        {/* 이미지 섹션 */}
+        {/* 이미지 업로드 */}
         <Box>
-          <Typography variant="subtitle2" color="primary" gutterBottom>
-            제품 이미지 {editData.image?.length ? `(${editData.image.length}개)` : ""}
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-
-          {isEditing && (
-            <Button
-              variant="outlined"
-              component="label"
-              startIcon={<AddIcon />}
-              sx={{ mb: 2 }}
-            >
-              이미지 추가
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                hidden
-                onChange={handleImageAdd}
-              />
-            </Button>
-          )}
-
-          {editData.image?.length ? (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
-              {editData.image.map((img, idx) => (
-                <Box
-                  key={idx}
-                  sx={{
-                    position: "relative",
-                    width: 140,
-                    height: 140,
-                    border: "1px solid #ddd",
-                    borderRadius: 1,
-                    overflow: "hidden",
-                  }}
-                >
-                  <img
-                    src={img.img_url}
-                    alt={img.img_ori_name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      borderRadius: 4,
-                    }}
-                  />
-                  {isEditing && (
-                    <IconButton
-                      size="small"
-                      sx={{
-                        position: "absolute",
-                        top: 4,
-                        right: 4,
-                        backgroundColor: "rgba(255,255,255,0.8)",
-                      }}
-                      onClick={() => handleImageDelete(idx)}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  )}
-                </Box>
-              ))}
-            </Box>
-          ) : (
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{
-                backgroundColor: "#f5f5f5",
-                p: 2,
-                borderRadius: 1,
-                textAlign: "center",
-              }}
-            >
-              등록된 이미지가 없습니다.
-            </Typography>
-          )}
-        </Box>
-
-        {/* 비고 섹션 */}
-        <Box>
-          <Typography variant="subtitle2" color="primary" gutterBottom>
-            비고
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          {isEditing ? (
-            <TextField
-              value={editData.note ?? ""}
-              onChange={(e) => handleChange("note", e.target.value)}
-              multiline
-              minRows={3}
-              fullWidth
-              variant="outlined"
-            />
-          ) : editData.note ? (
-            <Typography
-              variant="body1"
-              color="text.primary"
-              sx={{
-                whiteSpace: "pre-wrap",
-                backgroundColor: "#f5f5f5",
-                p: 2,
-                borderRadius: 1,
-                textAlign: "left",
-              }}
-            >
-              {editData.note}
-            </Typography>
-          ) : (
-            <Typography
-              variant="body1"
-              color="text.secondary"
-              sx={{
-                backgroundColor: "#f5f5f5",
-                p: 2,
-                borderRadius: 1,
-                textAlign: "center",
-              }}
-            >
-              비고 내용이 없습니다.
-            </Typography>
-          )}
+          <Typography variant="subtitle2" color="primary" gutterBottom>이미지</Typography>
+          <Divider sx={{ mb: 1 }} />
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {editData.image?.map((img, idx) => (
+              <Box key={idx} sx={{ position: "relative" }}>
+                <img src={img.img_url} alt={img.img_ori_name} width={80} height={80} style={{ objectFit: "cover", borderRadius: 4 }} />
+                {isEditing && (
+                  <IconButton
+                    size="small"
+                    sx={{ position: "absolute", top: 0, right: 0, bgcolor: "rgba(255,255,255,0.7)" }}
+                    onClick={() => handleImageDelete(idx)}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+            ))}
+            {isEditing && (
+              <Button component="label" size="small" startIcon={<AddIcon />}>
+                추가
+                <input type="file" hidden multiple accept="image/*" onChange={handleImageAdd} />
+              </Button>
+            )}
+          </Box>
         </Box>
       </DialogContent>
     </Dialog>
