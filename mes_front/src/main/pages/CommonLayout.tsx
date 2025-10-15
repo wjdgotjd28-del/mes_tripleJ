@@ -16,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Menu as MenuIcon, Layers } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 import OrderInViewPage from "../../orders/inbound/pages/OrderInViewPage";
 import OrderOutViewPage from "../../orders/outbound/pages/OrderOutViewPage";
@@ -23,7 +24,7 @@ import RawInViewPage from "../../rawMaterials/inbound/pages/RawInViewPage";
 import RawOutViewPage from "../../rawMaterials/outbound/pages/RawOutViewPage";
 import OrderViewPage from "../../masterData/items/pages/OrderViewPage";
 import RawViewPage from "../../masterData/items/pages/RawViewPage";
-import RoutingLookupPage from "../../masterData/routings/pages/RoutingViewPage";
+import RoutingViewPage from "../../masterData/routings/pages/RoutingViewPage";
 import BusinessPartnerViewPage from "../../masterData/companies/pages/BusinessPartnerViewPage";
 import InboundHistoryPage from "../../orders/inbound/pages/InboundHistoryPage";
 import RawMaterialInventoryStatus from "../../rawMaterials/inventory/RawMaterialInventoryStatus";
@@ -57,7 +58,11 @@ const mainMenus: MainMenu[] = [
   {
     text: "원자재 관리",
     icon: <Layers />,
-    subs: [{ text: "원자재 입고" }, { text: "원자재 출고" }, { text: "재고현황" }],
+    subs: [
+      { text: "원자재 입고" },
+      { text: "원자재 출고" },
+      { text: "재고현황" },
+    ],
   },
   {
     text: "기준 정보 관리",
@@ -83,6 +88,8 @@ export default function CommonLayout() {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     [mainMenus[0].text]: true, // 처음엔 첫 메뉴 열림 상태로 시작
   });
+
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
@@ -117,7 +124,7 @@ export default function CommonLayout() {
     "원자재 관리 > 재고현황": <RawMaterialInventoryStatus />,
     "기준 정보 관리 > 수주 대상 품목 관리": <OrderViewPage />,
     "기준 정보 관리 > 원자재 품목 관리": <RawViewPage />,
-    "기준 정보 관리 > 라우팅 관리": <RoutingLookupPage />,
+    "기준 정보 관리 > 라우팅 관리": <RoutingViewPage />,
     "기준 정보 관리 > 업체 관리": <BusinessPartnerViewPage />,
   };
 
@@ -125,23 +132,29 @@ export default function CommonLayout() {
     pageMap[currentPath] || <Typography>페이지를 선택하세요.</Typography>;
 
   // 2계층 메뉴 클릭 핸들러
-  const handleSubClick = (mainText: string, subText: string, hasSubs: boolean) => {
-  setActiveMain(mainText);
-  setActiveSub(subText);
+  const handleSubClick = (
+    mainText: string,
+    subText: string,
+    hasSubs: boolean
+  ) => {
+    setActiveMain(mainText);
+    setActiveSub(subText);
 
-  const mainMenu = mainMenus.find(m => m.text === mainText);
-  const subMenu = mainMenu?.subs.find(s => s.text === subText);
+    const mainMenu = mainMenus.find((m) => m.text === mainText);
+    const subMenu = mainMenu?.subs.find((s) => s.text === subText);
 
-  if (hasSubs && subMenu?.subs && subMenu.subs.length > 0) {
-    // 3계층이 있는 경우 → 첫 번째 3계층 자동 선택
-    const firstThird = subMenu.subs[0].text;
-    setActiveThird(firstThird);
-  } else {
-    // 3계층이 없는 경우 → 바로 페이지 렌더링
-    setActiveThird(null);
-  }
-};
-
+    if (hasSubs && subMenu?.subs && subMenu.subs.length > 0) {
+      // 3계층이 있는 경우 → 첫 번째 3계층 자동 선택
+      const firstThird = subMenu.subs[0].text;
+      setActiveThird(firstThird);
+    } else {
+      // 3계층이 없는 경우 → 바로 페이지 렌더링
+      setActiveThird(null);
+    }
+    if (mainText === "기준 정보 관리" && subText === "라우팅 관리") {
+      navigate("/routing");
+    }
+  };
 
   // ================= Drawer 내용 =================
   const drawerContent = (

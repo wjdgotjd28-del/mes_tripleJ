@@ -16,9 +16,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { exportToExcel } from "../../../Common/ExcelUtils";
-
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 //  샘플 데이터 (입고된 수주 목록)
 const sampleData = [
   {
@@ -72,12 +77,26 @@ export default function InboundHistoryPage() {
     lot_no: "",
     inbound_date: "",
   });
+  const [data, setData] = useState(sampleData);
+  const [sortAsc, setSortAsc] = useState(true); // true: 오름차순, false: 내림차순
+  const toggleSortOrder = () => {
+    setSortAsc((prev) => !prev);
+  };
+  const sortedData = [...data].sort((a, b) =>
+    sortAsc ? a.id - b.id : b.id - a.id
+  );
+  const filteredData = sortedData.filter(
+    (row) =>
+      row.customer_name.includes(searchParams.customer_name) &&
+      row.item_code.includes(searchParams.item_code) &&
+      row.item_name.includes(searchParams.item_name) &&
+      row.lot_no.includes(searchParams.lot_no) &&
+      row.inbound_date.includes(searchParams.inbound_date)
+  );
 
   //  작업지시서 모달 상태
   const [openModal, setOpenModal] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null); // ID 기준으로 선택
-
-  const [data, setData] = useState(sampleData);
 
   //  검색 실행
   const handleSearch = () => {
@@ -91,14 +110,7 @@ export default function InboundHistoryPage() {
   };
 
   //  검색 조건에 따라 필터링된 데이터
-  const filteredData = data.filter(
-    (row) =>
-      row.customer_name.includes(searchParams.customer_name) &&
-      row.item_code.includes(searchParams.item_code) &&
-      row.item_name.includes(searchParams.item_name) &&
-      row.lot_no.includes(searchParams.lot_no) &&
-      row.inbound_date.includes(searchParams.inbound_date)
-  );
+
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState({
     qty: 0,
@@ -138,9 +150,16 @@ export default function InboundHistoryPage() {
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
       {/*  페이지 제목 */}
-      <Typography variant="h5" sx={{ mb: 1 }}>
-        입고된 수주 이력
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
+        <Typography variant="h5">입고된 수주 이력</Typography>
+      </Box>
 
       {/*  검색창 + Excel 버튼 */}
       <Box
@@ -194,6 +213,11 @@ export default function InboundHistoryPage() {
           <Button variant="contained" onClick={handleSearch}>
             검색
           </Button>
+          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+            <IconButton onClick={toggleSortOrder}>
+              {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/*  Excel 다운로드 버튼 */}

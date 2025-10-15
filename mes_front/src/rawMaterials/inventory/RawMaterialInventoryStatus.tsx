@@ -13,6 +13,12 @@ import {
   Button,
   TextField,
 } from "@mui/material";
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
+import { Tooltip, IconButton } from "@mui/material";
+
 import { exportToExcel } from "../../Common/ExcelUtils";
 
 const sampleData = [
@@ -63,8 +69,16 @@ export default function RawMaterialInventoryStatus() {
     });
   };
 
-  // 필터링은 searchParams 기준으로만 수행
-  const filteredData = sampleData.filter(
+  const [sortAsc, setSortAsc] = useState(true);
+  const toggleSortOrder = () => {
+    setSortAsc((prev) => !prev);
+  };
+
+  const sortedData = [...sampleData].sort((a, b) =>
+    sortAsc ? a.id - b.id : b.id - a.id
+  );
+
+  const filteredData = sortedData.filter(
     (row) =>
       row.customer_name.includes(searchParams.customer_name) &&
       row.item_code.includes(searchParams.item_code) &&
@@ -113,6 +127,11 @@ export default function RawMaterialInventoryStatus() {
           <Button variant="contained" onClick={handleSearch}>
             검색
           </Button>
+          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+            <IconButton onClick={toggleSortOrder}>
+              {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/* 오른쪽: Excel 버튼 */}
