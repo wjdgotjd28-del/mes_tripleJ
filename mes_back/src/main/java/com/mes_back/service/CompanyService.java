@@ -71,4 +71,16 @@ public class CompanyService {
     }
 
 
+    public CompanyDto updateTradeStatus(Long companyId, String status) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(EntityNotFoundException::new);
+
+        company.updateStatus(status);
+        companyRepository.save(company);
+
+        return CompanyDto.builder()
+                .companyId(company.getCompanyId())
+                .status(company.getStatus())
+                .build();
+    }
 }

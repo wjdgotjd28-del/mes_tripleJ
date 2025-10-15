@@ -33,7 +33,7 @@ public class CompanyController {
         return companyService.updateCompany(companyDto);
     }
 
-    @PatchMapping("/companies/(companyId}/updateStatus")
+    @PatchMapping("/{companyId}/updateTradeStatus")
     public ResponseEntity<CompanyDto> updateTradeStatus(@PathVariable Long companyId, @RequestBody CompanyDto companyDto) {
          CompanyDto newStatus = companyService.updateTradeStatus(companyId, companyDto.getStatus());
          return ResponseEntity.ok(newStatus);
