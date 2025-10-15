@@ -22,21 +22,25 @@ import type { SelectChangeEvent } from "@mui/material";
 import BusinessPartnerDetailModal from "./BusinessPartnerDetailModal";
 import BusinessPartnerRegisterModal from "./BusinessPartnerRegisterModal";
 import type { Company } from "../../../type";
+import { getCompany } from "../api/companyApi";
 
 export default function BusinessPartnerViewPage() {
-  const initialData: Company[] = [
-    { companyId: 1, type: "거래처", companyName: "한송상사", ceoName: "김태준", bizRegNo: "123-45-67890", ceoPhone: "010-1111-1111", managerName: "홍길동", managerPhone: "010-2222-2222", managerEmail: "manager@hansong.com", address: "경기도 안산시 단원구 산업로 124", note: "프라이머, 상도 도료 납품", status: "Y" },
-    { companyId: 2, type: "매입처", companyName: "강남제비스", ceoName: "김준형", bizRegNo: "234-56-78901", ceoPhone: "010-3333-3333", managerName: "박영희", managerPhone: "010-4444-4444", managerEmail: "manager@gangnam.com", address: "경기도 화성시 남양읍 공단로 58", note: "도로, 에폭시 공급", status: "Y" },
-    { companyId: 3, type: "매입처", companyName: "페인트메카", ceoName: "박선희", bizRegNo: "345-67-89012", ceoPhone: "010-5555-5555", managerName: "이철수", managerPhone: "010-6666-6666", managerEmail: "manager@paint.com", address: "충청남도 아산시 탕정면 산업단지로 102", note: "프라이머, 상도 도료 공급", status: "N" },
-    { companyId: 4, type: "거래처", companyName: "일도포장", ceoName: "박선호", bizRegNo: "456-78-90123", ceoPhone: "010-7777-7777", managerName: "최민수", managerPhone: "010-8888-8888", managerEmail: "manager@ildo.com", address: "경기도 시흥시 정왕동 산업로 11", note: "포장재 납품", status: "Y" },
-  ];
-
-  const [allRows, setAllRows] = useState<Company[]>(initialData);
+  const [allRows, setAllRows] = useState<Company[]>([]);
   const [filterType, setFilterType] = useState<string>("모든 업체");
   const [searchName, setSearchName] = useState("");
   const [searchCeo, setSearchCeo] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+
+  React.useEffect(() => {
+    loadCompanyData();
+  }, [])
+  
+  const loadCompanyData = () => {
+    getCompany()
+    .then(res => setAllRows(res))
+    .catch(err => console.log(err))
+  }
 
   const handleAddCompany = (newCompany: Company) => {
     setAllRows((prev) => [...prev, newCompany]);

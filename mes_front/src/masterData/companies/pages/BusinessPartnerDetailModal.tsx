@@ -11,7 +11,8 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import type { Company } from "../type";
+import type { Company } from "../../../type";
+
 
 
 type BusinessPartnerDetailModalProps = {
