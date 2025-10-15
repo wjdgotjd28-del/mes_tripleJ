@@ -46,12 +46,12 @@ export default function CompanyViewPage() {
     setAllRows((prev) => [...prev, newCompany]);
   };
 
-  const handleDelete = (event: React.MouseEvent, companyId: number, companyName: string) => {
-    event.stopPropagation();
-    if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
-      setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
-    }
-  };
+  // const handleDelete = (event: React.MouseEvent, companyId: number, companyName: string) => {
+  //   event.stopPropagation();
+  //   if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
+  //     setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
+  //   }
+  // };
 
   const handleStatusToggle = async (event: React.MouseEvent, companyId: number, currentStatus: StatusType) => {
     event.stopPropagation();
@@ -183,14 +183,14 @@ export default function CompanyViewPage() {
                   >
                     {row.status === "Y" ? "거래 종료" : "거래 재개"}
                   </Button>
-                  <Button
+                  {/* <Button
                     variant="outlined"
                     size="small"
                     color="error"
                     onClick={(e) => handleDelete(e, row.companyId as number, row.companyName)}
                   >
                     삭제
-                  </Button>
+                  </Button> */}
                 </TableCell>
               </TableRow>
             ))}
