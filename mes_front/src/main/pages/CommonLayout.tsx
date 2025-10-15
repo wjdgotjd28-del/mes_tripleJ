@@ -47,7 +47,11 @@ const mainMenus: MainMenu[] = [
   {
     text: "원자재 관리",
     icon: <Layers />,
-    subs: [{ text: "원자재 입고" }, { text: "원자재 출고" }, { text: "재고현황" }],
+    subs: [
+      { text: "원자재 입고" },
+      { text: "원자재 출고" },
+      { text: "재고현황" },
+    ],
   },
   {
     text: "기준 정보 관리",
@@ -62,20 +66,21 @@ const mainMenus: MainMenu[] = [
 ];
 
 export default function CommonLayout() {
-  const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMain, setActiveMain] = useState(mainMenus[0].text);
   const [activeSub, setActiveSub] = useState(mainMenus[0].subs[0].text);
   const [activeThird, setActiveThird] = useState<string | null>(
     mainMenus[0].subs[0].subs ? mainMenus[0].subs[0].subs[0].text : null
   );
-  
+
   // 메뉴별 열림 상태 관리
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     [mainMenus[0].text]: true,
   });
+
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
@@ -115,15 +120,50 @@ export default function CommonLayout() {
   };
 
   // 라우트 -> 메뉴 경로 역매핑
-  const pathToMenuMap: Record<string, { main: string; sub: string; third: string | null }> = {
-    "/orders/inbound/items": { main: "수주 대상 관리", sub: "수주 입고", third: "수주 대상 품목 입고" },
-    "/orders/inbound/history": { main: "수주 대상 관리", sub: "수주 입고", third: "수주 이력 조회" },
-    "/orders/outbound": { main: "수주 대상 관리", sub: "수주 출고", third: null },
-    "/raw-materials/inbound": { main: "원자재 관리", sub: "원자재 입고", third: null },
-    "/raw-materials/outbound": { main: "원자재 관리", sub: "원자재 출고", third: null },
-    "/raw-materials/inventory": { main: "원자재 관리", sub: "재고현황", third: null },
-    "/items/order/view": { main: "기준 정보 관리", sub: "수주 대상 품목 관리", third: null },
-    "/items/raw/view": { main: "기준 정보 관리", sub: "원자재 품목 관리", third: null },
+  const pathToMenuMap: Record<
+    string,
+    { main: string; sub: string; third: string | null }
+  > = {
+    "/orders/inbound/items": {
+      main: "수주 대상 관리",
+      sub: "수주 입고",
+      third: "수주 대상 품목 입고",
+    },
+    "/orders/inbound/history": {
+      main: "수주 대상 관리",
+      sub: "수주 입고",
+      third: "수주 이력 조회",
+    },
+    "/orders/outbound": {
+      main: "수주 대상 관리",
+      sub: "수주 출고",
+      third: null,
+    },
+    "/raw-materials/inbound": {
+      main: "원자재 관리",
+      sub: "원자재 입고",
+      third: null,
+    },
+    "/raw-materials/outbound": {
+      main: "원자재 관리",
+      sub: "원자재 출고",
+      third: null,
+    },
+    "/raw-materials/inventory": {
+      main: "원자재 관리",
+      sub: "재고현황",
+      third: null,
+    },
+    "/items/order/view": {
+      main: "기준 정보 관리",
+      sub: "수주 대상 품목 관리",
+      third: null,
+    },
+    "/items/raw/view": {
+      main: "기준 정보 관리",
+      sub: "원자재 품목 관리",
+      third: null,
+    },
     "/routings": { main: "기준 정보 관리", sub: "라우팅 관리", third: null },
     "/companies": { main: "기준 정보 관리", sub: "업체 관리", third: null },
   };
@@ -135,7 +175,7 @@ export default function CommonLayout() {
       setActiveMain(menuState.main);
       setActiveSub(menuState.sub);
       setActiveThird(menuState.third);
-      
+
       // 해당 메뉴 열기
       setOpenMenus((prev) => ({
         ...prev,
@@ -153,7 +193,11 @@ export default function CommonLayout() {
   }, [currentPath, navigate, location.pathname]);
 
   // 2계층 메뉴 클릭 핸들러
-  const handleSubClick = (mainText: string, subText: string, hasSubs: boolean) => {
+  const handleSubClick = (
+    mainText: string,
+    subText: string,
+    hasSubs: boolean
+  ) => {
     setActiveMain(mainText);
     setActiveSub(subText);
 

@@ -18,18 +18,16 @@ import {
   type SelectChangeEvent,
   Chip,
 } from "@mui/material";
-import {
-  FileDownload as FileDownloadIcon,
-} from "@mui/icons-material";
+import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
 
 import OrderRegisterModal from "./OrderRegisterModal";
-import OrderDetailModal from "./OrderDetailModal";
 
 // utils
 import { exportToExcel } from "../../../Common/ExcelUtils";
 
 // 타입
 import type { OrderItems } from "../../../type";
+import OrderDetailModal from "./OrderDetailModal";
 
 export default function OrderViewPage() {
   // State 정의
@@ -66,13 +64,13 @@ export default function OrderViewPage() {
         {
           img_url: "https://via.placeholder.com/300x300?text=Product+1",
           img_ori_name: "product1.jpg",
-          img_name: "1234567890_abc123.jpg"
+          img_name: "1234567890_abc123.jpg",
         },
         {
           img_url: "https://via.placeholder.com/300x300?text=Product+1-2",
           img_ori_name: "product1_detail.jpg",
-          img_name: "1234567891_def456.jpg"
-        }
+          img_name: "1234567891_def456.jpg",
+        },
       ],
       routing: [],
     },
@@ -92,8 +90,8 @@ export default function OrderViewPage() {
         {
           img_url: "https://via.placeholder.com/300x300?text=Fan+Cover",
           img_ori_name: "fan_cover.jpg",
-          img_name: "1234567892_ghi789.jpg"
-        }
+          img_name: "1234567892_ghi789.jpg",
+        },
       ],
       routing: [],
     },
@@ -115,7 +113,9 @@ export default function OrderViewPage() {
   ]);
 
   // 검색 로직
-  const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleTextChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setSearchValues((prev) => ({ ...prev, [name]: value }));
   };
@@ -132,19 +132,34 @@ export default function OrderViewPage() {
   // 검색 조건 및 필터링
   const filteredData: OrderItems[] = orderItems.filter((item) => {
     return (
-      (appliedSearchValues.companyName === "" || 
-        item.company_name.toLowerCase().includes(appliedSearchValues.companyName.toLowerCase())) &&
-      (appliedSearchValues.itemCode === "" || 
-        item.item_code.toLowerCase().includes(appliedSearchValues.itemCode.toLowerCase())) &&
-      (appliedSearchValues.itemName === "" || 
-        item.item_name.toLowerCase().includes(appliedSearchValues.itemName.toLowerCase())) &&
-      (appliedSearchValues.useYn === "" || item.use_yn === appliedSearchValues.useYn)
+      (appliedSearchValues.companyName === "" ||
+        item.company_name
+          .toLowerCase()
+          .includes(appliedSearchValues.companyName.toLowerCase())) &&
+      (appliedSearchValues.itemCode === "" ||
+        item.item_code
+          .toLowerCase()
+          .includes(appliedSearchValues.itemCode.toLowerCase())) &&
+      (appliedSearchValues.itemName === "" ||
+        item.item_name
+          .toLowerCase()
+          .includes(appliedSearchValues.itemName.toLowerCase())) &&
+      (appliedSearchValues.useYn === "" ||
+        item.use_yn === appliedSearchValues.useYn)
     );
   });
 
   // CRUD 로직
-  const handleDelete = (id: number, company_name: string, item_name: string) => {
-    if (window.confirm(`${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`)) {
+  const handleDelete = (
+    id: number,
+    company_name: string,
+    item_name: string
+  ) => {
+    if (
+      window.confirm(
+        `${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`
+      )
+    ) {
       setOrderItems((prev) => prev.filter((row) => row.id !== id));
     }
   };
@@ -154,8 +169,8 @@ export default function OrderViewPage() {
   };
 
   const handleSubmitAdd = (data: OrderItems) => {
-    const newId = Math.max(... orderItems.map((d) => d.id), 0) + 1;
-    setOrderItems([... orderItems, { ...data, id: newId }]);
+    const newId = Math.max(...orderItems.map((d) => d.id), 0) + 1;
+    setOrderItems([...orderItems, { ...data, id: newId }]);
   };
 
   const handleItemClick = (item: OrderItems) => {
@@ -165,25 +180,44 @@ export default function OrderViewPage() {
 
   // 상세 모달 내 저장 로직 (업데이트)
   const handleItemSave = (updatedItem: OrderItems) => {
-    setOrderItems(prev => prev.map(item => (item.id === updatedItem.id ? updatedItem : item)));
+    setOrderItems((prev) =>
+      prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
+    );
   };
 
   // 추가: use_yn 상태 토글 핸들러
   const handleToggleUseYn = (id: number) => {
-    setOrderItems(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, use_yn: item.use_yn === "Y" ? "N" : "Y" } : item
+    setOrderItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, use_yn: item.use_yn === "Y" ? "N" : "Y" }
+          : item
       )
     );
   };
 
   return (
-    <Box sx={{ padding: 4, width: "100%", display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box
+      sx={{
+        padding: 4,
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+      }}
+    >
       <Typography variant="h5">수주 대상 품목 관리</Typography>
 
       {/* 검색 영역 */}
-      <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
-        <Box sx={{ display: "flex", gap: 1}}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
             placeholder="거래처명"
@@ -210,7 +244,12 @@ export default function OrderViewPage() {
           />
           <FormControl size="small" sx={{ width: 120 }}>
             <InputLabel>사용여부</InputLabel>
-            <Select name="useYn" value={searchValues.useYn} label="사용여부" onChange={handleSelectChange}>
+            <Select
+              name="useYn"
+              value={searchValues.useYn}
+              label="사용여부"
+              onChange={handleSelectChange}
+            >
               <MenuItem value="">선택안함</MenuItem>
               <MenuItem value="Y">Y</MenuItem>
               <MenuItem value="N">N</MenuItem>
@@ -224,7 +263,12 @@ export default function OrderViewPage() {
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
             + 등록
           </Button>
-          <Button color="success" variant="outlined" endIcon={<FileDownloadIcon />} onClick={handleExcelDownload}>
+          <Button
+            color="success"
+            variant="outlined"
+            endIcon={<FileDownloadIcon />}
+            onClick={handleExcelDownload}
+          >
             엑셀 다운로드
           </Button>
         </Box>
@@ -235,16 +279,16 @@ export default function OrderViewPage() {
         <Table sx={{ minWidth: 900 }}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>ID</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>거래처명</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>품목번호</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>품목명</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>분류</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>도장방식</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>단가</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>비고</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>거래상태</TableCell>
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>사용여부</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>ID</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>거래처명</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>품목번호</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>품목명</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>분류</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>도장방식</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>단가</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>비고</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>거래상태</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>사용여부</TableCell>
               <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
@@ -258,12 +302,12 @@ export default function OrderViewPage() {
                   <Typography
                     variant="body2"
                     sx={{
-                      textDecoration: 'underline',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        color: 'primary.dark',
-                        fontWeight: 'bold'
-                      }
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      "&:hover": {
+                        color: "primary.dark",
+                        fontWeight: "bold",
+                      },
                     }}
                     onClick={() => handleItemClick(row)}
                   >
@@ -296,11 +340,18 @@ export default function OrderViewPage() {
                     size="small"
                     color={row.use_yn === "Y" ? "error" : "success"}
                     onClick={() => handleToggleUseYn(row.id)}
-                    sx={{mr:1}}
+                    sx={{ mr: 1 }}
                   >
                     {row.use_yn === "Y" ? "사용 중지" : "사용"}
                   </Button>
-                  <Button variant="outlined" size="small" color="error" onClick={() => handleDelete(row.id, row.company_name, row.item_name)}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={() =>
+                      handleDelete(row.id, row.company_name, row.item_name)
+                    }
+                  >
                     삭제
                   </Button>
                 </TableCell>

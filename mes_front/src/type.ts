@@ -56,3 +56,18 @@ export interface Company {
   note: string;
   status: "Y" | "N";
 };
+
+export type RoutingCreateData = {
+  processCode: string;
+  processName: string;
+  processTime: string;
+  note: string;
+};
+
+
+export type RoutingFormData = RoutingCreateData & {
+  routingId: number;
+};
+
+
+

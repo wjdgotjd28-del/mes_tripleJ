@@ -1,4 +1,3 @@
-import "./App.css";
 import CommonLayout from "./main/pages/CommonLayout";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import RawViewPage from "./masterData/items/pages/RawViewPage";
@@ -20,16 +19,22 @@ function App() {
           <Route path="/" element={<CommonLayout />}>
             {/* 수주 대상 관리 - 3계층 */}
             <Route path="orders/inbound/items" element={<OrderInViewPage />} />
-            <Route path="orders/inbound/history" element={<InboundHistoryPage />} />
-            
+            <Route
+              path="orders/inbound/history"
+              element={<InboundHistoryPage />}
+            />
+
             {/* 수주 대상 관리 - 2계층 */}
             <Route path="orders/outbound" element={<OrderOutViewPage />} />
-            
+
             {/* 원자재 관리 */}
             <Route path="raw-materials/inbound" element={<RawInViewPage />} />
             <Route path="raw-materials/outbound" element={<RawOutViewPage />} />
-            <Route path="raw-materials/inventory" element={<RawMaterialInventoryStatus />} />
-            
+            <Route
+              path="raw-materials/inventory"
+              element={<RawMaterialInventoryStatus />}
+            />
+
             {/* 기준 정보 관리 */}
             <Route path="items/order/view" element={<OrderViewPage />} />
             <Route path="items/raw/view" element={<RawViewPage />} />
