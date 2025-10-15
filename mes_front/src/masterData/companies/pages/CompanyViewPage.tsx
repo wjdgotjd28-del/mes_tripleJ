@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import type { Company, StatusType } from "../../../type";
-import { getCompany, updateTradeStatus } from "../api/companyApi";
+import { deleteCompany, getCompany, updateTradeStatus } from "../api/companyApi";
 import CompanyRegisterModal from "./CompanyRegisterModal";
 import CompanyDetailModal from "./CompanyDetailModal";
 
@@ -47,9 +47,10 @@ export default function CompanyViewPage() {
     setAllRows((prev) => [...prev, newCompany]);
   };
 
-  const handleDelete = (event: React.MouseEvent, companyId: number, companyName: string) => {
+  const handleDelete = async (event: React.MouseEvent, companyId: number, companyName: string) => {
     event.stopPropagation();
     if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
+      await deleteCompany(companyId);
       setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
     }
   };

@@ -26,5 +26,11 @@ export const updateTradeStatus = async (companyId: number, status: StatusType): 
     const response = await axios.patch(`${BASE_URL}/companies/${companyId}/updateTradeStatus`, {status});
     return response.data.status;
 }
+
+// 회사 삭제(소프트)
+export const deleteCompany = async (companyId: number): Promise<Company> => {
+    const response = await axios.delete(`${BASE_URL}/companies/${companyId}`)
+    return response.data;
+}
     
 
