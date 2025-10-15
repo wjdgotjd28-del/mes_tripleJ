@@ -19,8 +19,8 @@ import {
   Button,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import type { Company } from "../../../type";
-import { getCompany } from "../api/companyApi";
+import type { Company, StatusType } from "../../../type";
+import { getCompany, updateTradeStatus } from "../api/companyApi";
 import CompanyRegisterModal from "./CompanyRegisterModal";
 import CompanyDetailModal from "./CompanyDetailModal";
 
@@ -53,18 +53,24 @@ export default function CompanyViewPage() {
     }
   };
 
-  const handleStatusToggle = (event: React.MouseEvent, companyId: number) => {
+  const handleStatusToggle = async (event: React.MouseEvent, companyId: number, currentStatus: StatusType) => {
     event.stopPropagation();
-    setAllRows((prev) =>
-      prev.map((row) =>
-        row.companyId === companyId
-          ? {
-              ...row,
-              status: row.status === "Y" ? "N" : "Y",
-            }
-          : row
-      )
-    );
+    const newStatus = currentStatus === 'Y' ? 'N' : 'Y';
+    if (window.confirm(`거래 상태를 '${newStatus === 'Y' ? '거래중' : '거래 종료'}'(으)로 변경하시겠습니까?`)) {
+      try {
+        await updateTradeStatus(companyId, newStatus);
+        setAllRows((prev) =>
+          prev.map((row) =>
+            row.companyId === companyId
+              ? { ...row, status: newStatus }
+              : row
+          )
+        );
+      } catch (error) {
+        console.error("Failed to update status:", error);
+        alert("상태 변경에 실패했습니다.");
+      }
+    }
   };
 
   const handleFilterChange = (event: SelectChangeEvent<string>) => {
@@ -172,7 +178,7 @@ export default function CompanyViewPage() {
                     variant="outlined"
                     size="small"
                     color={row.status === "Y" ? "warning" : "success"}
-                    onClick={(e) => handleStatusToggle(e, row.companyId as number)}
+                    onClick={(e) => handleStatusToggle(e, row.companyId as number, row.status)}
                     sx={{ mr: "1px" }}
                   >
                     {row.status === "Y" ? "거래 종료" : "거래 재개"}

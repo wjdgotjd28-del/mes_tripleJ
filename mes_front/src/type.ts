@@ -73,5 +73,5 @@ export type Company = {
 };
 
 
-type CompanyType = "거래처" | "매입처";
-type StatusType = "Y" | "N";
+export type CompanyType = "거래처" | "매입처";
+export type StatusType = "Y" | "N";

@@ -1,4 +1,4 @@
-import type { Company } from "../../../type";
+import type { Company, StatusType } from "../../../type";
 import axios from "axios";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -20,4 +20,11 @@ export const updateCompany = async (company: Company): Promise<Company> => {
     const reponse = await axios.put(`${BASE_URL}/companies`, company);
     return reponse.data;
 }
+
+// 거래 상태 변경 
+export const updateTradeStatus = async (companyId: number, status: StatusType): Promise<StatusType> => {
+    const response = await axios.patch(`${BASE_URL}/companies/${companyId}/updateTradeStatus`, {status});
+    return response.data.status;
+}
+    
 

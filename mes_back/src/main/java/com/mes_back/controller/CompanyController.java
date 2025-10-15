@@ -4,6 +4,7 @@ import com.mes_back.dto.CompanyDto;
 import com.mes_back.entity.Company;
 import com.mes_back.service.CompanyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,12 @@ public class CompanyController {
     @PutMapping("")
     public CompanyDto updateCompany(@RequestBody CompanyDto companyDto) {
         return companyService.updateCompany(companyDto);
+    }
+
+    @PatchMapping("/companies/(companyId}/updateStatus")
+    public ResponseEntity<CompanyDto> updateTradeStatus(@PathVariable Long companyId, @RequestBody CompanyDto companyDto) {
+         CompanyDto newStatus = companyService.updateTradeStatus(companyId, companyDto.getStatus());
+         return ResponseEntity.ok(newStatus);
     }
 
 

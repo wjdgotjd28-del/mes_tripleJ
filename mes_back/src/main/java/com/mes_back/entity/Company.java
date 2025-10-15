@@ -69,4 +69,8 @@ public class Company {
         this.status = companyDto.getStatus();
 
     }
+
+    public void updateStatus(String status) {
+        this.status = status;
+    }
 }
