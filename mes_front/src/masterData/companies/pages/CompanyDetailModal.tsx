@@ -11,7 +11,9 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import type { Company } from "../type";
+import type { Company } from "../../../type";
+import { updateCompany } from "../api/companyApi";
+
 
 
 type BusinessPartnerDetailModalProps = {
@@ -37,7 +39,7 @@ const style = {
   flexDirection: "column",
 };
 
-export default function BusinessPartnerDetailModal({
+export default function CompanyDetailModal({
   open,
   onClose,
   company,
@@ -65,12 +67,15 @@ export default function BusinessPartnerDetailModal({
     setFormData({ ...formData, [name as string]: value } as Company);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    await updateCompany(formData);
+ 
     if (formData) {
       onSave(formData);
       setBackupData(formData);
       setIsEditing(false);
     }
+
   };
 
   const handleCancel = () => {
