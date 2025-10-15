@@ -4,6 +4,7 @@ import com.mes_back.entity.Company;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
@@ -15,5 +16,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     // 삭제된 업체 조회 페이지용
     List<Company> findByDeletedAtIsNotNull();
+
+    Optional<Company> findByCompanyName(String companyName);
 }
 
