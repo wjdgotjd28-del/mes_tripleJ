@@ -27,6 +27,7 @@ import CompanyDetailModal from "./CompanyDetailModal";
 export default function CompanyViewPage() {
   const [allRows, setAllRows] = useState<Company[]>([]);
   const [filterType, setFilterType] = useState<string>("모든 업체");
+  const [statusFilter, setStatusFilter] = useState<string>("모든 상태");
   const [searchName, setSearchName] = useState("");
   const [searchCeo, setSearchCeo] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
@@ -77,6 +78,10 @@ export default function CompanyViewPage() {
     setFilterType(event.target.value as string);
   };
 
+  const handleStatusFilterChange = (event: SelectChangeEvent<string>) => {
+    setStatusFilter(event.target.value as string);
+  };
+
   const handleRowClick = (company: Company) => {
     setSelectedCompany(company);
     setDetailOpen(true);
@@ -90,6 +95,7 @@ export default function CompanyViewPage() {
 
   const filteredRows = allRows.filter((row) => {
     if (filterType !== "모든 업체" && row.type !== filterType) return false;
+    if (statusFilter !== "모든 상태" && row.status !== statusFilter) return false;
     if (searchName && !row.companyName.includes(searchName)) return false;
     if (searchCeo && !row.ceoName.includes(searchCeo)) return false;
     return true;
@@ -115,6 +121,19 @@ export default function CompanyViewPage() {
             <MenuItem value="모든 업체">모든 업체</MenuItem>
             <MenuItem value="거래처">거래처</MenuItem>
             <MenuItem value="매입처">매입처</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 150 }} size="small">
+          <InputLabel>거래 상태</InputLabel>
+          <Select
+            value={statusFilter}
+            label="거래 상태"
+            onChange={handleStatusFilterChange}
+          >
+            <MenuItem value="모든 상태">모든 상태</MenuItem>
+            <MenuItem value="Y">거래중</MenuItem>
+            <MenuItem value="N">거래 종료</MenuItem>
           </Select>
         </FormControl>
 
