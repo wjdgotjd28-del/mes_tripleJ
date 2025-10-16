@@ -78,7 +78,7 @@ public class Company {
         this.status = status;
     }
 
-    @Column(name = "deleted_at", columnDefinition = "TIMESTAMP(0)")
+    @Column(name = "deleted_at", columnDefinition = "TIMESTAMP(0)", nullable = true)
     private LocalDateTime deletedAt;
 
     public void restore() {
