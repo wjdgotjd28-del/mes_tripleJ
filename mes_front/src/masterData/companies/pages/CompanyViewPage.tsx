@@ -94,6 +94,16 @@ export default function CompanyViewPage() {
     );
   };
 
+  // ✅ 업체 유형 영-한 변환
+  const companyTypeMap: { [key: string]: string } = {
+    CUSTOMER: '거래처',
+    PURCHASER: '매입처',
+  };
+
+  const translateCompanyType = (type: string) => {
+    return companyTypeMap[type] || type;
+  };
+
   const filteredRows = allRows.filter((row) => {
     if (filterType !== "모든 업체" && row.type !== filterType) return false;
     if (statusFilter !== "모든 상태" && row.status !== statusFilter) return false;
@@ -120,8 +130,8 @@ export default function CompanyViewPage() {
             onChange={handleFilterChange}
           >
             <MenuItem value="모든 업체">모든 업체</MenuItem>
-            <MenuItem value="거래처">거래처</MenuItem>
-            <MenuItem value="매입처">매입처</MenuItem>
+            <MenuItem value="CUSTOMER">거래처</MenuItem>
+            <MenuItem value="PURCHASER">매입처</MenuItem>
           </Select>
         </FormControl>
 
@@ -180,7 +190,7 @@ export default function CompanyViewPage() {
                 onClick={() => handleRowClick(row)}
               >
                 <TableCell align="center">{row.companyId}</TableCell>
-                <TableCell align="center">{row.type}</TableCell>
+                <TableCell align="center">{translateCompanyType(row.type)}</TableCell>
                 <TableCell align="center">{row.companyName}</TableCell>
                 <TableCell align="center">{row.ceoName}</TableCell>
                 <TableCell align="center">{row.address}</TableCell>
