@@ -44,7 +44,7 @@ export default function OrderOutRegisterModal({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>수주대상 입고 등록</DialogTitle>
+      <DialogTitle>수주대상 출고 등록</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
           <Typography variant="subtitle1">{itemName}</Typography>

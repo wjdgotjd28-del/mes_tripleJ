@@ -47,16 +47,7 @@ export interface RawItems {
   use_yn: string;
 }
 
-// export interface Company {
-//   id: number;
-//   type: "거래처" | "매입처";
-//   name: string;
-//   ceo: string;
-//   address: string;
-//   note: string;
-//   status: "Y" | "N";
-// };
-
+//거래처 타입
 export type Company = {
   companyId?: number; // 업체 id
   type: CompanyType; // 업체 유형
@@ -69,8 +60,14 @@ export type Company = {
   managerName: string; // 담당자
   managerPhone: string; // 담당자 전화번호
   managerEmail: string; // 담당자 이메일
-  status: StatusType; //거래 상태
+  status: StatusType; // 거래 상태
 };
+
+// 거래처 유형 타입 
+export type CompanyType = "거래처" | "매입처";
+// 거래 상태 타입
+export type StatusType = "Y" | "N";
+
 
 export type RoutingCreateData = {
   processCode: string;
@@ -86,6 +83,3 @@ export type RoutingFormData = RoutingCreateData & {
 
 
 
-
-export type CompanyType = "거래처" | "매입처";
-export type StatusType = "Y" | "N";
