@@ -94,7 +94,7 @@ export type OrderOutbound = {
   category: string;
 };
 
-// 수주 입고 
+// 수주 출고에서 쓰이는 수주 입고 데이터 조회용 타입 
 export type Inbound = {
   orderInboundId: number;
   lotNo: string;
