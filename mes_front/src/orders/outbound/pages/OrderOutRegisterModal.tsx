@@ -154,7 +154,7 @@ export default function OrderOutRegisterModal({
             value={search.customerName}
             onChange={handleSearchChange}
             size="small" 
-            sx={{ width: 150 }} 
+            sx={{ width: 200 }} 
           />
           <TextField 
             placeholder="품목번호" 
@@ -162,7 +162,7 @@ export default function OrderOutRegisterModal({
             value={search.itemCode}
             onChange={handleSearchChange}
             size="small" 
-            sx={{ width: 130 }} 
+            sx={{ width: 200 }} 
           />
           <TextField 
             placeholder="품목명" 
@@ -170,7 +170,7 @@ export default function OrderOutRegisterModal({
             value={search.itemName}
             onChange={handleSearchChange}
             size="small" 
-            sx={{ width: 130 }} 
+            sx={{ width: 200 }} 
           />
           <TextField 
             placeholder="LOT번호" 
@@ -178,7 +178,7 @@ export default function OrderOutRegisterModal({
             value={search.lotNo}
             onChange={handleSearchChange}
             size="small" 
-            sx={{ width: 130 }} 
+            sx={{ width: 200 }} 
           />
           {/* 입고일자 필드: placeholder 사용, 값이 없을 때 텍스트 색상 조정 */}
           <TextField
@@ -188,7 +188,7 @@ export default function OrderOutRegisterModal({
             value={search.inboundDate}
             onChange={handleSearchChange}
             size="small"
-            sx={{ width: 150 }} 
+            sx={{ width: 200 }} 
             InputProps={{ 
               sx: {
                 // 값이 없을 때 '연도-월-일' 텍스트를 연한 회색으로 변경
