@@ -122,6 +122,14 @@ export default function OrderOutRegisterModal({
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
     const outboundNo = `OUT-${dateStr}-001`; 
 
+    const categoryMap: { [key: string]: string } = {
+      "방산": "DEFENSE",
+      "일반": "GENERAL",
+      "자동차": "AUTOMOTIVE",
+      "조선": "SHIPBUILDING"
+    };
+    const engCategory = categoryMap[selected.category] || selected.category;
+
     onSubmit({
       orderInboundId: selected.orderInboundId,
       outboundNo,
@@ -130,7 +138,7 @@ export default function OrderOutRegisterModal({
       itemCode: selected.itemCode,
       qty: qty,
       outboundDate: form.outboundDate,
-      category: selected.category,
+      category: engCategory,
     });
     onClose();
   };

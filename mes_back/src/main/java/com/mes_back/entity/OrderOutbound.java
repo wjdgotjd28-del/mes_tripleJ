@@ -6,22 +6,17 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "order_outbound")
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity @Table(name = "order_outbound")
+@Getter @NoArgsConstructor @AllArgsConstructor @Builder
 public class OrderOutbound {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    // ✅ (수정) fetch = FetchType.LAZY 추가
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_inbound_id", nullable = false)
     private OrderInbound orderInbound;
 
