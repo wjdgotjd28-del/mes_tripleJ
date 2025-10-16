@@ -25,13 +25,10 @@ import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
 import { addOrderOutbound, getOrderOutbound } from "../api/orderOutbound";
 
-
-
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
   const [allRows, setAllRows] = useState<OrderOutbound[]>([]);
   const [displayedRows, setDisplayedRows] = useState<OrderOutbound[]>([]);
-
 
   // ✅ 검색 상태
   const [search, setSearch] = useState({
@@ -49,16 +46,16 @@ export default function OrderOutViewPage() {
 
   useEffect(() => {
     loadOrderOutboundData();
-  }, [])
-  
+  }, []);
+
   const loadOrderOutboundData = () => {
-     getOrderOutbound()
-     .then(res => {
-      setAllRows(res);
-      setDisplayedRows(res);
-     })
-     .catch(err => console.log(err))
-   }
+    getOrderOutbound()
+      .then((res) => {
+        setAllRows(res);
+        setDisplayedRows(res);
+      })
+      .catch((err) => console.log(err));
+  };
 
   // ✅ 등록 모달용 입고 데이터 샘플
   const [inbounds] = useState<Inbound[]>([
@@ -208,56 +205,54 @@ export default function OrderOutViewPage() {
 
   // ✅ 카테고리 영-한 변환
   const categoryMap: { [key: string]: string } = {
-    DEFENSE: '방산',
-    GENERAL: '일반',
-    AUTOMOTIVE: '자동차',
-    SHIPBUILDING: '조선'
+    DEFENSE: "방산",
+    GENERAL: "일반",
+    AUTOMOTIVE: "자동차",
+    SHIPBUILDING: "조선",
   };
-
   const translateCategory = (category: string) => {
     return categoryMap[category] || category;
   };
-
-
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
         출고 처리된 수주 목록
       </Typography>
-
       {/* 검색 + 등록 버튼 */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+        {/* 모든 TextField에 size="small" 적용 */}
         <TextField
           size="small"
-          label="출고번호"
+          placeholder="출고번호" // label 대신 placeholder 사용
           value={search.outboundNo}
           onChange={(e) => setSearch({ ...search, outboundNo: e.target.value })}
         />
         <TextField
           size="small"
-          label="거래처명"
+          placeholder="거래처명" // label 대신 placeholder 사용
           value={search.customerName}
-          onChange={(e) => setSearch({ ...search, customerName: e.target.value })}
+          onChange={(e) =>
+            setSearch({ ...search, customerName: e.target.value })
+          }
         />
         <TextField
           size="small"
-          label="품목번호"
+          placeholder="품목번호" // label 대신 placeholder 사용
           value={search.itemCode}
           onChange={(e) => setSearch({ ...search, itemCode: e.target.value })}
         />
         <TextField
           size="small"
-          label="품목명"
+          placeholder="품목명" // label 대신 placeholder 사용
           value={search.itemName}
           onChange={(e) => setSearch({ ...search, itemName: e.target.value })}
         />
-
-        <Button variant="contained" onClick={handleSearch} sx={{ ml: 1 }}>검색</Button>
-
+        <Button variant="contained" onClick={handleSearch} sx={{ ml: 1, height: 40 }}> {/* height 추가 */}
+          검색
+        </Button>
         <Box sx={{ flex: 1 }} />
-
-        <Button variant="outlined" endIcon={<FileDownloadIcon />}>
+        <Button variant="outlined" endIcon={<FileDownloadIcon />} sx={{ height: 40 }}> {/* height 추가 */}
           Excel
         </Button>
         <Button
@@ -265,11 +260,12 @@ export default function OrderOutViewPage() {
           color="success"
           endIcon={<AddIcon />}
           onClick={() => setRegisterOpen(true)}
+          sx={{ height: 40 }} 
+          // {/* height 추가 */}
         >
           출고 등록
         </Button>
       </Box>
-
       {/* 테이블 */}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 900 }}>
@@ -329,11 +325,12 @@ export default function OrderOutViewPage() {
           </TableBody>
         </Table>
       </TableContainer>
-
       {/* 수정 모달 */}
       <Dialog open={!!editData} onClose={() => setEditData(null)} fullWidth>
         <DialogTitle>출고 정보 수정</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
           <TextField label="출고번호" value={editData?.outboundNo} disabled />
           <TextField label="거래처명" value={editData?.customerName} disabled />
           <TextField label="품목명" value={editData?.itemName} disabled />
@@ -362,11 +359,11 @@ export default function OrderOutViewPage() {
         <DialogActions>
           <Button onClick={() => setEditData(null)}>취소</Button>
           <Button variant="contained" onClick={handleEditSave}>
-            저장
+            {" "}
+            저장{" "}
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
         open={registerOpen}
