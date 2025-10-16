@@ -21,7 +21,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
-import OrderOutRegisterModal from "./OrderOutRegisterModal"; // ✅ 추가
+import OrderOutRegisterModal from "./OrderOutRegisterModal";
 
 export type OrderOutbound = {
   id?: number;
@@ -35,8 +35,19 @@ export type OrderOutbound = {
   category: string;
 };
 
+type Inbound = {
+  orderInboundId: number;
+  lotNo: string;
+  customerName: string;
+  itemName: string;
+  itemCode: string;
+  inboundQty: number;
+  category: string;
+  inboundDate: string;
+};
+
 export default function OrderOutViewPage() {
-  // ✅ 출고 이력 샘플 데이터
+  // ✅ 출고 리스트
   const [rows, setRows] = useState<OrderOutbound[]>([
     {
       id: 1,
@@ -65,25 +76,35 @@ export default function OrderOutViewPage() {
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
 
-  // ✅ 등록 모달용 더미 입고 데이터 (실제로는 선택된 입고에서 받아옴)
-  const dummyInbound = {
-    orderInboundId: 101,
-    lotNo: "LOT-20251016-01",
-    customerName: "일도테크",
-    itemName: "페인트",
-    itemCode: "ITE001",
-    inboundQty: 100,
-    category: "방산",
-  };
+  // ✅ 등록 모달용 입고 데이터 샘플
+  const [inbounds] = useState<Inbound[]>([
+    {
+      orderInboundId: 101,
+      lotNo: "LOT-20251016-01",
+      customerName: "일도테크",
+      itemName: "페인트",
+      itemCode: "ITE001",
+      inboundQty: 100,
+      category: "방산",
+      inboundDate: "2025-10-16",
+    },
+    {
+      orderInboundId: 102,
+      lotNo: "LOT-20251016-02",
+      customerName: "삼성전자",
+      itemName: "컴퓨터",
+      itemCode: "ITE002",
+      inboundQty: 30,
+      category: "전자",
+      inboundDate: "2025-10-15",
+    },
+  ]);
 
-  // ✅ 등록 처리
+  // ✅ 출고 등록 처리
   const handleRegister = (data: OrderOutbound) => {
     setRows((prev) => [
       ...prev,
-      {
-        id: prev.length + 1,
-        ...data,
-      },
+      { id: prev.length + 1, ...data },
     ]);
     setRegisterOpen(false);
   };
@@ -113,12 +134,11 @@ export default function OrderOutViewPage() {
 
   return (
     <Box sx={{ p: 4 }}>
-      {/* 제목 */}
       <Typography variant="h5" sx={{ mb: 2 }}>
         출고 처리된 수주 목록
       </Typography>
 
-      {/* 검색 + 등록 버튼 라인 */}
+      {/* 검색 + 등록 버튼 */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <TextField
           size="small"
@@ -130,9 +150,7 @@ export default function OrderOutViewPage() {
           size="small"
           label="거래처명"
           value={search.customerName}
-          onChange={(e) =>
-            setSearch({ ...search, customerName: e.target.value })
-          }
+          onChange={(e) => setSearch({ ...search, customerName: e.target.value })}
         />
         <TextField
           size="small"
@@ -147,7 +165,6 @@ export default function OrderOutViewPage() {
           onChange={(e) => setSearch({ ...search, itemName: e.target.value })}
         />
 
-        {/* 오른쪽 정렬 */}
         <Box sx={{ flex: 1 }} />
 
         <Button variant="contained">검색</Button>
@@ -261,12 +278,12 @@ export default function OrderOutViewPage() {
         </DialogActions>
       </Dialog>
 
-      {/* ✅ 출고 등록 모달 연결 */}
+      {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
         open={registerOpen}
         onClose={() => setRegisterOpen(false)}
         onSubmit={handleRegister}
-        selectedInbound={dummyInbound}
+        inbounds={inbounds} // ✅ 모달에서 요구하는 inbounds prop
       />
     </Box>
   );
