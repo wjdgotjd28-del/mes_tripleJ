@@ -10,11 +10,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  type SelectChangeEvent,
 } from "@mui/material";
-import type { Company } from "../../../type";
+import type { Company, CompanyType } from "../../../type";
 import { updateCompany } from "../api/companyApi";
-
-
 
 type BusinessPartnerDetailModalProps = {
   open: boolean;
@@ -56,51 +58,57 @@ export default function CompanyDetailModal({
     setIsEditing(false);
   }, [company]);
 
+  // ✅ 업체 유형 영-한 변환
+  const companyTypeMap: { [key: string]: string } = {
+    CUSTOMER: "거래처",
+    PURCHASER: "매입처",
+  };
+
+  const translateCompanyType = (type: string) => {
+    return companyTypeMap[type] || type;
+  };
+
   if (!formData) return null;
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | { name?: string; value: unknown }
-    >
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name as string]: value } as Company);
   };
 
+  const handleTypeChange = (e: SelectChangeEvent<CompanyType>) => {
+    setFormData({ ...formData, type: e.target.value as CompanyType } as Company);
+  };
+
   const handleSave = async () => {
     await updateCompany(formData);
- 
+
     if (formData) {
       onSave(formData);
       setBackupData(formData);
       setIsEditing(false);
     }
-
   };
 
   const handleCancel = () => {
     if (isEditing) {
-      // 🔍 변경사항 비교
       const isChanged = JSON.stringify(formData) !== JSON.stringify(backupData);
       if (isChanged) {
-        setConfirmOpen(true); // 변경사항 있을 시 다이얼로그 표시
+        setConfirmOpen(true);
       } else {
-        setIsEditing(false); // 변경 없으면 그냥 종료
+        setIsEditing(false);
       }
     } else {
-      onClose(); // 수정 중 아님 → 그냥 닫기
+      onClose();
     }
   };
 
   const confirmCancel = () => {
-    // ✅ 예: 변경사항 버리고 종료
     if (backupData) setFormData(backupData);
     setIsEditing(false);
     setConfirmOpen(false);
   };
 
   const cancelDialogClose = () => {
-    // ❌ 아니오: 다이얼로그 닫기
     setConfirmOpen(false);
   };
 
@@ -124,25 +132,24 @@ export default function CompanyDetailModal({
             sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}
           >
             {isEditing ? (
-              <TextField
-                select
-                fullWidth
-                size="small"
-                label="업체 유형"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                sx={{ mb: 2 }}
-              >
-                <MenuItem value="거래처">거래처</MenuItem>
-                <MenuItem value="매입처">매입처</MenuItem>
-              </TextField>
+              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                <InputLabel>업체 유형</InputLabel>
+                <Select
+                  name="type"
+                  value={formData.type}
+                  label="업체 유형"
+                  onChange={handleTypeChange}
+                >
+                  <MenuItem value="CUSTOMER">거래처</MenuItem>
+                  <MenuItem value="PURCHASER">매입처</MenuItem>
+                </Select>
+              </FormControl>
             ) : (
               <TextField
                 fullWidth
                 size="small"
                 label="업체 유형"
-                value={formData.type}
+                value={translateCompanyType(formData.type)}
                 InputProps={{ readOnly: true }}
                 sx={{ mb: 2 }}
               />

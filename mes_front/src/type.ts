@@ -64,7 +64,7 @@ export type Company = {
 };
 
 // 거래처 유형 타입 
-export type CompanyType = "거래처" | "매입처";
+export type CompanyType = "CUSTOMER" | "PURCHASER";
 // 거래 상태 타입
 export type StatusType = "Y" | "N";
 

@@ -1,10 +1,7 @@
-import { Box, Button, Modal, TextField, MenuItem, Typography } from "@mui/material";
+import { Box, Button, Modal, TextField, MenuItem, Typography, FormControl, InputLabel, Select, type SelectChangeEvent } from "@mui/material";
 import * as React from "react";
 import { addCompany } from "../api/companyApi";
-import type { Company } from "../../../type";
-
-
-
+import type { Company, CompanyType } from "../../../type";
 
 type Props = {
   onAdd: (newCompany: Company) => void;
@@ -32,7 +29,7 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
   const handleClose = () => setOpen(false);
 
   const [company, setCompany] = React.useState<Omit<Company, "companyId" | "status">>({
-    type: "거래처",
+    type: "CUSTOMER",
     bizRegNo: "",
     companyName: "",
     ceoName: "",
@@ -49,20 +46,18 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
     setCompany(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleTypeChange = (e: SelectChangeEvent<CompanyType>) => {
+    setCompany(prev => ({ ...prev, type: e.target.value as CompanyType }));
+  };
+
   const handleSubmit = async () => {
     try {
-      const companyTypeMap: { [key: string]: string } = {
-        "거래처": "CUSTOMER",
-        "매입처": "PURCHASER"
-      };
-      const engCompanyType = companyTypeMap[company.type] || company.type;
-
-      const newCompany = await addCompany({ ...company, type: engCompanyType });
+      const newCompany = await addCompany(company);
       onAdd(newCompany);
       handleClose();
       // 초기화
       setCompany({
-        type: "거래처",
+        type: "CUSTOMER",
         bizRegNo: "",
         companyName: "",
         ceoName: "",
@@ -91,19 +86,18 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
           </Typography>
 
           <Box sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}>
-            <TextField
-              select
-              fullWidth
-              size="small"
-              label="업체 유형"
-              name="type"
-              value={company.type}
-              onChange={handleChange}
-              sx={{ mb: 2 }}
-            >
-              <MenuItem value="거래처">거래처</MenuItem>
-              <MenuItem value="매입처">매입처</MenuItem>
-            </TextField>
+            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+              <InputLabel>업체 유형</InputLabel>
+              <Select
+                name="type"
+                value={company.type}
+                label="업체 유형"
+                onChange={handleTypeChange}
+              >
+                <MenuItem value="CUSTOMER">거래처</MenuItem>
+                <MenuItem value="PURCHASER">매입처</MenuItem>
+              </Select>
+            </FormControl>
 
             <TextField
               fullWidth
