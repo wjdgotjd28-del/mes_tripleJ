@@ -81,5 +81,29 @@ export type RoutingFormData = RoutingCreateData & {
   routingId: number;
 };
 
+// 수주 출고 
+export type OrderOutbound = {
+  id?: number;
+  orderInboundId: number;
+  outboundNo: string;
+  customerName: string;
+  itemCode: string;
+  itemName: string;
+  qty: number;
+  outboundDate: string;
+  category: string;
+};
+
+// 수주 입고 
+export type Inbound = {
+  orderInboundId: number;
+  lotNo: string;
+  customerName: string;
+  itemName: string;
+  itemCode: string;
+  inboundQty: number;
+  category: string;
+  inboundDate: string;
+};
 
 

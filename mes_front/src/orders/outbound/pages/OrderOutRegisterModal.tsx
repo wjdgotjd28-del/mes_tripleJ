@@ -16,18 +16,9 @@ import {
   Paper,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import type { OrderOutbound } from "./OrderOutViewPage"; 
+import type { Inbound, OrderOutbound } from "../../../type";
 
-type Inbound = {
-  orderInboundId: number;
-  lotNo: string;
-  customerName: string;
-  itemName: string;
-  itemCode: string;
-  inboundQty: number;
-  category: string;
-  inboundDate: string;
-};
+
 
 type Props = {
   open: boolean;

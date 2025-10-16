@@ -22,29 +22,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
+import type { Inbound, OrderOutbound } from "../../../type";
 
-export type OrderOutbound = {
-  id?: number;
-  orderInboundId: number;
-  outboundNo: string;
-  customerName: string;
-  itemCode: string;
-  itemName: string;
-  qty: number;
-  outboundDate: string;
-  category: string;
-};
 
-type Inbound = {
-  orderInboundId: number;
-  lotNo: string;
-  customerName: string;
-  itemName: string;
-  itemCode: string;
-  inboundQty: number;
-  category: string;
-  inboundDate: string;
-};
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
