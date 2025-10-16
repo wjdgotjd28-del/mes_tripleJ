@@ -75,11 +75,11 @@ export type RoutingFormData = RoutingCreateData & {
 // 원자재 재고 현황 테이블 타입
 export type RawMaterialInventoryStatus = {
   id: number;
-  companyName: string;
+  company_name: string;
   item_code: string;
   item_name: string;
-  qty: number;
-  spec_unit: string;
+  total_qty: number;
+  unit: string;
 };
 
 

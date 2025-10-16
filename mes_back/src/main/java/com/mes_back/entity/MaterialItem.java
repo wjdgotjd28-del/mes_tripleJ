@@ -34,7 +34,7 @@ public class MaterialItem {
     private String color;
 
     @Column(name = "spec_qty", nullable = false)
-    private Long specQty;
+    private Integer specQty;
 
     @Column(name = "spec_unit", nullable = false, length = 5)
     private String specUnit;

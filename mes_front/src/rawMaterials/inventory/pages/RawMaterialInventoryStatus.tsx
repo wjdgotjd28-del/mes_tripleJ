@@ -32,7 +32,7 @@ export default function RawMaterialInventoryStatus() {
   const [itemNameSearch, setItemNameSearch] = useState("");
 
   const [searchParams, setSearchParams] = useState({
-    customer_name: "",
+    company_name: "",
     item_code: "",
     item_name: "",
   });
@@ -53,7 +53,7 @@ export default function RawMaterialInventoryStatus() {
 
   const handleSearch = () => {
     setSearchParams({
-      customer_name: clientSearch,
+      company_name: clientSearch,
       item_code: itemNoSearch,
       item_name: itemNameSearch,
     });
@@ -71,7 +71,7 @@ export default function RawMaterialInventoryStatus() {
 
   const filteredData = sortedData.filter(
     (item) =>
-      (item.customer_name ?? "").includes(searchParams.customer_name) &&
+      (item.company_name ?? "").includes(searchParams.company_name) &&
       (item.item_code ?? "").includes(searchParams.item_code) &&
       (item.item_name ?? "").includes(searchParams.item_name)
   );
@@ -152,11 +152,11 @@ export default function RawMaterialInventoryStatus() {
             {paginatedData.map((row) => (
               <TableRow key={row.id}>
                 <TableCell align="center">{row.id}</TableCell>
-                <TableCell align="center">{row.customer_name}</TableCell>
+                <TableCell align="center">{row.company_name}</TableCell>
                 <TableCell align="center">{row.item_code}</TableCell>
                 <TableCell align="center">{row.item_name}</TableCell>
-                <TableCell align="center">{row.qty}</TableCell>
-                <TableCell align="center">{row.spec_unit}</TableCell>
+                <TableCell align="center">{row.total_qty}</TableCell>
+                <TableCell align="center">{row.unit}</TableCell>
               </TableRow>
             ))}
           </TableBody>
