@@ -212,7 +212,7 @@ export default function OrderOutRegisterModal({
         </Box>
 
         {/* 🔹 입고 리스트 테이블 */}
-        <TableContainer component={Paper} sx={{ maxHeight: 260 }}>
+        <TableContainer component={Paper} sx={{ maxHeight: 470 }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -256,42 +256,49 @@ export default function OrderOutRegisterModal({
             value={selected?.lotNo ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
+            sx={{ width: 200 }}
           />
           <TextField
             label="거래처명"
             value={selected?.customerName ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
+            sx={{ width: 200 }}
           />
           <TextField
             label="품목번호"
             value={selected?.itemCode ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
+            sx={{ width: 200 }}
           />
           <TextField
             label="품목명"
             value={selected?.itemName ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
+            sx={{ width: 200 }}
           />
           <TextField
             label="입고일자"
             value={selected?.inboundDate ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
+            sx={{ width: 200 }}
           />
           <TextField
             label="입고수량"
             value={selected?.inboundQty ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
+            sx={{ width: 200 }}
           />
           <TextField
             label="분류"
             value={selected?.category ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
+            sx={{ width: 200 }}
           />
           
           {/* ✅ 출고 수량 필드: 선택 유무에 따라 스타일 분기 (배경색 없음) */}
@@ -306,7 +313,7 @@ export default function OrderOutRegisterModal({
                 size="small"
                 InputLabelProps={{ shrink: true }}
                 placeholder="출고 수량 입력하세요" 
-                sx={{ width: 223 }}
+                sx={{ width: 200 }}
                 InputProps={{
                   sx: {
                     '&::placeholder': {
@@ -323,7 +330,7 @@ export default function OrderOutRegisterModal({
                 value="-"
                 size="small"
                 InputProps={InactiveInputProps}
-                sx={{ width: 223 }}
+                sx={{ width: 200 }}
               />
           )}
           
@@ -338,7 +345,7 @@ export default function OrderOutRegisterModal({
                 onChange={handleFormChange}
                 InputLabelProps={{ shrink: true }}
                 size="small"
-                sx={{ width: 180 }} 
+                sx={{ width: 200 }} 
               />
           ) : (
               // 항목 선택 안됨: Read-only 필드처럼 '-' 표시 (배경색 없음)
@@ -347,7 +354,7 @@ export default function OrderOutRegisterModal({
                 value="-"
                 size="small"
                 InputProps={InactiveInputProps}
-                sx={{ width: 180 }}
+                sx={{ width: 200 }}
               />
           )}
         </Box>
