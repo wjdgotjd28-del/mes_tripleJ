@@ -132,7 +132,6 @@ export default function OrderOutRegisterModal({
       outboundDate: form.outboundDate,
       category: selected.category,
     });
-
     onClose();
   };
 

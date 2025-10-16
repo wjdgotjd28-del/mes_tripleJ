@@ -23,6 +23,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
+import { addOrderOutbound } from "./api/orderOutbound";
 
 
 
@@ -161,12 +162,19 @@ export default function OrderOutViewPage() {
   ]);
 
   // ✅ 출고 등록 처리
-  const handleRegister = (data: OrderOutbound) => {
-    setRows((prev) => [
-      ...prev,
-      { id: prev.length + 1, ...data },
-    ]);
-    setRegisterOpen(false);
+  const handleRegister = async (data: OrderOutbound) => {
+    try {
+      // API 호출
+      const newOrder = await addOrderOutbound(data);
+      setRows((prev) => [
+        ...prev,
+        newOrder, // API 응답으로 받은 객체를 추가
+      ]);
+      setRegisterOpen(false);
+    } catch (error) {
+      console.error("출고 등록 실패:", error);
+      alert("출고 등록에 실패했습니다.");
+    }
   };
 
   // ✅ 검색 필터
