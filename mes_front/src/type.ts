@@ -1,50 +1,43 @@
 // 이미지 정보 타입
-export interface ImageData {
-  order_item_img_id?: number; // 이미지 ID (수정 시 사용)
-  order_item_id?: number; // 수주 품목 ID
-  file?: File; // 신규 업로드 시 사용
-  img_url: string; // 파일 경로 (필수)
-  img_ori_name: string; // 원본 파일 이름 (필수)
-  img_name: string; // 저장된 파일 이름 (필수)
+export interface OrderItemImage {
+  orderItemImgId?: number;     // 이미지 고유 ID
+  orderItemId?: number;        // 품목 ID
+  img_url: string;             // 이미지 URL
+  img_ori_name: string;        // 원본 파일명
+  img_name: string;            // 저장 파일명
+  file?: File;                 // 신규 업로드 시 사용
 }
 
-// 공정 프로세스 타입
-export interface RoutingData {
-  step: string;
-  description?: string;
-  duration?: number; // 소요 시간 (분)
-}
-
-// 테이블 데이터 타입
+// 수주 대상 품목 데이터 타입
 export interface OrderItems {
-  id: number; // ViewPage에서만 필요
+  order_item_id: number;
   company_name: string;
   item_code: string;
   item_name: string;
-  category: string;
-  color: string;
-  unit_price: number;
+  category: "DEFENSE"|"GENERAL"|"AUTOMOTIVE"|"SHIPBUILDING";
+  color?: string;
+  unit_price?: number;
   paint_type: "LIQUID" | "POWDER";
-  note: string;
-  use_yn: string;
-  status: string;
-  image?: ImageData[];      // 다중 이미지
-  routing?: RoutingData[];  // 공정 프로세스 배열
+  note?: string;
+  use_yn: "Y" | "N";
+  status: "Y" | "N";
+  image?: OrderItemImage[];
+  routing?: RoutingFormData[];
 }
 
-// 테이블 데이터 타입
+// 원자재 품목 데이터 타입
 export interface RawItems {
   material_item_id: number;
   company_name: string;
   item_code: string;
   item_name: string;
-  category: string;
+  category: "PAINT"|"THINNER"|"CLEANER"|"HARDENER";
   color: string;
   spec_qty: number;
   spec_unit: string;
   manufacturer: string;
   note: string;
-  use_yn: string;
+  use_yn: "Y" | "N";
 }
 
 //거래처 타입
@@ -76,9 +69,12 @@ export type RoutingCreateData = {
   note: string;
 };
 
-
 export type RoutingFormData = RoutingCreateData & {
   routingId: number;
+};
+
+export type RoutingFormDataWithProcessNo = RoutingFormData & {
+  process_no: number;
 };
 
 // 수주 출고 
@@ -105,5 +101,6 @@ export type Inbound = {
   category: string;
   inboundDate: string;
 };
+
 
 

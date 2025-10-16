@@ -1,9 +1,13 @@
 package com.mes_back.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "order_item_img")
+@Getter
+@Setter
 public class OrderItemImg {
 
     @Id
