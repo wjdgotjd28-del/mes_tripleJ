@@ -16,7 +16,6 @@ import {
   Paper,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-// OrderOutViewPage에 정의된 타입이라고 가정합니다.
 import type { OrderOutbound } from "./OrderOutViewPage"; 
 
 type Inbound = {
@@ -37,6 +36,15 @@ type Props = {
   inbounds: Inbound[];
 };
 
+// Read-only 필드에 적용할 공통 스타일 정의
+const ReadOnlyInputProps = {
+    readOnly: true,
+    style: { color: 'black' },
+    sx: { 
+        backgroundColor: '#f5f5f5', // 연한 회색 배경
+    }
+};
+
 export default function OrderOutRegisterModal({
   open,
   onClose,
@@ -49,7 +57,6 @@ export default function OrderOutRegisterModal({
     outboundDate: "",
   });
 
-  // 🔹 검색 필드 상태
   const [search, setSearch] = useState({
     customerName: "",
     itemCode: "",
@@ -58,11 +65,10 @@ export default function OrderOutRegisterModal({
     inboundDate: "",
   });
 
-  // 🔹 모달 열릴 때마다 체크박스와 폼 초기화
   useEffect(() => {
     if (open) {
       setSelected(null);
-      setForm({ outboundQty: "", outboundDate: "" });
+      setForm({ outboundQty: "", outboundDate: new Date().toISOString().slice(0, 10) });
       setSearch({
         customerName: "",
         itemCode: "",
@@ -74,7 +80,12 @@ export default function OrderOutRegisterModal({
   }, [open]);
 
   const handleSelect = (inbound: Inbound) => {
-    setSelected(inbound);
+    if (selected?.orderInboundId === inbound.orderInboundId) {
+        setSelected(null);
+        setForm({ ...form, outboundQty: "" });
+    } else {
+        setSelected(inbound);
+    }
   };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +97,6 @@ export default function OrderOutRegisterModal({
   };
   
   const handleSearchClick = () => {
-    // TODO: 여기에 실제 입고 목록 조회 API 호출 및 필터링 로직 구현
     console.log("검색 기준:", search);
     alert("검색 기능이 실행되었습니다. (현재는 Mock 데이터라 필터링되지 않음)");
   };
@@ -104,7 +114,6 @@ export default function OrderOutRegisterModal({
     if (qty > selected.inboundQty)
         return alert(`출고 수량(${qty})은 입고 수량(${selected.inboundQty})을 초과할 수 없습니다.`);
 
-    // 출고번호 생성 (요구사항: OUT-yyyyMMdd-001)
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
     const outboundNo = `OUT-${dateStr}-001`; 
@@ -127,11 +136,11 @@ export default function OrderOutRegisterModal({
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle>수주 대상 출고 등록</DialogTitle>
       <DialogContent>
-        {/* 🔹 검색 영역 (레이아웃 조정 완료) */}
+        {/* 🔹 검색 영역 */}
         <Box 
             sx={{ 
                 display: "flex", 
-                gap: 2, // 간격 조정
+                gap: 2, 
                 mb: 2, 
                 alignItems: 'center' 
             }}
@@ -168,16 +177,23 @@ export default function OrderOutRegisterModal({
             size="small" 
             sx={{ width: 130 }} 
           />
+          {/* ✅ 입고일자 필드: placeholder 사용, 값이 없을 때 텍스트 색상 조정 */}
           <TextField
+            // label 대신 placeholder를 사용
             placeholder="입고일자"
             name="inboundDate"
             type="date"
             value={search.inboundDate}
             onChange={handleSearchChange}
-            InputLabelProps={{ shrink: true }}
+            // InputLabelProps는 label을 사용하지 않으므로 제거함
             size="small"
-            // ✅ 입고 일자 폭 조정
             sx={{ width: 150 }} 
+            InputProps={{ 
+              sx: {
+                // 값이 없을 때 '연도-월-일' 텍스트를 연한 회색으로 변경
+                color: search.inboundDate ? 'rgba(0, 0, 0, 0.87)' : 'rgba(0, 0, 0, 0.42)',
+              },
+            }}
           />
           <Button variant="contained" onClick={handleSearchClick}>
             검색
@@ -200,7 +216,6 @@ export default function OrderOutRegisterModal({
               </TableRow>
             </TableHead>
             <TableBody>
-              {/* NOTE: 실제 사용 시 inbounds 데이터는 검색 결과에 따라 변경되어야 합니다. */}
               {inbounds.map((row) => (
                 <TableRow key={row.orderInboundId} hover>
                   <TableCell>
@@ -222,61 +237,74 @@ export default function OrderOutRegisterModal({
           </Table>
         </TableContainer>
 
-        {/* 🔹 선택된 품목 표시 및 입력 영역 (size="small" 적용) */}
+        {/* 🔹 선택된 품목 표시 및 입력 영역 (Read-only 필드에 스타일 적용) */}
         <Box sx={{ mt: 3, display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {/* 선택 정보 필드 (ReadOnly) */}
+          {/* Read-only 필드 */}
           <TextField
             label="LOT번호"
             value={selected?.lotNo ?? "-"}
-            disabled
             size="small"
+            InputProps={ReadOnlyInputProps}
           />
           <TextField
             label="거래처명"
             value={selected?.customerName ?? "-"}
-            disabled
             size="small"
+            InputProps={ReadOnlyInputProps}
           />
           <TextField
             label="품목번호"
             value={selected?.itemCode ?? "-"}
-            disabled
             size="small"
+            InputProps={ReadOnlyInputProps}
           />
           <TextField
             label="품목명"
             value={selected?.itemName ?? "-"}
-            disabled
             size="small"
+            InputProps={ReadOnlyInputProps}
           />
           <TextField
             label="입고일자"
             value={selected?.inboundDate ?? "-"}
-            disabled
             size="small"
+            InputProps={ReadOnlyInputProps}
           />
           <TextField
             label="입고수량"
             value={selected?.inboundQty ?? "-"}
-            disabled
             size="small"
+            InputProps={ReadOnlyInputProps}
           />
           <TextField
             label="분류"
             value={selected?.category ?? "-"}
-            disabled
             size="small"
+            InputProps={ReadOnlyInputProps}
           />
-          {/* 출고 정보 입력 필드 */}
+          
+          {/* 출고 수량 입력 필드 */}
           <TextField
-            label="출고수량"
+            label="출고수량" 
             name="outboundQty"
             type="number"
             value={form.outboundQty}
             onChange={handleFormChange}
-            placeholder="출고 수량 입력"
             size="small"
+            InputLabelProps={{ shrink: true }}
+            disabled={!selected} 
+            placeholder={selected ? "출고 수량 입력하세요" : undefined}
+            InputProps={{
+              sx: {
+                '&::placeholder': {
+                  color: 'black',
+                  opacity: 1, 
+                },
+              },
+            }}
           />
+          
+          {/* 출고일자 필드 */}
           <TextField
             label="출고일자"
             name="outboundDate"
@@ -285,6 +313,7 @@ export default function OrderOutRegisterModal({
             onChange={handleFormChange}
             InputLabelProps={{ shrink: true }}
             size="small"
+            disabled={!selected} 
           />
         </Box>
       </DialogContent>
