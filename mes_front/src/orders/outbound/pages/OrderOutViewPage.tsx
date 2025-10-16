@@ -206,6 +206,18 @@ export default function OrderOutViewPage() {
     }
   };
 
+  // ✅ 카테고리 영-한 변환
+  const categoryMap: { [key: string]: string } = {
+    DEFENSE: '방산',
+    GENERAL: '일반',
+    AUTOMOTIVE: '자동차',
+    SHIPBUILDING: '조선'
+  };
+
+  const translateCategory = (category: string) => {
+    return categoryMap[category] || category;
+  };
+
 
 
   return (
@@ -281,7 +293,7 @@ export default function OrderOutViewPage() {
                 <TableCell>{row.itemName}</TableCell>
                 <TableCell>{row.qty}</TableCell>
                 <TableCell>{row.outboundDate}</TableCell>
-                <TableCell>{row.category}</TableCell>
+                <TableCell>{translateCategory(row.category)}</TableCell>
                 <TableCell align="center">
                   <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
                     <Button
