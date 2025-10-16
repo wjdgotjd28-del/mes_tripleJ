@@ -97,8 +97,6 @@ public class CompanyService {
 
     // 회사 복구
     public void restoreCompany(Long companyId) {
-        // findById는 @Where를 무시하므로, 삭제된 데이터를 찾으려면 네이티브 쿼리 필요
-        // -> @Where를 사용하지 않기로 했으므로 findById로 그냥 조회가 가능합니다.
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new EntityNotFoundException("Company not found with id: " + companyId));
 
