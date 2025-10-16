@@ -51,7 +51,13 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
 
   const handleSubmit = async () => {
     try {
-      const newCompany = await addCompany(company);
+      const companyTypeMap: { [key: string]: string } = {
+        "거래처": "CUSTOMER",
+        "매입처": "PURCHASER"
+      };
+      const engCompanyType = companyTypeMap[company.type] || company.type;
+
+      const newCompany = await addCompany({ ...company, type: engCompanyType });
       onAdd(newCompany);
       handleClose();
       // 초기화
