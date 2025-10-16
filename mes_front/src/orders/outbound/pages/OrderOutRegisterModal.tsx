@@ -306,7 +306,7 @@ export default function OrderOutRegisterModal({
                 size="small"
                 InputLabelProps={{ shrink: true }}
                 placeholder="출고 수량 입력하세요" 
-                sx={{ width: 130 }}
+                sx={{ width: 223 }}
                 InputProps={{
                   sx: {
                     '&::placeholder': {
@@ -323,7 +323,7 @@ export default function OrderOutRegisterModal({
                 value="-"
                 size="small"
                 InputProps={InactiveInputProps}
-                sx={{ width: 130 }}
+                sx={{ width: 223 }}
               />
           )}
           
@@ -338,7 +338,7 @@ export default function OrderOutRegisterModal({
                 onChange={handleFormChange}
                 InputLabelProps={{ shrink: true }}
                 size="small"
-                sx={{ width: 130 }} 
+                sx={{ width: 180 }} 
               />
           ) : (
               // 항목 선택 안됨: Read-only 필드처럼 '-' 표시 (배경색 없음)
@@ -347,7 +347,7 @@ export default function OrderOutRegisterModal({
                 value="-"
                 size="small"
                 InputProps={InactiveInputProps}
-                sx={{ width: 130 }}
+                sx={{ width: 180 }}
               />
           )}
         </Box>
