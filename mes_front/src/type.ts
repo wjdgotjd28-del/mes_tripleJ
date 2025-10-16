@@ -1,18 +1,11 @@
 // 이미지 정보 타입
 export interface OrderItemImage {
-  img_url: string;
-  img_ori_name: string;
-  img_name: string;
-  file?: File;
-}
-
-
-// 공정 프로세스 타입
-export interface OrderItemRouting {
-  routingId?: number; // DB에서 가져온 경우
-  step: string;
-  description: string;
-  duration?: number;
+  orderItemImgId?: number;     // 이미지 고유 ID
+  orderItemId?: number;        // 품목 ID
+  img_url: string;             // 이미지 URL
+  img_ori_name: string;        // 원본 파일명
+  img_name: string;            // 저장 파일명
+  file?: File;                 // 신규 업로드 시 사용
 }
 
 // 수주 대상 품목 데이터 타입
@@ -29,7 +22,7 @@ export interface OrderItems {
   use_yn: "Y" | "N";
   status: "Y" | "N";
   image?: OrderItemImage[];
-  routing?: OrderItemRouting[];
+  routing?: RoutingFormData[];
 }
 
 // 원자재 품목 데이터 타입
@@ -68,5 +61,7 @@ export type RoutingFormData = RoutingCreateData & {
   routingId: number;
 };
 
-
+export type RoutingFormDataWithProcessNo = RoutingFormData & {
+  process_no: number;
+};
 

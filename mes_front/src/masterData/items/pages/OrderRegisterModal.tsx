@@ -6,38 +6,57 @@ import {
   TableCell, TableContainer, TableHead, TableRow, Paper
 } from "@mui/material";
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
-import type { OrderItems, OrderItemImage } from "../../../type";
+import type { OrderItems, OrderItemImage, RoutingFormData } from "../../../type";
 import { createOrderItems } from "../api/OrderApi";
-
-interface RoutingInfo {
-  id: number;
-  process_code: string;
-  process_name: string;
-  process_time: string;
-  note?: string;
-}
-
-interface SelectedRouting extends RoutingInfo {
-  order: number;
-}
+import { fetchRoutings } from "../../routings/api/RoutingApi";
 
 interface OrderRegisterModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: OrderItems) => void;
-  routingList: RoutingInfo[];
+  companyList?: Array<{ id: number; name: string }>;
 }
 
-export default function OrderRegisterModal({ open, onClose, onSubmit, routingList }: OrderRegisterModalProps) {
+export default function OrderRegisterModal({ open, onClose, onSubmit, companyList = [] }: OrderRegisterModalProps) {
   const [newData, setNewData] = useState<Partial<OrderItems>>({
-    company_name: "", item_name: "", item_code: "", category: "GENERAL",
-    paint_type: "POWDER", unit_price: 0, color: "", note: "",
-    use_yn: "Y", status: "Y", image: [], routing: []
+    company_name: "",
+    item_name: "",
+    item_code: "",
+    category: "GENERAL",
+    paint_type: "POWDER",
+    unit_price: 0,
+    color: "",
+    note: "",
+    use_yn: "Y",
+    status: "Y",
+    image: [],
+    routing: []
   });
 
-  const [selectedRouting, setSelectedRouting] = useState<SelectedRouting[]>([]);
+  const [routingList, setRoutingList] = useState<RoutingFormData[]>([]);
+  const [selectedRouting, setSelectedRouting] = useState<(RoutingFormData & { process_no: number })[]>([]);
 
-  useEffect(() => { if (!open) setSelectedRouting([]); }, [open]);
+  useEffect(() => {
+    if (!open) {
+      setSelectedRouting([]);
+      setNewData({
+        company_name: "", item_name: "", item_code: "", category: "GENERAL",
+        paint_type: "POWDER", unit_price: 0, color: "", note: "",
+        use_yn: "Y", status: "Y", image: [], routing: []
+      });
+      setRoutingList([]);
+      return;
+    }
+    const loadRoutings = async (): Promise<void> => {
+      try {
+        const data: RoutingFormData[] = await fetchRoutings();
+        setRoutingList(data);
+      } catch (error) {
+        console.error("라우팅 데이터 불러오기 실패", error);
+      }
+    };
+    loadRoutings();
+  }, [open]);
 
   const handleChange = (field: keyof OrderItems, value: string | number) => {
     setNewData(prev => ({ ...prev, [field]: value }));
@@ -65,83 +84,89 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
     });
   };
 
-  const handleRoutingToggle = (routing: RoutingInfo) => {
+  const handleRoutingToggle = (routing: RoutingFormData) => {
     setSelectedRouting(prev => {
-      const exists = prev.find(r => r.id === routing.id);
-      if (exists) return prev.filter(r => r.id !== routing.id);
-      return [...prev, { ...routing, order: prev.length + 1 }];
+      const exists = prev.find(r => r.routingId === routing.routingId);
+      if (exists) return prev.filter(r => r.routingId !== routing.routingId);
+      return [...prev, { ...routing, process_no: prev.length + 1 }];
     });
   };
 
   const handleOrderChange = (id: number, newOrder: number) => {
     if (newOrder < 1) newOrder = 1;
-    setSelectedRouting(prev => prev.map(r => r.id === id ? { ...r, order: newOrder } : r));
+    setSelectedRouting(prev => prev.map(r => r.routingId === id ? { ...r, process_no: newOrder } : r));
   };
 
-  const parseDuration = (timeStr: string | undefined) => {
-    if (!timeStr) return undefined;
-    const match = timeStr.match(/([\d.]+)h/);
-    return match ? Math.round(parseFloat(match[1]) * 60) : undefined;
-  };
-
-  const categoryToEnum = (category?: string) => {
-    const map: Record<string,string> = { "일반":"GENERAL","방산":"DEFENSE","자동차":"AUTOMOTIVE","조선":"SHIPBUILDING" };
-    return map[category||"일반"] || "GENERAL";
-  };
+  // const parseDuration = (timeStr: string | undefined) => {
+  //   if (!timeStr) return undefined;
+  //   const match = timeStr.match(/([\d.]+)h/);
+  //   return match ? Math.round(parseFloat(match[1]) * 60) : undefined;
+  // };
 
   const handleSubmit = async () => {
     if (!newData.company_name || !newData.item_code || !newData.item_name || !newData.unit_price) {
-      alert("필수값을 입력해주세요."); return;
+      alert("필수값을 입력해주세요.");
+      return;
     }
 
     const formData = new FormData();
 
-    formData.append("orderItem", new Blob([JSON.stringify({
-      companyName: newData.company_name,
-      itemName: newData.item_name,
-      itemCode: newData.item_code,
-      category: categoryToEnum(newData.category as string),
+    const orderItemData = {
+      company_name: newData.company_name,
+      item_name: newData.item_name,
+      item_code: newData.item_code,
+      category: newData.category,
       color: newData.color || "",
-      unitPrice: newData.unit_price,
-      paintType: newData.paint_type,
+      unit_price: newData.unit_price,
+      paint_type: newData.paint_type,
       note: newData.note || "",
-      useYn: newData.use_yn,
+      use_yn: newData.use_yn,
       status: newData.status
-    })], { type:"application/json" }));
+    };
+
+    formData.append("orderItem", new Blob([JSON.stringify(orderItemData)], { type: "application/json" }));
 
     if (selectedRouting.length > 0) {
-      const routingData = selectedRouting.sort((a,b)=>a.order-b.order).map((r,i)=>({
-        routingId: r.id,
-        processNo: i+1,
-        step: r.process_code,
-        description: r.process_name,
-        duration: parseDuration(r.process_time)
+      const routingData = selectedRouting.sort((a, b) => a.process_no - b.process_no).map((r, i) => ({
+        routing_id: r.routingId,
+        process_no: i + 1,
+        // process_code: r.processCode,
+        // process_name: r.processName,
+        // process_time: parseDuration(r.processTime),
+        // note: r.note
       }));
-      formData.append("routing", new Blob([JSON.stringify(routingData)], { type:"application/json" }));
+      formData.append("routing", new Blob([JSON.stringify(routingData)], { type: "application/json" }));
     }
 
-    newData.image?.forEach(img => { if (img.file) formData.append("images", img.file); });
+    newData.image?.forEach(img => img.file && formData.append("images", img.file));
 
     try {
       await createOrderItems(formData);
       alert("품목이 등록되었습니다.");
       onSubmit(newData as OrderItems);
       handleClose();
-    } catch (err) { console.error(err); alert("등록 실패"); }
+    } catch (err) {
+      console.error(err);
+      alert("등록 실패: 서버 통신 오류");
+    }
   };
 
   const handleClose = () => {
     newData.image?.forEach(img => img.img_url?.startsWith("blob:") && URL.revokeObjectURL(img.img_url));
-    setNewData({ company_name:"", item_name:"", item_code:"", category:"GENERAL", paint_type:"POWDER", unit_price:0, color:"", note:"", use_yn:"Y", status:"Y", image:[], routing:[] });
+    setNewData({
+      company_name: "", item_name: "", item_code: "", category: "GENERAL",
+      paint_type: "POWDER", unit_price: 0, color: "", note: "",
+      use_yn: "Y", status: "Y", image: [], routing: []
+    });
     setSelectedRouting([]);
     onClose();
   };
 
-  const sortedSelectedRouting = [...selectedRouting].sort((a,b)=>a.order-b.order);
+  const sortedSelectedRouting = [...selectedRouting].sort((a, b) => a.process_no - b.process_no);
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
-      <DialogTitle sx={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h6">수주 대상 품목 등록</Typography>
         <Box>
           <Button onClick={handleSubmit} variant="contained" color="primary">등록</Button>
@@ -150,21 +175,37 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
       </DialogTitle>
 
       <DialogContent dividers>
-        {/* 좌우 분할 - 왼쪽 기본정보, 오른쪽 상세정보 */}
         <Box sx={{ display: "flex", gap: 4 }}>
-          {/* 왼쪽 기본정보 */}
           <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle2" color="primary" gutterBottom>기본정보</Typography>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 2 }}>
               <Typography color="text.secondary" alignSelf="center">업체명</Typography>
-              <TextField
-                value={newData.company_name ?? ""}
-                onChange={(e) => handleChange("company_name", e.target.value)}
-                size="small"
-                fullWidth
-                required
-              />
+              {companyList.length > 0 ? (
+                <TextField
+                  select
+                  value={newData.company_name ?? ""}
+                  onChange={(e) => handleChange("company_name", e.target.value)}
+                  size="small"
+                  fullWidth
+                  required
+                >
+                  {companyList.map((company) => (
+                    <MenuItem key={company.id} value={company.name}>
+                      {company.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ) : (
+                <TextField
+                  value={newData.company_name ?? ""}
+                  onChange={(e) => handleChange("company_name", e.target.value)}
+                  size="small"
+                  fullWidth
+                  required
+                  placeholder="업체 목록을 불러오지 못했습니다. 직접 입력하세요."
+                />
+              )}
               <Typography color="text.secondary" alignSelf="center">품목번호</Typography>
               <TextField
                 value={newData.item_code ?? ""}
@@ -181,23 +222,28 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
                 fullWidth
                 required
               />
+              {/* value는 영문 ENUM, 표시는 한글 */}
               <Typography color="text.secondary" alignSelf="center">분류</Typography>
               <TextField
                 select
-                value={newData.category ?? "일반"}
-                onChange={(e) => handleChange("category", e.target.value)}
+                value={newData.category ?? "GENERAL"}
+                onChange={(e) => {
+                  const selectedValue = e.target.value;
+                  console.log("Select onChange - selected value:", selectedValue); // 디버깅
+                  handleChange("category", selectedValue);
+                }}
                 size="small"
                 fullWidth
                 required
               >
-                {["일반", "방산", "자동차", "조선"].map((opt) => (
-                  <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                ))}
+                <MenuItem value="GENERAL">일반</MenuItem>
+                <MenuItem value="DEFENSE">방산</MenuItem>
+                <MenuItem value="AUTOMOTIVE">자동차</MenuItem>
+                <MenuItem value="SHIPBUILDING">조선</MenuItem>
               </TextField>
             </Box>
           </Box>
 
-          {/* 오른쪽 상세정보 + 라디오 */}
           <Box sx={{ flex: 1 }}>
             <Typography variant="subtitle2" color="primary" gutterBottom>상세정보</Typography>
             <Divider sx={{ mb: 2 }} />
@@ -222,7 +268,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
               <FormControl component="fieldset" required>
                 <RadioGroup
                   row
-                  value={newData.paint_type ?? "POWDER"}
+                  value={newData.paint_type ?? "LIQUID"}
                   onChange={(e) => handleChange("paint_type", e.target.value)}
                 >
                   <FormControlLabel value="LIQUID" control={<Radio />} label="액체 (LIQUID)" />
@@ -242,7 +288,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
                 </RadioGroup>
               </FormControl>
 
-              <Typography color="text.secondary" alignSelf="center">거래상태</Typography>
+              {/* <Typography color="text.secondary" alignSelf="center">거래상태</Typography>
               <FormControl component="fieldset" required>
                 <RadioGroup
                   row
@@ -252,7 +298,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
                   <FormControlLabel value="Y" control={<Radio />} label="Y" />
                   <FormControlLabel value="N" control={<Radio />} label="N" />
                 </RadioGroup>
-              </FormControl>
+              </FormControl> */}
             </Box>
           </Box>
         </Box>
@@ -278,7 +324,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
                           checked={selectedRouting.length === routingList.length && routingList.length > 0}
                           onChange={(e) => {
                             if (e.target.checked) {
-                              setSelectedRouting(routingList.map((r, i) => ({ ...r, order: i + 1 })));
+                              setSelectedRouting(routingList.map((r, i) => ({ ...r, process_no: i + 1 })));
                             } else {
                               setSelectedRouting([]);
                             }
@@ -294,9 +340,9 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
                   </TableHead>
                   <TableBody>
                     {routingList.map((r, idx) => {
-                      const checked = selectedRouting.some((sr) => sr.id === r.id);
+                      const checked = selectedRouting.some((sr) => sr.routingId === r.routingId);
                       return (
-                        <TableRow key={r.id} hover>
+                        <TableRow key={r.routingId} hover>
                           <TableCell padding="checkbox">
                             <Checkbox
                               checked={checked}
@@ -304,9 +350,9 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
                             />
                           </TableCell>
                           <TableCell>{idx + 1}</TableCell>
-                          <TableCell>{r.process_code}</TableCell>
-                          <TableCell>{r.process_name}</TableCell>
-                          <TableCell>{r.process_time}</TableCell>
+                          <TableCell>{r.processCode}</TableCell>
+                          <TableCell>{r.processName}</TableCell>
+                          <TableCell>{r.processTime}</TableCell>
                           <TableCell>{r.note || "-"}</TableCell>
                         </TableRow>
                       );
@@ -336,22 +382,22 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
                     </TableHead>
                     <TableBody>
                       {sortedSelectedRouting.map((r) => (
-                        <TableRow key={r.id}>
+                        <TableRow key={r.routingId}>
                           <TableCell>
                             <TextField
                               type="number"
-                              value={r.order}
+                              value={r.process_no}
                               size="small"
                               inputProps={{ min: 1, style: { width: 50 } }}
                               onChange={(e) => {
                                 const val = parseInt(e.target.value, 10);
-                                if (!isNaN(val) && val > 0) handleOrderChange(r.id, val);
+                                if (!isNaN(val) && val > 0) handleOrderChange(r.routingId, val);
                               }}
                             />
                           </TableCell>
-                          <TableCell>{r.process_code}</TableCell>
-                          <TableCell>{r.process_name}</TableCell>
-                          <TableCell>{r.process_time}</TableCell>
+                          <TableCell>{r.processCode}</TableCell>
+                          <TableCell>{r.processName}</TableCell>
+                          <TableCell>{r.processTime}</TableCell>
                           <TableCell>{r.note || "-"}</TableCell>
                         </TableRow>
                       ))}
@@ -374,16 +420,16 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, routingLis
           {newData.image && newData.image.length > 0 && (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 2 }}>
               {newData.image.map((img, idx) => (
-                <Box key={idx} sx={{ position:"relative", width:140, height:140, border:"1px solid #ddd", borderRadius:1, overflow:"hidden" }}>
-                  <img src={img.img_url} alt={img.img_ori_name} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-                  <IconButton size="small" sx={{ position:"absolute", top:4, right:4, backgroundColor:"rgba(255,255,255,0.8)" }} onClick={() => handleImageDelete(idx)}>
+                <Box key={idx} sx={{ position: "relative", width: 140, height: 140, border: "1px solid #ddd", borderRadius: 1, overflow: "hidden" }}>
+                  <img src={img.img_url} alt={img.img_ori_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <IconButton size="small" sx={{ position: "absolute", top: 4, right: 4, backgroundColor: "rgba(255,255,255,0.8)" }} onClick={() => handleImageDelete(idx)}>
                     <CloseIcon fontSize="small" />
                   </IconButton>
-                  <Box sx={{ position:"absolute", bottom:0, left:0, right:0, backgroundColor:"rgba(0,0,0,0.7)", color:"white", p:0.5 }}>
-                    <Typography variant="caption" sx={{ fontSize:"0.65rem", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                  <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.7)", color: "white", p: 0.5 }}>
+                    <Typography variant="caption" sx={{ fontSize: "0.65rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       원본: {img.img_ori_name}
                     </Typography>
-                    <Typography variant="caption" sx={{ fontSize:"0.6rem", color:"#aaa", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    <Typography variant="caption" sx={{ fontSize: "0.6rem", color: "#aaa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       저장명: {img.img_name}
                     </Typography>
                   </Box>

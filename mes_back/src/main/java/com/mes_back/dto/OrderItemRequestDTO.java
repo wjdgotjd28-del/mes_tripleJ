@@ -1,6 +1,8 @@
 package com.mes_back.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.mes_back.constant.OrderCategory;
+import com.mes_back.constant.PaintType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,12 +19,12 @@ public class OrderItemRequestDTO {
     private String itemName;
     @JsonProperty("item_code")
     private String itemCode;
-    private String category; // 방산, 일반, 자동차, 조선
+    private OrderCategory category; // 방산, 일반, 자동차, 조선
     private String color;
     @JsonProperty("unit_price")
     private Long unitPrice;
     @JsonProperty("paint_type")
-    private String paintType; // POWDER / LIQUID
+    private PaintType paintType; // POWDER / LIQUID
     private String note;
     @JsonProperty("use_yn")
     private String useYn; // Y / N

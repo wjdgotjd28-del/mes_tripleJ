@@ -24,7 +24,4 @@ public class OrderItemRouting {
 
     @Column(name = "process_no", nullable = false)
     private Long processNo;
-    private String step;
-    private String description;
-    private Integer duration;
 }

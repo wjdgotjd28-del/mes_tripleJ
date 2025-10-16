@@ -16,4 +16,14 @@ public interface MasterDataOrderItemsRepository extends JpaRepository<OrderItem,
             "WHERE o.orderItemId = :id")
     Optional<OrderItem> findByIdWithImagesAndRoutings(@Param("id") Long id);
 
+    @Query("SELECT DISTINCT o FROM OrderItem o " +
+            "LEFT JOIN FETCH o.images " +
+            "WHERE o.orderItemId = :id")
+    Optional<OrderItem> findByIdWithImages(@Param("id") Long id);
+
+    @Query("SELECT DISTINCT o FROM OrderItem o " +
+            "LEFT JOIN FETCH o.routings " +
+            "WHERE o.orderItemId = :id")
+    Optional<OrderItem> findByIdWithRoutings(@Param("id") Long id);
+
 }

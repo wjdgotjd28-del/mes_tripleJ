@@ -58,4 +58,9 @@ public class OrderItem {
     @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemRouting> routings = new ArrayList<>();
 
+    public void addRouting(OrderItemRouting routing) {
+        routings.add(routing);
+        routing.setOrderItem(this);
+    }
+
 }

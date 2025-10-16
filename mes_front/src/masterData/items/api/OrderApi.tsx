@@ -35,6 +35,13 @@ export const updateOrderItems = async (id: number, formData: FormData) => {
     return res.data;
 };
 
+// 이미지 삭제
+export const deleteSingleImageAPI = async (id: number): Promise<number> => {
+  const url = `${BASE_URL}/items/order/image/${id}`;
+  const res = await axios.delete(url);
+  return res.data;
+};
+
 // 삭제
 export const deleteOrderItems = async (id: number): Promise<number> => {
   const url = `${BASE_URL}/items/order/delete/${id}`;
