@@ -253,9 +253,10 @@ export default function OrderOutViewPage() {
           onChange={(e) => setSearch({ ...search, itemName: e.target.value })}
         />
 
+        <Button variant="contained" onClick={handleSearch} sx={{ ml: 1 }}>검색</Button>
+
         <Box sx={{ flex: 1 }} />
 
-        <Button variant="contained" onClick={handleSearch}>검색</Button>
         <Button variant="outlined" endIcon={<FileDownloadIcon />}>
           Excel
         </Button>
