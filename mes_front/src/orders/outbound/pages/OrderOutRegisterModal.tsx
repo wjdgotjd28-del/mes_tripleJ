@@ -216,32 +216,32 @@ export default function OrderOutRegisterModal({
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ width: 50 }}>선택</TableCell>
-                <TableCell>LOT번호</TableCell>
-                <TableCell>거래처명</TableCell>
-                <TableCell>품목번호</TableCell>
-                <TableCell>품목명</TableCell>
-                <TableCell>입고일자</TableCell>
-                <TableCell>입고수량</TableCell>
-                <TableCell>분류</TableCell>
+                <TableCell align="center" sx={{ width: 50 }}>선택</TableCell>
+                <TableCell align="center">LOT번호</TableCell>
+                <TableCell align="center">거래처명</TableCell>
+                <TableCell align="center">품목번호</TableCell>
+                <TableCell align="center">품목명</TableCell>
+                <TableCell align="center">입고일자</TableCell>
+                <TableCell align="center">입고수량</TableCell>
+                <TableCell align="center">분류</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {inbounds.map((row) => (
                 <TableRow key={row.orderInboundId} hover>
-                  <TableCell>
+                  <TableCell align="center">
                     <Checkbox
                       checked={selected?.orderInboundId === row.orderInboundId}
                       onChange={() => handleSelect(row)}
                     />
                   </TableCell>
-                  <TableCell>{row.lotNo}</TableCell>
-                  <TableCell>{row.customerName}</TableCell>
-                  <TableCell>{row.itemCode}</TableCell>
-                  <TableCell>{row.itemName}</TableCell>
-                  <TableCell>{row.inboundDate}</TableCell>
-                  <TableCell>{row.inboundQty}</TableCell>
-                  <TableCell>{row.category}</TableCell>
+                  <TableCell align="center">{row.lotNo}</TableCell>
+                  <TableCell align="center">{row.customerName}</TableCell>
+                  <TableCell align="center">{row.itemCode}</TableCell>
+                  <TableCell align="center">{row.itemName}</TableCell>
+                  <TableCell align="center">{row.inboundDate}</TableCell>
+                  <TableCell align="center">{row.inboundQty}</TableCell>
+                  <TableCell align="center">{row.category}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
