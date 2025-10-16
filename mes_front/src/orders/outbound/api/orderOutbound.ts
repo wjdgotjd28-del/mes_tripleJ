@@ -10,8 +10,10 @@ export const addOrderOutbound = async (order: Omit<OrderOutbound, "id">): Promis
     return response.data;
 };
 
-// 출고 목록 조회 (필요하다면 추가)
+// 출고된 이력 조회 
 export const getOrderOutbound = async (): Promise<OrderOutbound[]> => {
     const response = await axios.get(`${BASE_URL}/orderitem/outbound`);
     return response.data;
 };
+
+

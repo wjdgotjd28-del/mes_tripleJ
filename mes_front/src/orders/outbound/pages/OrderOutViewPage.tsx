@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -23,25 +23,15 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
-import { addOrderOutbound } from "../api/orderOutbound";
+import { addOrderOutbound, getOrderOutbound } from "../api/orderOutbound";
 
 
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
-  const [rows, setRows] = useState<OrderOutbound[]>([
-    {
-      id: 1,
-      orderInboundId: 101,
-      outboundNo: "OUT-20251016-001",
-      customerName: "일도테크",
-      itemCode: "ITE001",
-      itemName: "페인트",
-      qty: 50,
-      outboundDate: "2025-10-16",
-      category: "방산",
-    },
-  ]);
+  const [allRows, setAllRows] = useState<OrderOutbound[]>([]);
+  const [displayedRows, setDisplayedRows] = useState<OrderOutbound[]>([]);
+
 
   // ✅ 검색 상태
   const [search, setSearch] = useState({
@@ -56,6 +46,19 @@ export default function OrderOutViewPage() {
 
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
+
+  useEffect(() => {
+    loadOrderOutboundData();
+  }, [])
+  
+  const loadOrderOutboundData = () => {
+     getOrderOutbound()
+     .then(res => {
+      setAllRows(res);
+      setDisplayedRows(res);
+     })
+     .catch(err => console.log(err))
+   }
 
   // ✅ 등록 모달용 입고 데이터 샘플
   const [inbounds] = useState<Inbound[]>([
@@ -166,7 +169,7 @@ export default function OrderOutViewPage() {
     try {
       // API 호출
       const newOrder = await addOrderOutbound(data);
-      setRows((prev) => [
+      setAllRows((prev) => [
         ...prev,
         newOrder, // API 응답으로 받은 객체를 추가
       ]);
@@ -177,28 +180,33 @@ export default function OrderOutViewPage() {
     }
   };
 
-  // ✅ 검색 필터
-  const filteredRows = rows.filter(
-    (row) =>
-      row.customerName.includes(search.customerName) &&
-      row.itemCode.includes(search.itemCode) &&
-      row.itemName.includes(search.itemName) &&
-      row.outboundNo.includes(search.outboundNo)
-  );
+  // ✅ 검색 처리
+  const handleSearch = () => {
+    const filtered = allRows.filter(
+      (row) =>
+        (row.customerName ?? "").includes(search.customerName) &&
+        (row.itemCode ?? "").includes(search.itemCode) &&
+        (row.itemName ?? "").includes(search.itemName) &&
+        (row.outboundNo ?? "").includes(search.outboundNo)
+    );
+    setDisplayedRows(filtered);
+  };
 
   // ✅ 수정 저장
   const handleEditSave = () => {
     if (!editData) return;
-    setRows((prev) => prev.map((r) => (r.id === editData.id ? editData : r)));
+    setAllRows((prev) => prev.map((r) => (r.id === editData.id ? editData : r)));
     setEditData(null);
   };
 
   // ✅ 삭제
   const handleDelete = (id: number) => {
     if (window.confirm("이 출고 정보를 삭제하시겠습니까?")) {
-      setRows((prev) => prev.filter((r) => r.id !== id));
+      setAllRows((prev) => prev.filter((r) => r.id !== id));
     }
   };
+
+
 
   return (
     <Box sx={{ p: 4 }}>
@@ -235,7 +243,7 @@ export default function OrderOutViewPage() {
 
         <Box sx={{ flex: 1 }} />
 
-        <Button variant="contained">검색</Button>
+        <Button variant="contained" onClick={handleSearch}>검색</Button>
         <Button variant="outlined" endIcon={<FileDownloadIcon />}>
           Excel
         </Button>
@@ -265,7 +273,7 @@ export default function OrderOutViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRows.map((row) => (
+            {displayedRows.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.outboundNo}</TableCell>
                 <TableCell>{row.customerName}</TableCell>
