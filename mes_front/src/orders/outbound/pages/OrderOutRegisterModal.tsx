@@ -36,11 +36,11 @@ type Props = {
   inbounds: Inbound[];
 };
 
-// Read-only 필드에 적용할 공통 스타일 정의 (배경색 제거)
+// Read-only 필드에 적용할 공통 스타일 정의
 const ReadOnlyInputProps = {
     readOnly: true,
     style: { color: 'black' },
-    // sx: { backgroundColor: '#f5f5f5' } // 배경색 제거
+    sx: { backgroundColor: '#f5f5f5' }
 };
 
 // 출고수량 및 출고일자 필드의 선택 안 되었을 때 스타일 (배경색 제거)
