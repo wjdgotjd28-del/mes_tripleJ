@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { OrderOutbound } from "../../../../type";
+import type { OrderOutbound } from "../../../type";
 
 
 const BASE_URL = import.meta.env.VITE_API_URL;

@@ -23,7 +23,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
-import { addOrderOutbound } from "./api/orderOutbound";
+import { addOrderOutbound } from "../api/orderOutbound";
 
 
 
