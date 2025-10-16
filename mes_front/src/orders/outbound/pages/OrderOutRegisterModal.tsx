@@ -36,14 +36,19 @@ type Props = {
   inbounds: Inbound[];
 };
 
-// Read-only 필드에 적용할 공통 스타일 정의
+// Read-only 필드에 적용할 공통 스타일 정의 (배경색 제거)
 const ReadOnlyInputProps = {
     readOnly: true,
     style: { color: 'black' },
-    sx: { 
-        backgroundColor: '#f5f5f5', // 연한 회색 배경
-    }
+    // sx: { backgroundColor: '#f5f5f5' } // 배경색 제거
 };
+
+// 출고수량 및 출고일자 필드의 선택 안 되었을 때 스타일 (배경색 제거)
+const InactiveInputProps = {
+    readOnly: true,
+    style: { color: 'black' },
+};
+
 
 export default function OrderOutRegisterModal({
   open,
@@ -68,7 +73,8 @@ export default function OrderOutRegisterModal({
   useEffect(() => {
     if (open) {
       setSelected(null);
-      setForm({ outboundQty: "", outboundDate: new Date().toISOString().slice(0, 10) });
+      // 모달 초기화 시 출고수량 및 출고일자는 비어있도록 설정
+      setForm({ outboundQty: "", outboundDate: "" });
       setSearch({
         customerName: "",
         itemCode: "",
@@ -82,9 +88,16 @@ export default function OrderOutRegisterModal({
   const handleSelect = (inbound: Inbound) => {
     if (selected?.orderInboundId === inbound.orderInboundId) {
         setSelected(null);
-        setForm({ ...form, outboundQty: "" });
+        // 해제 시 모두 초기화
+        setForm({ outboundQty: "", outboundDate: "" }); 
     } else {
         setSelected(inbound);
+        // 항목 선택 시 출고일자를 오늘 날짜로 자동 설정 (UX 개선)
+        setForm({ 
+            ...form, 
+            outboundDate: new Date().toISOString().slice(0, 10),
+            outboundQty: "" // 새 항목 선택 시 수량은 초기화
+        });
     }
   };
 
@@ -177,15 +190,13 @@ export default function OrderOutRegisterModal({
             size="small" 
             sx={{ width: 130 }} 
           />
-          {/* ✅ 입고일자 필드: placeholder 사용, 값이 없을 때 텍스트 색상 조정 */}
+          {/* 입고일자 필드: placeholder 사용, 값이 없을 때 텍스트 색상 조정 */}
           <TextField
-            // label 대신 placeholder를 사용
             placeholder="입고일자"
             name="inboundDate"
             type="date"
             value={search.inboundDate}
             onChange={handleSearchChange}
-            // InputLabelProps는 label을 사용하지 않으므로 제거함
             size="small"
             sx={{ width: 150 }} 
             InputProps={{ 
@@ -239,7 +250,7 @@ export default function OrderOutRegisterModal({
 
         {/* 🔹 선택된 품목 표시 및 입력 영역 (Read-only 필드에 스타일 적용) */}
         <Box sx={{ mt: 3, display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {/* Read-only 필드 */}
+          {/* Read-only 필드 - 기존 ReadOnlyInputProps 사용 (배경색 제거됨) */}
           <TextField
             label="LOT번호"
             value={selected?.lotNo ?? "-"}
@@ -283,38 +294,62 @@ export default function OrderOutRegisterModal({
             InputProps={ReadOnlyInputProps}
           />
           
-          {/* 출고 수량 입력 필드 */}
-          <TextField
-            label="출고수량" 
-            name="outboundQty"
-            type="number"
-            value={form.outboundQty}
-            onChange={handleFormChange}
-            size="small"
-            InputLabelProps={{ shrink: true }}
-            disabled={!selected} 
-            placeholder={selected ? "출고 수량 입력하세요" : undefined}
-            InputProps={{
-              sx: {
-                '&::placeholder': {
-                  color: 'black',
-                  opacity: 1, 
-                },
-              },
-            }}
-          />
+          {/* ✅ 출고 수량 필드: 선택 유무에 따라 스타일 분기 (배경색 없음) */}
+          {selected ? (
+              // 항목 선택됨: 활성 입력 필드
+              <TextField
+                label="출고수량" 
+                name="outboundQty"
+                type="number"
+                value={form.outboundQty}
+                onChange={handleFormChange}
+                size="small"
+                InputLabelProps={{ shrink: true }}
+                placeholder="출고 수량 입력하세요" 
+                sx={{ width: 130 }}
+                InputProps={{
+                  sx: {
+                    '&::placeholder': {
+                      color: 'black',
+                      opacity: 1, 
+                    },
+                  },
+                }}
+              />
+          ) : (
+              // 항목 선택 안됨: Read-only 필드처럼 '-' 표시 (배경색 없음)
+              <TextField
+                label="출고수량"
+                value="-"
+                size="small"
+                InputProps={InactiveInputProps}
+                sx={{ width: 130 }}
+              />
+          )}
           
-          {/* 출고일자 필드 */}
-          <TextField
-            label="출고일자"
-            name="outboundDate"
-            type="date"
-            value={form.outboundDate}
-            onChange={handleFormChange}
-            InputLabelProps={{ shrink: true }}
-            size="small"
-            disabled={!selected} 
-          />
+          {/* ✅ 출고일자 필드: 선택 유무에 따라 스타일 분기 (배경색 없음) */}
+          {selected ? (
+              // 항목 선택됨: 활성 입력 필드
+              <TextField
+                label="출고일자"
+                name="outboundDate"
+                type="date"
+                value={form.outboundDate}
+                onChange={handleFormChange}
+                InputLabelProps={{ shrink: true }}
+                size="small"
+                sx={{ width: 130 }} 
+              />
+          ) : (
+              // 항목 선택 안됨: Read-only 필드처럼 '-' 표시 (배경색 없음)
+              <TextField
+                label="출고일자"
+                value="-"
+                size="small"
+                InputProps={InactiveInputProps}
+                sx={{ width: 130 }}
+              />
+          )}
         </Box>
       </DialogContent>
 
