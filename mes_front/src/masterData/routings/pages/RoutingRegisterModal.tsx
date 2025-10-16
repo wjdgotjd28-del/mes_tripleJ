@@ -31,9 +31,9 @@ export default function RoutingRegisterModal({
 }: Props) {
   // 입력 폼 상태
   const [form, setForm] = useState({
-    processCode: "",
-    processName: "",
-    processTime: "",
+    process_code: "",
+    process_name: "",
+    process_time: "",
     note: "",
   });
 
@@ -48,11 +48,11 @@ export default function RoutingRegisterModal({
 
   // 등록 버튼 클릭 시 처리
   const handleSubmit = async () => {
-    if (existingCodes.includes(form.processCode)) {
+    if (existingCodes.includes(form.process_code)) {
       setError("중복된 공정코드가 있습니다.");
       return;
     }
-    if (!form.processCode || !form.processName || !form.processTime) {
+    if (!form.process_code || !form.process_name || !form.process_time) {
       alert("필수 항목을 모두 입력하세요.");
       return;
     }
@@ -62,9 +62,9 @@ export default function RoutingRegisterModal({
       onRegister(saved); // 부모에게 전달
       onClose();
       setForm({
-        processCode: "",
-        processName: "",
-        processTime: "",
+        process_code: "",
+        process_name: "",
+        process_time: "",
         note: "",
       });
     } catch (err) {
@@ -94,20 +94,20 @@ export default function RoutingRegisterModal({
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 0 }}>
           <TextField
             label="공정 코드"
-            value={form.processCode}
-            onChange={(e) => handleChange("processCode", e.target.value)}
+            value={form.process_code}
+            onChange={(e) => handleChange("process_code", e.target.value)}
             required
           />
           <TextField
             label="공정 명"
-            value={form.processName}
-            onChange={(e) => handleChange("processName", e.target.value)}
+            value={form.process_name}
+            onChange={(e) => handleChange("process_name", e.target.value)}
             required
           />
           <TextField
             label="공정 시간"
-            value={form.processTime}
-            onChange={(e) => handleChange("processTime", e.target.value)}
+            value={form.process_time}
+            onChange={(e) => handleChange("process_time", e.target.value)}
             required
           />
           <TextField

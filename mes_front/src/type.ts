@@ -60,15 +60,15 @@ export interface Company {
 
 // 라우팅 등록 타입
 export type RoutingCreateData = {
-  processCode: string;
-  processName: string;
-  processTime: string;
+  process_code: string;
+  process_name: string;
+  process_time: string;
   note: string;
 };
 
 // 라우팅 조회 타입
 export type RoutingFormData = RoutingCreateData & {
-  routingId: number;
+  routing_id: number;
 };
 
 
@@ -83,3 +83,12 @@ export type RawMaterialInventoryStatus = {
 };
 
 
+export type OrderInView = {
+  id: number;
+  customer_name: string;
+  item_code: string;
+  item_name: string;
+  qty: number;
+  category: string;
+  note: string;
+}

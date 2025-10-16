@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import {
   Box,
@@ -12,59 +12,57 @@ import {
   Paper,
   Button,
   TextField,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import {
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
-import { Tooltip, IconButton } from "@mui/material";
 
 import InboundRegisterModal from "./OrderInRegisterModal";
 import { exportToExcel } from "../../../Common/ExcelUtils";
+import { usePagination } from "../../../Common/usePagination";
+import type { OrderInView } from "../../../type";
+import { fetchInboundOrderItems } from "../api/OrderInViewApi";
 
-const sampleData = [
-  {
-    id: 1,
-    customer_name: "거래처 A",
-    item_code: "AD217000",
-    item_name: "품목 A",
-    qty: 10,
-    category: "방산",
-    note: "입고 예정",
-  },
-  {
-    id: 2,
-    customer_name: "거래처 B",
-    item_code: "AD217002",
-    item_name: "품목 B",
-    qty: 30,
-    category: "자동차",
-    note: "검수 완료",
-  },
-  {
-    id: 3,
-    customer_name: "거래처 C",
-    item_code: "AD217005",
-    item_name: "품목 C",
-    qty: 30,
-    category: "조선",
-    note: "긴급 입고",
-  },
-];
+// 샘플 데이터 (실제 API 연동 시 교체 예정)
 
 export default function OrderInViewPage() {
+  //  검색창 상태
   const [clientSearch, setClientSearch] = useState("");
   const [itemNoSearch, setItemNoSearch] = useState("");
   const [itemNameSearch, setItemNameSearch] = useState("");
 
-  // 검색 실행 상태
+  //  검색 실행 시 저장되는 필터 조건
   const [searchParams, setSearchParams] = useState({
     customer_name: "",
     item_code: "",
     item_name: "",
   });
 
-  // 검색 버튼 클릭 시 실행
+  const categoryLabels: Record<string, string> = {
+    AUTOMOTIVE: "자동차",
+    DEFENSE: "방산",
+    GENERAL: "일반",
+    SHIPBUILDING: "조선",
+  };
+
+  const [rawData, setRawData] = useState<OrderInView[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await fetchInboundOrderItems();
+        setRawData(data);
+      } catch (err) {
+        console.error("데이터 불러오기 실패", err);
+      }
+    };
+    loadData();
+  }, []);
+
+  //  검색 버튼 클릭 시 실행
   const handleSearch = () => {
     setSearchParams({
       customer_name: clientSearch,
@@ -73,14 +71,20 @@ export default function OrderInViewPage() {
     });
   };
 
+  //  정렬 상태
   const [sortAsc, setSortAsc] = useState(true);
-  const toggleSortOrder = () => {
-    setSortAsc((prev) => !prev);
-  };
-  const sortedData = [...sampleData].sort((a, b) =>
-    sortAsc ? a.id - b.id : b.id - a.id
-  );
+  const toggleSortOrder = () => setSortAsc((prev) => !prev);
 
+  //  정렬된 데이터 (ID 기준)
+  const sortedData = Array.isArray(rawData)
+    ? [...rawData].sort((a, b) =>
+        sortAsc
+          ? a.order_item_id - b.order_item_id
+          : b.order_item_id - a.order_item_id
+      )
+    : [];
+
+  //  필터링된 데이터
   const filteredData = sortedData.filter(
     (row) =>
       row.customer_name.includes(searchParams.customer_name) &&
@@ -88,20 +92,25 @@ export default function OrderInViewPage() {
       row.item_name.includes(searchParams.item_name)
   );
 
+  //  모달 상태 및 선택된 품목
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{
     item_name: string;
     qty: number;
   } | null>(null);
 
+  //  페이지네이션 처리
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(filteredData, 10); // 한 페이지당 10개
+
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
-      {/* 제목 */}
+      {/*  페이지 제목 */}
       <Typography variant="h5" sx={{ mb: 1 }}>
         수주대상 품목 조회
       </Typography>
 
-      {/* 검색창 박스: 제목 아래에 따로 배치 */}
+      {/*  검색창 + 정렬 + 엑셀 다운로드 */}
       <Box
         sx={{
           display: "flex",
@@ -110,7 +119,7 @@ export default function OrderInViewPage() {
           mb: 2,
         }}
       >
-        {/* 왼쪽: 검색창들 */}
+        {/*  왼쪽: 검색창 영역 */}
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
@@ -136,6 +145,7 @@ export default function OrderInViewPage() {
           <Button variant="contained" onClick={handleSearch}>
             검색
           </Button>
+          {/*  정렬 토글 버튼 */}
           <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
             <IconButton onClick={toggleSortOrder}>
               {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
@@ -143,7 +153,7 @@ export default function OrderInViewPage() {
           </Tooltip>
         </Box>
 
-        {/* 오른쪽: Excel 버튼 */}
+        {/*  오른쪽: 엑셀 다운로드 버튼 */}
         <Button
           color="success"
           variant="outlined"
@@ -154,7 +164,7 @@ export default function OrderInViewPage() {
         </Button>
       </Box>
 
-      {/* 테이블 영역 */}
+      {/*  테이블 영역 */}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 800 }}>
           <TableHead>
@@ -171,14 +181,16 @@ export default function OrderInViewPage() {
           </TableHead>
 
           <TableBody>
-            {filteredData.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
+            {paginatedData.map((row) => (
+              <TableRow key={row.order_item_id}>
+                <TableCell>{row.order_item_id}</TableCell>
                 <TableCell>{row.customer_name}</TableCell>
                 <TableCell>{row.item_code}</TableCell>
                 <TableCell>{row.item_name}</TableCell>
                 <TableCell>{row.qty}</TableCell>
-                <TableCell>{row.category}</TableCell>
+                <TableCell>
+                  {categoryLabels[row.category] ?? row.category}
+                </TableCell>
                 <TableCell>{row.note}</TableCell>
                 <TableCell>
                   <Button
@@ -200,6 +212,8 @@ export default function OrderInViewPage() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/*  입고 등록 모달 */}
       {selectedItem && (
         <InboundRegisterModal
           open={openModal}
@@ -211,6 +225,32 @@ export default function OrderInViewPage() {
           }}
         />
       )}
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          mt: 2,
+          gap: 1,
+        }}
+      >
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography variant="body2" sx={{ px: 2 }}>
+          페이지 {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
     </Box>
   );
 }

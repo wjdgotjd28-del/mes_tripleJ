@@ -1,5 +1,6 @@
 package com.mes_back.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +15,16 @@ import java.time.LocalDate;
 //- 기본 생성자(파라미터 없는 생성자)를 자동 생성
 
 public class RoutingDTO {
+    @JsonProperty("routing_id")
     private Long routingId;
+    @JsonProperty("process_code")
     private String processCode;
+    @JsonProperty("process_name")
     private String processName;
+    @JsonProperty("process_time")
     private String processTime;
     private String note;
 }
+
 
 

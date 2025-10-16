@@ -49,8 +49,16 @@ public class RoutingService {
      * 전체 공정 목록을 화면에 보여주기 위해
      * @return Routing 엔티티 리스트
      */
-    public List<Routing> findAll() {
-        return routingRepository.findAll();
+    public List<RoutingDTO> findAll() {
+        return routingRepository.findAll().stream()
+                .map(r -> new RoutingDTO(
+                        r.getRoutingId(),
+                        r.getProcessCode(),
+                        r.getProcessName(),
+                        r.getProcessTime(),
+                        r.getNote()
+                ))
+                .toList();
     }
 
     public void DeleteById(Long id) {

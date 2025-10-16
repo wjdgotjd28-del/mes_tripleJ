@@ -3,10 +3,16 @@ package com.mes_back.entity;
 import com.mes_back.constant.OrderCategory;
 import com.mes_back.constant.PaintType;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 @Table(name = "order_inbound")
 public class OrderInbound {
 

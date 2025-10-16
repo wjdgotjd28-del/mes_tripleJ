@@ -3,6 +3,8 @@ package com.mes_back.controller;
 import com.mes_back.dto.RoutingDTO;
 import com.mes_back.entity.Routing;
 import com.mes_back.service.RoutingService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +13,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/routing")
+@RequiredArgsConstructor
+@Slf4j
+
 public class RoutingController {
 
     // RoutingService를 주입받아 비즈니스 로직을 처리
@@ -28,8 +33,8 @@ public class RoutingController {
      * @return 전체 Routing 리스트를 담은 ResponseEntity
      */
     @GetMapping
-    public ResponseEntity<List<Routing>> getAllRoutings() {
-        List<Routing> routings = routingService.findAll();
+    public ResponseEntity<List<RoutingDTO>> getAllRoutings() {
+        List<RoutingDTO> routings = routingService.findAll();
         return ResponseEntity.ok(routings);
     }
 
