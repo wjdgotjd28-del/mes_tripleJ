@@ -1,5 +1,6 @@
 package com.mes_back.service;
 
+import com.mes_back.dto.OrderInboundDTO.OrderInboundHistoryResponseDto;
 import com.mes_back.dto.OrderInboundDTO.OrderInboundItemRequestDto;
 import com.mes_back.entity.OrderInbound;
 
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -18,6 +20,7 @@ import java.util.List;
 public class OrderInboundService {
 
     private final OrderInboundRepository orderInboundItemRequestRepository;
+    private final OrderInboundRepository orderInboundRepository;
 
     public List<OrderInboundItemRequestDto> findAllByOrderInbound() {
         List<OrderInbound> orderInboundList = orderInboundItemRequestRepository.findAll();
@@ -25,7 +28,7 @@ public class OrderInboundService {
         return orderInboundList.stream().map(oi -> {
             OrderInboundItemRequestDto dto = new OrderInboundItemRequestDto();
             dto.setOrderItemId(oi.getOrderItem().getOrderItemId());
-            dto.setCustomerName(oi.getCustomerName());
+            dto.setCustomerName(oi.getCustomer().getCompanyName());
             dto.setItemName(oi.getItemName());
             dto.setItemCode(oi.getItemCode());
             dto.setQty(oi.getQty());
@@ -37,6 +40,25 @@ public class OrderInboundService {
             return dto;
         }).toList();
     }
+    public List<OrderInboundHistoryResponseDto> findInboundForOutbound() {
+        return orderInboundRepository.findAllByOrderByInboundDateDesc()
+                .stream()
+                .map(i -> new OrderInboundHistoryResponseDto(
+                        i.getOrderInboundId(),
+                        i.getCustomer().getCompanyName(),  // Company 연동
+                        i.getItemName(),
+                        i.getItemCode(),
+                        i.getQty(),
+                        i.getCategory(),
+                        i.getNote(),
+                        i.getInboundDate(),
+                        i.getLotNo(),
+                        i.getPaintType()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 
 }
 

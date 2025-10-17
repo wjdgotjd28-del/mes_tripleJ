@@ -27,8 +27,8 @@ public class OrderInboundIController {
         return ResponseEntity.ok(OrderInboundItemRequestDtos);
     }
 
-    // 수주 출고 등록에서 쓰이는 입고 조회용
-    @GetMapping("/outbound")
+    // 수주 출고 등록에서 사용되는 입고 조회
+    @GetMapping("/orderoutbound")
     public List<OrderInboundHistoryResponseDto> findInboundForOutbound() {
         return orderInboundService.findInboundForOutbound();
     }

@@ -7,6 +7,53 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+//@Entity
+//@Getter
+//@Setter
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@ToString
+//@Table(name = "order_inbound")
+//public class OrderInbound {
+//
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "order_inbound_id")
+//    private Long orderInboundId;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "order_item_id", nullable = false)
+//    private OrderItem orderItem;
+//
+//    @Column(name = "customer_name", nullable = false, length = 255)
+//    private String customerName;
+//
+//    @Column(name = "item_name", nullable = false, length = 255)
+//    private String itemName;
+//
+//    @Column(name = "item_code", nullable = false, length = 255)
+//    private String itemCode;
+//
+//    @Column(nullable = false)
+//    private Long qty;
+//
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+//    private OrderCategory category;
+//
+//    @Column(length = 255)
+//    private String note;
+//
+//    @Column(name = "inbound_date", nullable = false)
+//    private LocalDate inboundDate;
+//
+//    @Column(name = "lot_no", nullable = false, length = 20)
+//    private String lotNo;
+//
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "paint_type", nullable = false)
+//    private PaintType paintType;
+//}
 @Entity
 @Getter
 @Setter
@@ -18,15 +65,19 @@ public class OrderInbound {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_inbound_id")
     private Long orderInboundId;
 
     @ManyToOne
     @JoinColumn(name = "order_item_id", nullable = false)
     private OrderItem orderItem;
 
-    @Column(name = "customer_name", nullable = false, length = 255)
-    private String customerName;
+    // 기존 customerName 제거
+    // @Column(name = "customer_name", nullable = false, length = 255)
+    // private String customerName;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company customer;
 
     @Column(name = "item_name", nullable = false, length = 255)
     private String itemName;
@@ -53,4 +104,6 @@ public class OrderInbound {
     @Enumerated(EnumType.STRING)
     @Column(name = "paint_type", nullable = false)
     private PaintType paintType;
+
+
 }
