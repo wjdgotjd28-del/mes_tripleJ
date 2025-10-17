@@ -5,6 +5,7 @@ import com.mes_back.entity.OrderInbound;
 import com.mes_back.entity.OrderOutbound;
 import com.mes_back.repository.OrderInboundRepository;
 import com.mes_back.repository.OrderOutboundRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -119,5 +120,14 @@ public class OrderOutboundService {
                         .outboundDate(o.getOutboundDate())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+
+    public OrderOutboundDto updateOrderOutbound(OrderOutboundDto orderOutboundDto) {
+        OrderOutbound orderOutbound = orderOutboundRepository.findById(orderOutboundDto.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        orderOutbound.updateOrderOutbound(orderOutboundDto);
+        return orderOutboundDto;
+
     }
 }

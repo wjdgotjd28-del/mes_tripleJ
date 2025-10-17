@@ -25,4 +25,9 @@ public class OrderOutboundController {
     public List<OrderOutboundDto> getAllOrderOutbound(){
         return orderOutboundService.findAll();
     }
+
+    @PatchMapping("")
+    public OrderOutboundDto updateOrderOutbound(@RequestBody OrderOutboundDto orderOutboundDto){
+        return orderOutboundService.updateOrderOutbound(orderOutboundDto);
+    }
 }
