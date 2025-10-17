@@ -42,6 +42,7 @@ export default function OrderOutViewPage() {
 
   // ✅ 수정 모달 상태
   const [editData, setEditData] = useState<OrderOutbound | null>(null);
+  const [tempQtyInput, setTempQtyInput] = useState<string>(""); // 출고 수량 임시 입력 상태
 
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -49,6 +50,15 @@ export default function OrderOutViewPage() {
   useEffect(() => {
     loadOrderOutboundData();
   }, []);
+
+  // editData가 변경될 때 tempQtyInput 초기화
+  useEffect(() => {
+    if (editData) {
+      setTempQtyInput(editData.qty.toString());
+    } else {
+      setTempQtyInput("");
+    }
+  }, [editData]);
 
   // allRows 또는 search 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
   useEffect(() => {
@@ -206,8 +216,20 @@ export default function OrderOutViewPage() {
   // ✅ 수정 저장
   const handleEditSave = () => {
     if (!editData) return;
-    setAllRows((prev) => prev.map((r) => (r.id === editData.id ? editData : r)));
-    setEditData(null);
+
+    // Parse tempQtyInput to a number (0 if empty string)
+    const parsedQty = tempQtyInput === "" ? 0 : Number(tempQtyInput);
+
+    // Create an updated editData object
+    const updatedEditData = {
+      ...editData,
+      qty: parsedQty,
+    };
+
+    setAllRows((prev) =>
+      prev.map((r) => (r.id === updatedEditData.id ? updatedEditData : r))
+    );
+    setEditData(null); // Close the modal
   };
 
   // ✅ 삭제
@@ -366,16 +388,9 @@ export default function OrderOutViewPage() {
   >
     <TextField
       label="출고 수량"
-      type="number"
-      value={editData?.qty ?? ""}
-      onChange={(e) => {
-        const inputValue = e.target.value;
-        setEditData((prev) =>
-          prev
-            ? { ...prev, qty: inputValue === "" ? 0 : Number(inputValue) }
-            : prev
-        );
-      }}
+      type="text" // Changed to text
+      value={tempQtyInput} // Controlled by tempQtyInput
+      onChange={(e) => setTempQtyInput(e.target.value)} // Updates tempQtyInput
       fullWidth
     />
     <TextField
