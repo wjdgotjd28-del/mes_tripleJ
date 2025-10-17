@@ -18,7 +18,7 @@ import java.util.List;
 @Slf4j
 public class MaterialStockController {
 
-    private MaterialStockService materialStockService;
+    private final MaterialStockService materialStockService;
 
 
     @GetMapping("/inventory")

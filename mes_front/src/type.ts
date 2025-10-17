@@ -1,7 +1,7 @@
 // 이미지 정보 타입
 export interface OrderItemImage {
-  orderItemImgId?: number;     // 이미지 고유 ID
-  orderItemId?: number;        // 품목 ID
+  order_item_img_id?: number;     // 이미지 고유 ID
+  order_item_id?: number;        // 품목 ID
   img_url: string;             // 이미지 URL
   img_ori_name: string;        // 원본 파일명
   img_name: string;            // 저장 파일명
@@ -67,6 +67,7 @@ export type RoutingCreateData = {
   process_name: string;
   process_time: string;
   note: string;
+  process_no?: number;
 };
 
 // 라우팅 조회 타입
@@ -124,3 +125,17 @@ export type OrderInView = {
   category: string;
   note: string;
 }
+
+export type OrderInboundDTO = {
+  order_inbound_id?: number; // 저장 시에는 없어도 됨
+  order_item_id: number;
+  category: "AUTOMOTIVE" | "DEFENSE" | "GENERAL" | "SHIPBUILDING";
+  customer_name: string;
+  inbound_date: string; // "YYYY-MM-DD" 형식
+  item_code: string;
+  item_name: string;
+  lot_no: string;
+  note: string;
+  paint_type: "LIQUID" | "POWDER";
+  qty: number;
+};

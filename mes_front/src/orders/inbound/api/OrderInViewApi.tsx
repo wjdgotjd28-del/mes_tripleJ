@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { OrderInView } from "../../../type";
+import type { OrderInboundDTO, OrderInView } from "../../../type";
 
 // 환경 변수에서 API 서버 주소를 불러옴
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -12,4 +12,13 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 export async function fetchInboundOrderItems(): Promise<OrderInView[]> {
   const response = await axios.get(`${BASE_URL}/orders/inbound/items`);
   return response.data;
+}
+
+/**
+ * 입고등록 요청
+ * - POST {VITE_API_URL}/orders/inbound/items
+ * @param data OrderInboundDTO
+ */
+export async function registerInbound(data: OrderInboundDTO): Promise<void> {
+  await axios.post(`${BASE_URL}/orders/inbound/items`, data);
 }

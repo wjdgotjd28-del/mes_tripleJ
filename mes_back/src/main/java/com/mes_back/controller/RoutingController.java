@@ -19,12 +19,7 @@ import java.util.List;
 public class RoutingController {
 
     // RoutingService를 주입받아 비즈니스 로직을 처리
-    private RoutingService routingService;
-
-    // 생성자 주입 방식으로 서비스 연결
-    public RoutingController(RoutingService routingService) {
-        this.routingService = routingService;
-    }
+    private final RoutingService routingService;
 
     /**
      * 모든 공정 정보를 조회합니다.
