@@ -132,3 +132,16 @@ export type OrderProcessTracking = {
   process_start_time: string | null;
   process_status: number;
 };
+export type OrderInboundDTO = {
+  order_inbound_id?: number; // 저장 시에는 없어도 됨
+  order_item_id: number;
+  category: "AUTOMOTIVE" | "DEFENSE" | "GENERAL" | "SHIPBUILDING";
+  customer_name: string;
+  inbound_date: string; // "YYYY-MM-DD" 형식
+  item_code: string;
+  item_name: string;
+  lot_no: string;
+  note: string;
+  paint_type: "LIQUID" | "POWDER";
+  qty: number;
+};

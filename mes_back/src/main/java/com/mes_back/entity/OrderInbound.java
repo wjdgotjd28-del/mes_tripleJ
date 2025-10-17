@@ -22,8 +22,8 @@ public class OrderInbound {
     @Column(name = "order_inbound_id")
     private Long orderInboundId;
 
-    @ManyToOne
-    @JoinColumn(name = "order_item_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_item_id")
     private OrderItem orderItem;
 
     @ManyToOne(fetch = FetchType.LAZY)

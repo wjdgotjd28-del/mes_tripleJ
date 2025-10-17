@@ -1,6 +1,7 @@
 package com.mes_back.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Builder
 public class OrderItemDTO {
     @JsonProperty("order_item_id")
     private Long orderItemId;
