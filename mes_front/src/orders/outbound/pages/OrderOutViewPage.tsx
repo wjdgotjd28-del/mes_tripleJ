@@ -202,6 +202,7 @@ export default function OrderOutViewPage() {
 
   // ✅ 수정 저장
   const handleEditSave = async (apiPayload: OrderOutbound) => {
+    console.log("수정 API 요청 페이로드:", apiPayload);
     try {
       // Call the API to update the order
       const response = await updateOrderOutbound(apiPayload);
