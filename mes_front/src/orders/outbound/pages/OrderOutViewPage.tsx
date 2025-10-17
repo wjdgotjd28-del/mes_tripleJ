@@ -50,6 +50,18 @@ export default function OrderOutViewPage() {
     loadOrderOutboundData();
   }, []);
 
+  // allRows 또는 search 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
+  useEffect(() => {
+    const filtered = allRows.filter(
+      (row) =>
+        (row.customerName ?? "").includes(search.customerName) &&
+        (row.itemCode ?? "").includes(search.itemCode) &&
+        (row.itemName ?? "").includes(search.itemName) &&
+        (row.outboundNo ?? "").includes(search.outboundNo)
+    );
+    setDisplayedRows(filtered);
+  }, [allRows, search]);
+
   const loadOrderOutboundData = () => {
     getOrderOutbound()
       .then((res) => {
@@ -356,11 +368,14 @@ export default function OrderOutViewPage() {
       label="출고 수량"
       type="number"
       value={editData?.qty ?? ""}
-      onChange={(e) =>
+      onChange={(e) => {
+        const inputValue = e.target.value;
         setEditData((prev) =>
-          prev ? { ...prev, qty: Number(e.target.value) } : prev
-        )
-      }
+          prev
+            ? { ...prev, qty: inputValue === "" ? 0 : Number(inputValue) }
+            : prev
+        );
+      }}
       fullWidth
     />
     <TextField
