@@ -19,6 +19,9 @@ public class OrderInboundHistoryResponseDto {
     @JsonProperty("order_inbound_id")
     private Long orderInboundId;
 
+    @JsonProperty("order_item_id")
+    private Long orderItemId;
+
     @JsonProperty("customer_name")
     private String customerName;
 

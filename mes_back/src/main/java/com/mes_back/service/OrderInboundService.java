@@ -45,6 +45,7 @@ public class OrderInboundService {
                 .stream()
                 .map(i -> new OrderInboundHistoryResponseDto(
                         i.getOrderInboundId(),
+                        i.getOrderItem().getOrderItemId(),
                         i.getCustomer().getCompanyName(),  // Company 연동
                         i.getItemName(),
                         i.getItemCode(),
