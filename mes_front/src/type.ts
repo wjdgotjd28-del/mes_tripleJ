@@ -1,7 +1,7 @@
 // 이미지 정보 타입
 export interface OrderItemImage {
-  orderItemImgId?: number;     // 이미지 고유 ID
-  orderItemId?: number;        // 품목 ID
+  order_item_img_id?: number;     // 이미지 고유 ID
+  order_item_id?: number;        // 품목 ID
   img_url: string;             // 이미지 URL
   img_ori_name: string;        // 원본 파일명
   img_name: string;            // 저장 파일명
@@ -67,6 +67,7 @@ export type RoutingCreateData = {
   process_name: string;
   process_time: string;
   note: string;
+  process_no?: number;
 };
 
 // 라우팅 조회 타입

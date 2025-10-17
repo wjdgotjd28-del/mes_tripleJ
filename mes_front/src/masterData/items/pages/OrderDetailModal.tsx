@@ -37,10 +37,10 @@ export default function OrderDetailModal({
       setEditData(data);
       setSelectedRouting(
         (data.routing ?? []).map((r, i) => ({
-          routingId: r.routing_id,
-          processCode: r.process_code,
-          processName: r.process_name ?? "",
-          processTime: r.process_time ?? "",
+          routing_id: r.routing_id,
+          process_code: r.process_code,
+          process_name: r.process_name ?? "",
+          process_time: r.process_time ?? "",
           note: r.note ?? "",
           process_no: r.process_no ?? i + 1
         }))
@@ -68,18 +68,18 @@ export default function OrderDetailModal({
 
     // 🔹 백엔드 응답의 snake_case → camelCase 변환
     const convertedImages: OrderItemImage[] = (res.image ?? []).map(img => ({
-      orderItemImgId: img.order_item_img_id,
-      orderItemId: img.order_item_id,
+      order_item_img_id: img.order_item_img_id,
+      order_item_id: img.order_item_id,
       img_url: img.img_url,
       img_ori_name: img.img_ori_name,
       img_name: img.img_name
     }));
 
     const convertedRouting: RoutingFormDataWithProcessNo[] = (res.routing ?? []).map((r, i) => ({
-      routingId: r.routing_id,
-      processCode: r.process_code,
-      processName: r.process_name ?? "",
-      processTime: r.process_time ?? "",
+      routing_id: r.routing_id,
+      process_code: r.process_code,
+      process_name: r.process_name ?? "",
+      process_time: r.process_time ?? "",
       note: r.note ?? "",
       process_no: r.process_no ?? i + 1
     }));
@@ -90,7 +90,7 @@ export default function OrderDetailModal({
     });
 
     const selectedIds = new Set<number>((res.routing ?? []).map(r => r.routing_id));
-    const initialSelected = convertedRouting.filter(r => selectedIds.has(r.routingId));
+    const initialSelected = convertedRouting.filter(r => selectedIds.has(r.routing_id));
     setSelectedRouting(initialSelected);
 
     setIsEditing(false);
@@ -114,36 +114,36 @@ export default function OrderDetailModal({
     e.target.value = "";
   };
 
-  const handleImageDelete = async (index: number): Promise<void> => {
-    if (!isEditing || !editData?.image) return;
+  // const handleImageDelete = async (index: number): Promise<void> => {
+  //   if (!isEditing || !editData?.image) return;
 
-    const imgToDelete = editData.image[index];
+  //   const imgToDelete = editData.image[index];
 
-    // DB에 있는 이미지면 즉시 삭제
-    if (imgToDelete.orderItemImgId) {
-      try {
-        await deleteSingleImageAPI(imgToDelete.orderItemImgId); // 백엔드 API 호출
-      } catch (error) {
-        console.error("이미지 삭제 실패", error);
-        alert("이미지 삭제 중 오류가 발생했습니다.");
-        return;
-      }
-    }
+  //   // DB에 있는 이미지면 즉시 삭제
+  //   if (imgToDelete.order_item_img_id) {
+  //     try {
+  //       await deleteSingleImageAPI(imgToDelete.order_item_img_id); // 백엔드 API 호출
+  //     } catch (error) {
+  //       console.error("이미지 삭제 실패", error);
+  //       alert("이미지 삭제 중 오류가 발생했습니다.");
+  //       return;
+  //     }
+  //   }
 
-    // 프론트 상태에서 제거
-    setEditData(prev => {
-      if (!prev?.image) return prev;
-      const updated = [...prev.image];
-      if (imgToDelete.img_url.startsWith("blob:")) URL.revokeObjectURL(imgToDelete.img_url);
-      updated.splice(index, 1);
-      return { ...prev, image: updated };
-    });
-  };
+  //   // 프론트 상태에서 제거
+  //   setEditData(prev => {
+  //     if (!prev?.image) return prev;
+  //     const updated = [...prev.image];
+  //     if (imgToDelete.img_url.startsWith("blob:")) URL.revokeObjectURL(imgToDelete.img_url);
+  //     updated.splice(index, 1);
+  //     return { ...prev, image: updated };
+  //   });
+  // };
 
   const handleImageDeleteById = async (imgId: number): Promise<void> => {
     if (!isEditing || !editData?.image) return;
 
-    const imgToDelete = editData.image.find(img => img.orderItemImgId === imgId);
+    const imgToDelete = editData.image.find(img => img.order_item_img_id === imgId);
     if (!imgToDelete) return;
 
     try {
@@ -153,7 +153,7 @@ export default function OrderDetailModal({
       // 상태에서 제거
       setEditData(prev => {
         if (!prev?.image) return prev;
-        const updated = prev.image.filter(img => img.orderItemImgId !== imgId);
+        const updated = prev.image.filter(img => img.order_item_img_id !== imgId);
         if (imgToDelete.img_url.startsWith("blob:")) URL.revokeObjectURL(imgToDelete.img_url);
         return { ...prev, image: updated };
       });
@@ -163,13 +163,13 @@ export default function OrderDetailModal({
     }
   };
 
-  const handleRoutingToggle = (routing: RoutingFormDataWithProcessNo | RoutingFormData) => {
+  const handleRoutingToggle = (routing: RoutingFormData | RoutingFormDataWithProcessNo) => {
     if (!isEditing) return;
 
     setSelectedRouting(prev => {
-      const exists = prev.find(r => r.routingId === routing.routingId);
+      const exists = prev.find(r => r.routing_id === routing.routing_id);
       if (exists) {
-        const updated = prev.filter(r => r.routingId !== routing.routingId)
+        const updated = prev.filter(r => r.routing_id !== routing.routing_id)
                             .map((r, idx) => ({ ...r, process_no: idx + 1 }));
         return updated;
       } else {
@@ -182,7 +182,7 @@ export default function OrderDetailModal({
   const handleOrderChange = (id: number, newOrder: number): void => {
     if (!isEditing) return;
     if (newOrder < 1) newOrder = 1;
-    setSelectedRouting(prev => prev.map(r => r.routingId === id ? { ...r, process_no: newOrder } : r));
+    setSelectedRouting(prev => prev.map(r => r.routing_id === id ? { ...r, process_no: newOrder } : r));
   };
 
   const handleSubmit = async (): Promise<void> => {
@@ -213,14 +213,14 @@ export default function OrderDetailModal({
       const routingData = selectedRouting
         .sort((a, b) => a.process_no - b.process_no)
         .map((r, i) => ({
-          routing_id: r.routingId,
+          routing_id: r.routing_id,
           process_no: i + 1,
         }));
       formData.append("routing", new Blob([JSON.stringify(routingData)], { type: "application/json" }));
     }
 
     // 기존 이미지 ID만 전송
-    const keepImageIds = editData.image?.filter(img => img.orderItemImgId).map(img => img.orderItemImgId) ?? [];
+    const keepImageIds = editData.image?.filter(img => img.order_item_img_id).map(img => img.order_item_img_id) ?? [];
     formData.append("keepImageIds", new Blob([JSON.stringify(keepImageIds)], { type: "application/json" }));
 
     // 새로 추가한 이미지 파일 전송
@@ -344,16 +344,16 @@ export default function OrderDetailModal({
                   </TableHead>
                   <TableBody>
                     {allRoutingList.map((r, idx) => {
-                      const checked = selectedRouting.some((sr) => sr.routingId === r.routingId);
+                      const checked = selectedRouting.some((sr) => sr.routing_id === r.routing_id);
                       return (
-                        <TableRow key={r.routingId} hover>
+                        <TableRow key={r.routing_id} hover>
                           <TableCell padding="checkbox">
                             <Checkbox checked={checked} onChange={() => handleRoutingToggle(r)} disabled={!isEditing} />
                           </TableCell>
                           <TableCell>{idx + 1}</TableCell>
-                          <TableCell>{r.processCode}</TableCell>
-                          <TableCell>{r.processName}</TableCell>
-                          <TableCell>{r.processTime}</TableCell>
+                          <TableCell>{r.process_code}</TableCell>
+                          <TableCell>{r.process_name}</TableCell>
+                          <TableCell>{r.process_time}</TableCell>
                           <TableCell>{r.note || "-"}</TableCell>
                         </TableRow>
                       );
@@ -387,7 +387,7 @@ export default function OrderDetailModal({
                 </TableHead>
                 <TableBody>
                   {sortedSelectedRouting.map((r) => (
-                    <TableRow key={r.routingId}>
+                    <TableRow key={r.routing_id}>
                       <TableCell>
                         <TextField
                           type="number"
@@ -397,13 +397,13 @@ export default function OrderDetailModal({
                           disabled={!isEditing}
                           onChange={(e) => {
                             const val = parseInt(e.target.value, 10);
-                            if (!isNaN(val) && val > 0) handleOrderChange(r.routingId, val);
+                            if (!isNaN(val) && val > 0) handleOrderChange(r.routing_id, val);
                           }}
                         />
                       </TableCell>
-                      <TableCell>{r.processCode}</TableCell>
-                      <TableCell>{r.processName}</TableCell>
-                      <TableCell>{r.processTime}</TableCell>
+                      <TableCell>{r.process_code}</TableCell>
+                      <TableCell>{r.process_name}</TableCell>
+                      <TableCell>{r.process_time}</TableCell>
                       <TableCell>{r.note}</TableCell>
                     </TableRow>
                   ))}
@@ -430,7 +430,7 @@ export default function OrderDetailModal({
                   <IconButton
                     size="small"
                     sx={{ position: "absolute", top: 0, right: 0, bgcolor: "rgba(255,255,255,0.7)" }}
-                    onClick={() => handleImageDeleteById(img.orderItemImgId)}
+                    onClick={() => handleImageDeleteById(img.order_item_img_id!)}
                   >
                     <CloseIcon fontSize="small" />
                   </IconButton>
