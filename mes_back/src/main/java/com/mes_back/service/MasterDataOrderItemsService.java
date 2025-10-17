@@ -89,6 +89,7 @@ public class MasterDataOrderItemsService {
 
         OrderItem orderItem = modelMapper.map(requestDTO, OrderItem.class);
         orderItem.setCompany(company);
+        orderItem.setStatus(company.getStatus());
         OrderItem savedItem = masterDataOrderItemsRepository.save(orderItem);
 
         if (routingList != null && !routingList.isEmpty()) {
@@ -121,7 +122,7 @@ public class MasterDataOrderItemsService {
         Company company = companyRepository.findByCompanyName(requestDTO.getCompanyName())
                 .orElseThrow(() -> new RuntimeException("해당 업체를 찾을 수 없습니다: " + requestDTO.getCompanyName()));
         orderItem.setCompany(company);
-
+        orderItem.setStatus(company.getStatus());
         orderItem.setItemName(requestDTO.getItemName());
         orderItem.setItemCode(requestDTO.getItemCode());
         orderItem.setCategory(requestDTO.getCategory());
@@ -130,7 +131,6 @@ public class MasterDataOrderItemsService {
         orderItem.setPaintType(requestDTO.getPaintType());
         orderItem.setNote(requestDTO.getNote());
         orderItem.setUseYn(requestDTO.getUseYn());
-        orderItem.setStatus(requestDTO.getStatus());
 
         syncRouting(orderItem, routingList);
 
@@ -160,11 +160,16 @@ public class MasterDataOrderItemsService {
     private void syncImages(OrderItem orderItem, List<MultipartFile> newImages, List<Long> keepImageIds) throws IOException {
         List<OrderItemImg> existingImages = orderItemImgRepository.findByOrderItem(orderItem);
 
-        // 삭제할 이미지 선정 (keepImageIds에 없는 것)
-        List<OrderItemImg> imagesToDelete = (keepImageIds.isEmpty())
-                ? List.of() // 빈 리스트면 삭제 안 함
-                : existingImages.stream()
-                .filter(img -> !keepImageIds.contains(img.getOrderItemImgId()))
+        // null이면 빈 리스트로 초기화
+        if (keepImageIds == null) {
+            keepImageIds = List.of(); // Immutable empty list
+        }
+
+        // 삭제할 이미지 선정
+        List<Long> safeKeepImageIds = (keepImageIds != null) ? keepImageIds : List.of();
+
+        List<OrderItemImg> imagesToDelete = existingImages.stream()
+                .filter(img -> !safeKeepImageIds.contains(img.getOrderItemImgId()))
                 .toList();
 
         // 실제 DB와 파일에서 삭제
@@ -178,7 +183,7 @@ public class MasterDataOrderItemsService {
             orderItem.setImages(new java.util.ArrayList<>());
         }
 
-        // 새 이미지 추가 로직 그대로
+        // 새 이미지 추가
         if (newImages != null && !newImages.isEmpty()) {
             String uploadDir = imgFileLocation + "/order_items/";
             Path uploadPath = Paths.get(uploadDir);
@@ -344,6 +349,7 @@ public class MasterDataOrderItemsService {
                 .collect(Collectors.toList());
         dto.setImage(images);
         dto.setCompanyName(item.getCompany().getCompanyName());
+        dto.setStatus(item.getCompany().getStatus());
         return dto;
     }
 }

@@ -63,4 +63,9 @@ public class OrderItem {
         routing.setOrderItem(this);
     }
 
+//    @Transient
+//    public String getStatus() {
+//        return company != null ? company.getStatus() : null;
+//    }
+
 }

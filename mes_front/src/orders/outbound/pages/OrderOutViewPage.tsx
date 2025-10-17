@@ -18,14 +18,14 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ReceiptIcon from "@mui/icons-material/Receipt";
+// import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
 import { addOrderOutbound, getOrderOutbound } from "../api/orderOutbound";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-
+import OrdersOutDocModal from "./OrdersOutDocModal";
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -215,6 +215,20 @@ export default function OrderOutViewPage() {
   const translateCategory = (category: string) => {
     return categoryMap[category] || category;
   };
+  //  작업지시서 모달 상태
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
+  const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
+  const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
+      try {
+        setSelectedOrder(row); // row: OrderOutbound
+        const inbound = inbounds.find(item => item.orderInboundId === orderInboundId);
+        setSelectedInboundDate(inbound?.inboundDate);
+        setOpenModal(true);
+      } catch (err) {
+        console.error("출하증 조회 실패", err);
+      }
+    };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -304,8 +318,8 @@ export default function OrderOutViewPage() {
                     <Button
                       variant="outlined"
                       size="small"
-                      startIcon={<ReceiptIcon />}
-                      onClick={() => alert(`출하증 조회: ${row.outboundNo}`)}
+                      sx={{ color: "#ff8c00ff", borderColor: "#ff8c00ff" }}
+                      onClick={() => handleOpenModal(row, row.orderInboundId)}
                     >
                       출하증
                     </Button>
@@ -406,6 +420,14 @@ export default function OrderOutViewPage() {
         onClose={() => setRegisterOpen(false)}
         onSubmit={handleRegister}
         inbounds={inbounds} // ✅ 모달에서 요구하는 inbounds prop
+      />
+
+      {/* 작업지시서 모달 */}
+      <OrdersOutDocModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        outItem={selectedOrder}
+        inboundDate={selectedInboundDate}
       />
     </Box>
   );

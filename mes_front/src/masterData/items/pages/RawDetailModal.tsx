@@ -77,7 +77,7 @@ export default function RawDetailModal({ open, onClose, data, onSave }: RawDetai
     };
 
 
-    await updateRawItems(editData.material_item_id, payload);
+    await updateRawItems(editData.material_item_id!, payload);
     setIsEditing(false);
     onSave();
   };

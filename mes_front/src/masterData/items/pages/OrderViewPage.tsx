@@ -59,6 +59,19 @@ export default function OrderViewPage() {
     itemName: "",
     useYn: "",
   });
+
+  // category 매핑 테이블
+  const CATEGORY_LABELS: Record<string, string> = {
+    "DEFENSE": "방산",
+    "GENERAL": "일반",
+    "AUTOMOTIVE": "자동차",
+    "SHIPBUILDING": "조선",
+  };
+  const PAINT_LABELS: Record<string, string> = {
+    "LIQUID": "액체",
+    "POWDER": "분체",
+  };
+  
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
   // 초기 데이터 로드
@@ -314,8 +327,8 @@ export default function OrderViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell>{row.category}</TableCell>
-                    <TableCell>{row.paint_type}</TableCell>
+                    <TableCell>{CATEGORY_LABELS[row.category] || row.category}</TableCell>
+                    <TableCell>{PAINT_LABELS[row.paint_type] || row.paint_type}</TableCell>
                     <TableCell>{row.unit_price}</TableCell>
                     <TableCell>{row.note}</TableCell>
                     <TableCell align="center">
@@ -371,7 +384,6 @@ export default function OrderViewPage() {
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSubmit={handleSubmitAdd}
-        routingList={[]} // 필요 시 라우팅 리스트 전달
       />
 
       <OrderDetailModal
