@@ -30,4 +30,9 @@ public class OrderOutboundController {
     public OrderOutboundDto updateOrderOutbound(@RequestBody OrderOutboundDto orderOutboundDto){
         return orderOutboundService.updateOrderOutbound(orderOutboundDto);
     }
+
+    @DeleteMapping("/{id}")
+    public Long deleteOrderOutbound(@PathVariable("id") Long id){
+        return orderOutboundService.deleteOrderOutbound(id);
+    }
 }

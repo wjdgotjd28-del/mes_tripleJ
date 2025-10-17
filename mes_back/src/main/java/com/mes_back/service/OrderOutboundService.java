@@ -131,4 +131,9 @@ public class OrderOutboundService {
         return orderOutboundDto;
 
     }
+
+    public Long deleteOrderOutbound(Long id) {
+        orderOutboundRepository.deleteById(id);
+        return id;
+    }
 }
