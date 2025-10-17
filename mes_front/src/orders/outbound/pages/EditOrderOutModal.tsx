@@ -22,25 +22,34 @@ export default function EditOrderOutModal({
   editData,
   onSave,
 }: EditOrderOutModalProps) {
-  const [tempQtyInput, setTempQtyInput] = useState<string>("");
-  const [localEditData, setLocalEditData] = useState<OrderOutbound | null>(null);
+  const [editState, setEditState] = useState<{
+    data: OrderOutbound | null;
+    tempQtyInput: string;
+  }>({ 
+    data: null,
+    tempQtyInput: "",
+  });
 
   useEffect(() => {
     if (editData) {
-      setLocalEditData(editData);
-      setTempQtyInput(editData.qty.toString());
+      setEditState({
+        data: editData,
+        tempQtyInput: editData.qty.toString(),
+      });
     } else {
-      setLocalEditData(null);
-      setTempQtyInput("");
+      setEditState({
+        data: null,
+        tempQtyInput: "",
+      });
     }
   }, [editData]);
 
   const handleSave = () => {
-    if (!localEditData) return;
+    if (!editState.data) return;
 
-    const parsedQty = tempQtyInput === "" ? 0 : Number(tempQtyInput);
+    const parsedQty = editState.tempQtyInput === "" ? 0 : Number(editState.tempQtyInput);
     const apiPayload = {
-      ...localEditData,
+      ...editState.data,
       qty: parsedQty,
     };
     onSave(apiPayload);
@@ -64,51 +73,52 @@ export default function EditOrderOutModal({
         <TextField
           label="출고 수량"
           type="text"
-          value={tempQtyInput}
+          value={editState.tempQtyInput}
           onChange={(e) => {
-            setTempQtyInput(e.target.value);
+            setEditState((prev) => ({ ...prev, tempQtyInput: e.target.value }));
           }}
           fullWidth
         />
         <TextField
           label="출고 일자"
           type="date"
-          value={String(localEditData?.outboundDate ?? "")}
+          value={String(editState.data?.outboundDate ?? "")}
           onChange={(e) => {
-            setLocalEditData((prev) =>
-              prev ? { ...prev, outboundDate: e.target.value } : prev
-            );
+            setEditState((prev) => ({
+              ...prev,
+              data: prev.data ? { ...prev.data, outboundDate: e.target.value } : null,
+            }));
           }}
           InputLabelProps={{ shrink: true }}
           fullWidth
         />
         <TextField
           label="출고번호"
-          value={localEditData?.outboundNo ?? ""}
+          value={editState.data?.outboundNo ?? ""}
           disabled
           fullWidth
         />
         <TextField
           label="거래처명"
-          value={localEditData?.customerName ?? ""}
+          value={editState.data?.customerName ?? ""}
           disabled
           fullWidth
         />
         <TextField
           label="품목번호"
-          value={localEditData?.itemCode ?? ""}
+          value={editState.data?.itemCode ?? ""}
           disabled
           fullWidth
         />
         <TextField
           label="품목명"
-          value={localEditData?.itemName ?? ""}
+          value={editState.data?.itemName ?? ""}
           disabled
           fullWidth
         />
         <TextField
           label="분류"
-          value={localEditData?.category ?? ""}
+          value={editState.data?.category ?? ""}
           disabled
           fullWidth
         />
