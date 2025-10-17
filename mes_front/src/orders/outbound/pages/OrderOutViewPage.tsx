@@ -21,6 +21,7 @@ import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
 import {
   addOrderOutbound,
+  deleteOrderOutbound,
   getOrderOutbound,
   updateOrderOutbound,
 } from "../api/orderOutbound";
@@ -222,6 +223,7 @@ export default function OrderOutViewPage() {
   // ✅ 삭제
   const handleDelete = (id: number) => {
     if (window.confirm("이 출고 정보를 삭제하시겠습니까?")) {
+      deleteOrderOutbound(id);
       setAllRows((prev) => prev.filter((r) => r.id !== id));
     }
   };
