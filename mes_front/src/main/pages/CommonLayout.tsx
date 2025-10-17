@@ -168,7 +168,10 @@ export default function CommonLayout() {
     "/companies": { main: "기준 정보 관리", sub: "업체 관리", third: null },
   };
 
-  // URL 변경 시 메뉴 상태 동기화
+  // 새로고침 시 충돌 방지용 state
+  const [isInitialSync, setIsInitialSync] = useState(true);
+
+  // URL → 메뉴 상태 동기화
   useEffect(() => {
     const menuState = pathToMenuMap[location.pathname];
     if (menuState) {
@@ -176,7 +179,6 @@ export default function CommonLayout() {
       setActiveSub(menuState.sub);
       setActiveThird(menuState.third);
 
-      // 해당 메뉴 열기
       setOpenMenus((prev) => ({
         ...prev,
         [menuState.main]: true,
@@ -184,13 +186,23 @@ export default function CommonLayout() {
     }
   }, [location.pathname]);
 
-  // 메뉴 선택 시 네비게이션
+  // mount 후 1회만 navigate 활성화
   useEffect(() => {
+    const timer = setTimeout(() => setIsInitialSync(false), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // 메뉴 상태 → URL 이동
+  useEffect(() => {
+    if (isInitialSync) return; // 초기 렌더 시 navigate 비활성화
+
     const targetRoute = routeMap[currentPath];
+    // 경로가 존재하고, 현재 경로와 다를 때만 이동
     if (targetRoute && location.pathname !== targetRoute) {
-      navigate(targetRoute);
+      navigate(targetRoute, { replace: true });
     }
-  }, [currentPath, navigate, location.pathname]);
+  }, [currentPath, navigate, location.pathname, isInitialSync]);
+
 
   // 2계층 메뉴 클릭 핸들러
   const handleSubClick = (
