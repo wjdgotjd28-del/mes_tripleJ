@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -36,5 +39,24 @@ public class OrderOutboundService {
         OrderOutbound savedOrderOutbound = orderOutboundRepository.save(orderOutbound);
         orderOutboundDto.setId(savedOrderOutbound.getId());
         return orderOutboundDto;
+    }
+
+    public List<OrderOutboundDto> findAll() {
+        List<OrderOutboundDto> orderOutboundDtos = new ArrayList<>();
+        for (OrderOutbound orderOutbound : orderOutboundRepository.findAll()) {
+            OrderOutboundDto orderOutboundDto = OrderOutboundDto.builder()
+                    .id(orderOutbound.getId())
+                    .orderInboundId(orderOutbound.getOrderInbound().getOrderInboundId())
+                    .customerName(orderOutbound.getCustomerName())
+                    .itemName(orderOutbound.getItemName())
+                    .itemCode(orderOutbound.getItemCode())
+                    .qty(orderOutbound.getQty())
+                    .category(orderOutbound.getCategory())
+                    .outboundNo(orderOutbound.getOutboundNo())
+                    .outboundDate(orderOutbound.getOutboundDate())
+                    .build();
+            orderOutboundDtos.add(orderOutboundDto);
+        }
+        return orderOutboundDtos;
     }
 }
