@@ -55,6 +55,12 @@ export default function EditOrderOutModal({
     onSave(apiPayload);
   };
 
+  const isSaveDisabled =
+    !editState.data?.outboundDate ||
+    editState.tempQtyInput.trim() === '' ||
+    isNaN(Number(editState.tempQtyInput)) ||
+    Number(editState.tempQtyInput) < 0;
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" scroll="paper">
       <DialogTitle sx={{ fontWeight: 600, mt: 1 }}>
@@ -72,12 +78,13 @@ export default function EditOrderOutModal({
       >
         <TextField
           label="출고 수량"
-          type="text"
+          type="number"
           value={editState.tempQtyInput}
           onChange={(e) => {
             setEditState((prev) => ({ ...prev, tempQtyInput: e.target.value }));
           }}
           fullWidth
+          InputProps={{ inputProps: { min: 0 } }}
         />
         <TextField
           label="출고 일자"
@@ -136,7 +143,7 @@ export default function EditOrderOutModal({
         <Button onClick={onClose} variant="outlined">
           취소
         </Button>
-        <Button variant="contained" onClick={handleSave}>
+        <Button variant="contained" onClick={handleSave} disabled={isSaveDisabled}>
           저장
         </Button>
       </DialogActions>
