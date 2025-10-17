@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { useState, useEffect, type ChangeEvent } from "react";
 import {
   Box,
   Typography,
@@ -12,245 +11,343 @@ import {
   Paper,
   Button,
   TextField,
-  Tooltip,
-  IconButton,
+  Chip,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
-import {
-  ArrowUpward as ArrowUpwardIcon,
-  ArrowDownward as ArrowDownwardIcon,
-} from "@mui/icons-material";
+import { DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import dayjs from "dayjs";
 
-import InboundRegisterModal from "./OrderInRegisterModal";
+import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
+
+import OrderDetailModal from "../../../masterData/items/pages/OrderDetailModal";
+
+// utils
 import { exportToExcel } from "../../../Common/ExcelUtils";
-import { usePagination } from "../../../Common/usePagination";
-import type { OrderInView } from "../../../type";
-import { fetchInboundOrderItems } from "../api/OrderInViewApi";
+import { filterOrderItems } from "../../../masterData/items/components/OrderSearchUtils";
 
-// 샘플 데이터 (실제 API 연동 시 교체 예정)
+// API
+import { getOrderItems } from "../../../masterData/items/api/OrderApi";
+
+// 타입
+import type { OrderItems } from "../../../type";
+import { registerInbound } from "../api/OrderInViewApi";
 
 export default function OrderInViewPage() {
-  //  검색창 상태
-  const [clientSearch, setClientSearch] = useState("");
-  const [itemNoSearch, setItemNoSearch] = useState("");
-  const [itemNameSearch, setItemNameSearch] = useState("");
+  // 모달 상태
+  const [openDetailModal, setOpenDetailModal] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
 
-  //  검색 실행 시 저장되는 필터 조건
-  const [searchParams, setSearchParams] = useState({
-    customer_name: "",
-    item_code: "",
-    item_name: "",
+  const [inputValues, setInputValues] = useState<
+    Record<string, { qty: string; date: string }>
+  >({});
+
+  // 데이터
+  const [orderItems, setOrderItems] = useState<OrderItems[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<OrderItems[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 검색
+  const [searchValues, setSearchValues] = useState({
+    companyName: "",
+    itemCode: "",
+    itemName: "",
   });
+  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
-  const categoryLabels: Record<string, string> = {
-    AUTOMOTIVE: "자동차",
-    DEFENSE: "방산",
-    GENERAL: "일반",
-    SHIPBUILDING: "조선",
-  };
-
-  const [rawData, setRawData] = useState<OrderInView[]>([]);
-
+  // 초기 데이터 로드
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const data = await fetchInboundOrderItems();
-        setRawData(data);
-      } catch (err) {
-        console.error("데이터 불러오기 실패", err);
-      }
-    };
-    loadData();
+    void fetchOrderItems();
   }, []);
 
-  //  검색 버튼 클릭 시 실행
-  const handleSearch = () => {
-    setSearchParams({
-      customer_name: clientSearch,
-      item_code: itemNoSearch,
-      item_name: itemNameSearch,
-    });
+  const fetchOrderItems = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getOrderItems();
+
+      if (!Array.isArray(res)) {
+        setError("서버 응답 형식이 올바르지 않습니다.");
+        setOrderItems([]);
+        setDisplayedItems([]);
+        return;
+      }
+
+      const filtered = res.filter(
+        (item: OrderItems) => item.use_yn === "Y" && item.status === "Y"
+      );
+
+      setOrderItems(filtered);
+      setDisplayedItems(filtered);
+    } catch (err: unknown) {
+      console.error("API 호출 실패:", err);
+      setError("데이터를 불러오는 중 오류가 발생했습니다.");
+      setOrderItems([]);
+      setDisplayedItems([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  //  정렬 상태
-  const [sortAsc, setSortAsc] = useState(true);
-  const toggleSortOrder = () => setSortAsc((prev) => !prev);
+  // 검색 핸들러
+  const handleTextChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
+    const { name, value } = e.target;
+    setSearchValues((prev) => ({ ...prev, [name]: value }));
+  };
 
-  //  정렬된 데이터 (ID 기준)
-  const sortedData = Array.isArray(rawData)
-    ? [...rawData].sort((a, b) =>
-        sortAsc
-          ? a.order_item_id - b.order_item_id
-          : b.order_item_id - a.order_item_id
-      )
-    : [];
+  const handleSearch = (): void => {
+    setAppliedSearchValues(searchValues);
 
-  //  필터링된 데이터
-  const filteredData = sortedData.filter(
-    (row) =>
-      row.customer_name.includes(searchParams.customer_name) &&
-      row.item_code.includes(searchParams.item_code) &&
-      row.item_name.includes(searchParams.item_name)
-  );
+    if (
+      !searchValues.companyName &&
+      !searchValues.itemCode &&
+      !searchValues.itemName
+    ) {
+      setDisplayedItems(orderItems);
+      return;
+    }
 
-  //  모달 상태 및 선택된 품목
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<{
-    item_name: string;
-    qty: number;
-  } | null>(null);
+    const filtered = filterOrderItems(orderItems, searchValues);
+    setDisplayedItems(filtered);
+  };
 
-  //  페이지네이션 처리
-  const { currentPage, setCurrentPage, totalPages, paginatedData } =
-    usePagination(filteredData, 10); // 한 페이지당 10개
+  // 엑셀 다운로드
+  const handleExcelDownload = (): void => {
+    exportToExcel(displayedItems, "기준정보_수주대상_거래중품목조회");
+  };
+
+  // 상세 보기 클릭
+  const handleItemClick = (item: OrderItems): void => {
+    setSelectedItem(item);
+    setOpenDetailModal(true);
+  };
+
+  const handleQtyChange = (id: string, value: string) => {
+    setInputValues((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], qty: value },
+    }));
+  };
+
+  const handleDateChange = (id: string, value: dayjs.Dayjs | null) => {
+    setInputValues((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], date: value ? value.format("YYYY-MM-DD") : "" },
+    }));
+  };
 
   return (
-    <Box sx={{ padding: 4, width: "100%" }}>
-      {/*  페이지 제목 */}
-      <Typography variant="h5" sx={{ mb: 1 }}>
-        수주대상 품목 조회
-      </Typography>
+    <Box
+      sx={{
+        padding: 4,
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+      }}
+    >
+      <Typography variant="h5">거래중 품목 조회</Typography>
 
-      {/*  검색창 + 정렬 + 엑셀 다운로드 */}
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      {/* 검색 영역 */}
       <Box
         sx={{
           display: "flex",
+          gap: 1,
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 2,
         }}
       >
-        {/*  왼쪽: 검색창 영역 */}
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
             placeholder="거래처명"
-            value={clientSearch}
-            onChange={(e) => setClientSearch(e.target.value)}
+            name="companyName"
+            value={searchValues.companyName}
+            onChange={handleTextChange}
             sx={{ width: 150 }}
           />
           <TextField
             size="small"
-            placeholder="품목 번호"
-            value={itemNoSearch}
-            onChange={(e) => setItemNoSearch(e.target.value)}
+            placeholder="품목번호"
+            name="itemCode"
+            value={searchValues.itemCode}
+            onChange={handleTextChange}
             sx={{ width: 150 }}
           />
           <TextField
             size="small"
             placeholder="품목명"
-            value={itemNameSearch}
-            onChange={(e) => setItemNameSearch(e.target.value)}
+            name="itemName"
+            value={searchValues.itemName}
+            onChange={handleTextChange}
             sx={{ width: 150 }}
           />
-          <Button variant="contained" onClick={handleSearch}>
+          <Button variant="contained" color="primary" onClick={handleSearch}>
             검색
           </Button>
-          {/*  정렬 토글 버튼 */}
-          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
-            <IconButton onClick={toggleSortOrder}>
-              {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
-            </IconButton>
-          </Tooltip>
         </Box>
 
-        {/*  오른쪽: 엑셀 다운로드 버튼 */}
-        <Button
-          color="success"
-          variant="outlined"
-          endIcon={<FileDownloadIcon />}
-          onClick={() => exportToExcel(filteredData, "입고이력")}
-        >
-          엑셀 다운로드
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button
+            color="success"
+            variant="outlined"
+            endIcon={<FileDownloadIcon />}
+            onClick={handleExcelDownload}
+          >
+            엑셀 다운로드
+          </Button>
+        </Box>
       </Box>
 
-      {/*  테이블 영역 */}
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 800 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>거래처명</TableCell>
-              <TableCell>품목 번호</TableCell>
-              <TableCell>품목명</TableCell>
-              <TableCell>수량</TableCell>
-              <TableCell>분류</TableCell>
-              <TableCell>비고</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow key={row.order_item_id}>
-                <TableCell>{row.order_item_id}</TableCell>
-                <TableCell>{row.customer_name}</TableCell>
-                <TableCell>{row.item_code}</TableCell>
-                <TableCell>{row.item_name}</TableCell>
-                <TableCell>{row.qty}</TableCell>
-                <TableCell>
-                  {categoryLabels[row.category] ?? row.category}
-                </TableCell>
-                <TableCell>{row.note}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => {
-                      setSelectedItem({
-                        item_name: row.item_name,
-                        qty: row.qty,
-                      });
-                      setOpenModal(true);
-                    }}
-                  >
-                    입고 등록
-                  </Button>
-                </TableCell>
+      {/* 테이블 영역 */}
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 900 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell align="center">ID</TableCell>
+                <TableCell align="center">거래처명</TableCell>
+                <TableCell align="center">품목번호</TableCell>
+                <TableCell align="center">품목명</TableCell>
+                <TableCell align="center">분류</TableCell>
+                <TableCell align="center">비고</TableCell>
+                <TableCell align="center">거래상태</TableCell>
+                <TableCell align="center">수량</TableCell>
+                <TableCell align="center">입고일자</TableCell>
+                <TableCell align="center">입고등록</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {displayedItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                    <Typography color="text.secondary">
+                      거래중인 품목이 없습니다.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                displayedItems.map((row) => {
+                  const id = row.order_item_id.toString();
+                  const values = inputValues[id] || { qty: "", date: "" };
 
-      {/*  입고 등록 모달 */}
-      {selectedItem && (
-        <InboundRegisterModal
-          open={openModal}
-          onClose={() => setOpenModal(false)}
-          item_name={selectedItem.item_name}
-          onSubmit={(data) => {
-            console.log("입고 등록됨:", data);
-            setOpenModal(false);
-          }}
-        />
+                  return (
+                    <TableRow key={id}>
+                      <TableCell align="center">{row.order_item_id}</TableCell>
+                      <TableCell align="center">{row.company_name}</TableCell>
+                      <TableCell align="center">{row.item_code}</TableCell>
+                      <TableCell align="center">
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                            "&:hover": {
+                              color: "primary.dark",
+                              fontWeight: "bold",
+                            },
+                          }}
+                          onClick={() => handleItemClick(row)}
+                        >
+                          {row.item_name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">{row.category}</TableCell>
+                      <TableCell align="center">{row.note}</TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          label="거래중"
+                          color="success"
+                          size="small"
+                          sx={{ minWidth: 10 }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <TextField
+                          size="small"
+                          type="number"
+                          value={values.qty}
+                          onChange={(e) => handleQtyChange(id, e.target.value)}
+                          sx={{ width: 70 }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            value={values.date ? dayjs(values.date) : null}
+                            onChange={(newDate) =>
+                              handleDateChange(id, newDate)
+                            }
+                            format="YYYY-MM-DD"
+                            slotProps={{
+                              textField: { size: "small", sx: { width: 147 } },
+                            }}
+                          />
+                        </LocalizationProvider>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{ color: "#452f8eff", borderColor: "#452f8eff" }}
+                          disabled={!values.qty || !values.date}
+                          onClick={async () => {
+                            const payload = {
+                              order_item_id: row.order_item_id,
+                              category: row.category,
+                              customer_name: row.company_name,
+                              inbound_date: values.date,
+                              item_code: row.item_code,
+                              item_name: row.item_name,
+                              lot_no: "",
+                              note: row.note ?? "",
+                              paint_type: row.paint_type,
+                              qty: Number(values.qty),
+                            };
+
+                            try {
+                              await registerInbound(payload);
+                              console.log("입고등록 완료:", payload);
+                            } catch (err) {
+                              console.error("입고등록 실패:", err);
+                            }
+                          }}
+                        >
+                          입고등록
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          mt: 2,
-          gap: 1,
-        }}
-      >
-        <Button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(currentPage - 1)}
-        >
-          〈
-        </Button>
-        <Typography variant="body2" sx={{ px: 2 }}>
-          페이지 {currentPage} / {totalPages}
-        </Typography>
-        <Button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          〉
-        </Button>
-      </Box>
+      {/* 상세보기 모달 */}
+      <OrderDetailModal
+        open={openDetailModal}
+        onClose={() => setOpenDetailModal(false)}
+        data={selectedItem}
+        onSave={fetchOrderItems}
+        routingList={[]}
+      />
     </Box>
   );
 }

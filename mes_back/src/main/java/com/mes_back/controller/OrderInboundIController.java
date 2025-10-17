@@ -1,14 +1,10 @@
 package com.mes_back.controller;
 
-
-import com.mes_back.dto.OrderInboundDto;
-import com.mes_back.service.OrderInboundService;
+import com.mes_back.dto.OrderInboundDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,7 +15,7 @@ import java.util.List;
 public class OrderInboundIController {
 
     private final OrderInboundService orderInboundService;
-
+]
 //    @GetMapping("/items")
 //    public ResponseEntity<List<OrderInboundItemRequestDto> findAllItems() {
 //        List<OrderInboundItemRequestDto> OrderInboundItemRequestDtos = orderInboundService.findAllByOrderInbound();
@@ -27,7 +23,21 @@ public class OrderInboundIController {
 //    }
 
     @GetMapping("/orderoutbound")
-    public List<OrderInboundDto> findInboundHistoriesForOutbound() {
+    public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
         return orderInboundService.findInboundHistoriesForOutbound();
+        
+    @GetMapping("/items")
+    public ResponseEntity<List<OrderInboundDTO>> findAllItems() {
+        List<OrderInboundDTO> orderInboundDTOS = orderInboundService.findAllByOrderInbound();
+        return ResponseEntity.ok(orderInboundDTOS);
+        
     }
+
+    @PostMapping("/items")
+    public ResponseEntity<Void> registerInbound(@RequestBody OrderInboundDTO dto) {
+        orderInboundService.save(dto);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

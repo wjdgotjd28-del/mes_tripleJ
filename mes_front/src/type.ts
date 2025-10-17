@@ -77,7 +77,6 @@ export type RoutingFormData = RoutingCreateData & {
 
 export type RoutingFormDataWithProcessNo = RoutingFormData & {
   process_no: number;
-  id?: number;
 };
 
 // 수주 출고 
@@ -100,10 +99,11 @@ export type Inbound = {
   customerName: string;
   itemName: string;
   itemCode: string;
-  qty: number;
+  inboundQty: number;
   category: string;
   inboundDate: string;
 };
+
 
 // 원자재 재고 현황 테이블 타입
 export type RawMaterialInventoryStatus = {
@@ -115,20 +115,33 @@ export type RawMaterialInventoryStatus = {
   unit: string;
 };
 
-export type OrderInView = {
-  id: number;
+
+export interface OrderInView {
+  id?: number; // 선택값으로 변경
+  order_item_id: number;
+  category: "DEFENSE" | "GENERAL" | "AUTOMOTIVE" | "SHIPBUILDING";
   customer_name: string;
+  inbound_date: string;
   item_code: string;
   item_name: string;
-  qty: number;
-  category: string;
+  lot_no: string;
   note: string;
+  paint_type: "LIQUID" | "POWDER";
+  qty: number;
 }
 
-export type OrderProcessTracking = {
+
+export type OrderInbound = {
   id: number;
   order_inbound_id: number;
-  order_item_routing_id: number;
-  process_start_time: string | null;
-  process_status: number;
+  order_item_id: number;
+  category: "AUTOMOTIVE" | "DEFENSE" | "GENERAL" | "SHIPBUILDING";
+  customer_name: string;
+  inbound_date: string; // "YYYY-MM-DD" 형식
+  item_code: string;
+  item_name: string;
+  lot_no: string;
+  note: string;
+  paint_type: "LIQUID" | "POWDER";
+  qty: number;
 };
