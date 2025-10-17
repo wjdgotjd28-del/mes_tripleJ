@@ -20,6 +20,17 @@ interface EditOrderOutModalProps {
   onSave: (data: OrderOutbound) => void;
 }
 
+const categoryMap: { [key: string]: string } = {
+  DEFENSE: "방산",
+  GENERAL: "일반",
+  AUTOMOTIVE: "자동차",
+  SHIPBUILDING: "조선",
+};
+
+const translateCategory = (category: string) => {
+  return categoryMap[category] || category;
+};
+
 export default function EditOrderOutModal({
   open,
   onClose,
@@ -144,7 +155,7 @@ export default function EditOrderOutModal({
         />
         <TextField
           label="분류"
-          value={editState.data?.category ?? ""}
+          value={translateCategory(editState.data?.category ?? "")}
           disabled
           fullWidth
         />
