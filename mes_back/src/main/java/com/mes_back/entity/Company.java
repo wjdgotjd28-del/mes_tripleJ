@@ -1,14 +1,23 @@
 package com.mes_back.entity;
 
 import com.mes_back.constant.CompanyType;
+import com.mes_back.dto.CompanyDto;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "company")
 @Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@SQLDelete(sql = "UPDATE company SET deleted_at = NOW() WHERE company_id = ?")
 public class Company {
 
     @Id
@@ -49,4 +58,30 @@ public class Company {
 
     @Column(name = "status", nullable = false, length = 1)
     private String status; // 거래상태: Y/N
+
+    public void updateCompany(CompanyDto companyDto) {
+        this.type = companyDto.getType();
+        this.companyName = companyDto.getCompanyName();
+        this.ceoName = companyDto.getCeoName();
+        this.address = companyDto.getAddress();
+        this.note = companyDto.getNote();
+        this.bizRegNo = companyDto.getBizRegNo();
+        this.ceoPhone = companyDto.getCeoPhone();
+        this.managerName = companyDto.getManagerName();
+        this.managerPhone = companyDto.getManagerPhone();
+        this.managerEmail = companyDto.getManagerEmail();
+        this.status = companyDto.getStatus();
+
+    }
+
+    public void updateStatus(String status) {
+        this.status = status;
+    }
+
+    @Column(name = "deleted_at", columnDefinition = "TIMESTAMP(0)", nullable = true)
+    private LocalDateTime deletedAt;
+
+    public void restore() {
+        this.deletedAt = null;
+    }
 }

@@ -1,14 +1,18 @@
 package com.mes_back.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+
+import com.mes_back.constant.CompanyType;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CompanyDto {
     private Long companyId;
 
-    private String type; // 거래처 / 매입처
+    private CompanyType type; // 거래처 / 매입처
 
     private String companyName;
 
@@ -29,5 +33,7 @@ public class CompanyDto {
     private String managerEmail;
 
     private String status; // Y / N
+
+
 }
 

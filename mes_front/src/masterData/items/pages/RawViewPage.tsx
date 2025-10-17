@@ -11,11 +11,12 @@ import RawDetailModal from "./RawDetailModal";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import type { RawItems } from "../../../type";
 import {
+  deleteRawItems,
   getRawItems,
   // deleteRawItems,
   restoreRawItems,
 } from "../api/RawApi";
-import { filterRawItems } from "../components/SearchUtils";
+import { filterRawItems } from "../components/RawSearchUtils";
 
 export default function RawViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
@@ -104,6 +105,18 @@ export default function RawViewPage() {
 
     const filtered = filterRawItems(rawItems, searchValues);
     setDisplayedItems(filtered);
+  };
+
+  const handleDelete = async (id: number, company_name: string, item_name: string) => {
+    if (window.confirm(`${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`)) {
+      try {
+        await deleteRawItems(id);
+        await fetchRawItems();
+      } catch (err) {
+        console.error("삭제 실패:", err);
+        alert("삭제 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   const handleToggleUseYn = async (id: number) => {
@@ -265,6 +278,16 @@ export default function RawViewPage() {
                     <TableCell>
                       <Button onClick={() => handleToggleUseYn(row.material_item_id)} size="small">
                         {row.use_yn === "Y" ? "사용 중지" : "복원"}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="error"
+                        onClick={() =>
+                          handleDelete(row.material_item_id, row.company_name, row.item_name)
+                        }
+                      >
+                        삭제
                       </Button>
                     </TableCell>
                   </TableRow>

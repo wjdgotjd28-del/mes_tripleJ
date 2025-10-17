@@ -31,7 +31,7 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
     company_name: "",
     item_code: "",
     item_name: "",
-    category: "",
+    category: "PAINT",
     spec_qty: 0,
     spec_unit: "",
     color: "",
@@ -65,8 +65,9 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
     // 카테고리 한글 → 영어로 변환
     const payload: RawItems = {
       ...(newData as RawItems),
-      category: categoryMap[newData.category as string] || newData.category!,
+      category: (categoryMap[newData.category as string] || newData.category!) as RawItems["category"],
     };
+
 
     await createRawItems(payload);
     onSubmit();
@@ -78,7 +79,7 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
       company_name: "",
       item_code: "",
       item_name: "",
-      category: "",
+      category: "PAINT",
       spec_qty: 0,
       spec_unit: "",
       color: "",

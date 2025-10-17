@@ -5,62 +5,56 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 // 조회
 export const getOrderItems = async (): Promise<OrderItems[]> => {
-    const res = await axios.get(
-        `${BASE_URL}/items/order`
-    );
-    console.log("기준정보_수주대상품목_조회 -> ", res);
-    return res.data;
+    const url = `${BASE_URL}/items/order`
+    const res = await axios.get(url);
+  return res.data;
 };
 
 // 상세조회
 export const getOrderItemsdtl = async (id: number): Promise<OrderItems> => {
-    const res = await axios.get(
-        `${BASE_URL}/items/order/dtl/${id}`
-    );
-    console.log("기준정보_수주대상품목_조회 -> ", res);
+    const url = `${BASE_URL}/items/order/dtl/${id}`
+    const res = await axios.get(url);
     return res.data;
 };
 
 // 작성
-export const createOrderItems = async (orderItems: OrderItems) => {
-    try {
-            const res = await axios.post(
-            `${BASE_URL}/items/order/new`,
-            orderItems,
-        );
-        console.log("기준정보_수주대상품목_작성_성공 -> ", res);
-        return res.data;
-    } catch (err) {
-        console.log("기준정보_수주대상품목_작성_실패 -> ", err);
-    }
+export const createOrderItems = async (formData: FormData) => {
+    const url = `${BASE_URL}/items/order/new`
+    const res = await axios.post(url, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
 };
 
 // 수정
-export const updateOrderItems = async (id: number, orderItems: OrderItems) => {
-    try {
-            const res = await axios.put(
-            `${BASE_URL}/items/order/${id}`,
-            orderItems,
-        );
-        console.log("기준정보_수주대상품목_수정_성공 -> ", res);
-        return res.data;
-    } catch (err) {
-        console.log("기준정보_수주대상품목_수정_실패 -> ", err);
-    }
+export const updateOrderItems = async (id: number, formData: FormData) => {
+    const url = `${BASE_URL}/items/order/${id}`
+    const res = await axios.put(url, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
 };
 
-// 삭제(soft delete)
+// 이미지 삭제
+export const deleteSingleImageAPI = async (id: number): Promise<number> => {
+  const url = `${BASE_URL}/items/order/image/${id}`;
+  const res = await axios.delete(url);
+  return res.data;
+};
+
+// 삭제
 export const deleteOrderItems = async (id: number): Promise<number> => {
-  const response = await axios.post(
-    `${BASE_URL}/items/order/delete/${id}`,
-  );
-  console.log(response.data);
-  return response.data;
+  const url = `${BASE_URL}/items/order/delete/${id}`;
+  const res = await axios.delete(url);
+  return res.data;
 };
 
 // 복원(Y ↔ N)
 export const restoreOrderItems = async (id: number) => {
-  return await axios.post(
-    `${BASE_URL}/items/order/${id}`,
-  );
+  const url = `${BASE_URL}/items/order/${id}`;
+  console.log("restoreRawItems 호출 URL:", url);
+  const res = await axios.post(url, null, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return res.data;
 };

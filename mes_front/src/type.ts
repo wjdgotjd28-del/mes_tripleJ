@@ -1,64 +1,67 @@
 // 이미지 정보 타입
-export interface ImageData {
-  order_item_img_id?: number; // 이미지 ID (수정 시 사용)
-  order_item_id?: number; // 수주 품목 ID
-  file?: File; // 신규 업로드 시 사용
-  img_url: string; // 파일 경로 (필수)
-  img_ori_name: string; // 원본 파일 이름 (필수)
-  img_name: string; // 저장된 파일 이름 (필수)
+export interface OrderItemImage {
+  orderItemImgId?: number;     // 이미지 고유 ID
+  orderItemId?: number;        // 품목 ID
+  img_url: string;             // 이미지 URL
+  img_ori_name: string;        // 원본 파일명
+  img_name: string;            // 저장 파일명
+  file?: File;                 // 신규 업로드 시 사용
 }
 
-// 공정 프로세스 타입
-export interface RoutingData {
-  step: string;
-  description?: string;
-  duration?: number; // 소요 시간 (분)
-}
-
-// 테이블 데이터 타입
+// 수주 대상 품목 데이터 타입
 export interface OrderItems {
-  id: number; // ViewPage에서만 필요
+  order_item_id: number;
   company_name: string;
   item_code: string;
   item_name: string;
-  category: string;
-  color: string;
-  unit_price: number;
+  category: "DEFENSE"|"GENERAL"|"AUTOMOTIVE"|"SHIPBUILDING";
+  color?: string;
+  unit_price?: number;
   paint_type: "LIQUID" | "POWDER";
-  note: string;
-  use_yn: string;
-  status: string;
-  image?: ImageData[];      // 다중 이미지
-  routing?: RoutingData[];  // 공정 프로세스 배열
+  note?: string;
+  use_yn: "Y" | "N";
+  status: "Y" | "N";
+  image?: OrderItemImage[];
+  routing?: RoutingFormData[];
 }
 
-// 테이블 데이터 타입
+// 원자재 품목 데이터 타입
 export interface RawItems {
   material_item_id: number;
   company_name: string;
   item_code: string;
   item_name: string;
-  category: string;
+  category: "PAINT"|"THINNER"|"CLEANER"|"HARDENER";
   color: string;
   spec_qty: number;
   spec_unit: string;
   manufacturer: string;
   note: string;
-  use_yn: string;
+  use_yn: "Y" | "N";
 }
 
-// 업체 정보 타입
-export interface Company {
-  id: number;
-  type: "거래처" | "매입처";
-  name: string;
-  ceo: string;
-  address: string;
-  note: string;
-  status: "Y" | "N";
-}
+//거래처 타입
+export type Company = {
+  companyId?: number; // 업체 id
+  type: CompanyType; // 업체 유형
+  companyName: string; // 업체명
+  ceoName: string; // 대표명
+  address: string; //주소
+  note?: string; // 비고
+  bizRegNo: string; // 사업자 등록번호
+  ceoPhone: string; // 대표 전화번호
+  managerName: string; // 담당자
+  managerPhone: string; // 담당자 전화번호
+  managerEmail: string; // 담당자 이메일
+  status: StatusType; // 거래 상태
+};
 
-// 라우팅 등록 타입
+// 거래처 유형 타입 
+export type CompanyType = "거래처" | "매입처";
+// 거래 상태 타입
+export type StatusType = "Y" | "N";
+
+
 export type RoutingCreateData = {
   process_code: string;
   process_name: string;
@@ -69,6 +72,35 @@ export type RoutingCreateData = {
 // 라우팅 조회 타입
 export type RoutingFormData = RoutingCreateData & {
   routing_id: number;
+};
+
+export type RoutingFormDataWithProcessNo = RoutingFormData & {
+  process_no: number;
+};
+
+// 수주 출고 
+export type OrderOutbound = {
+  id?: number;
+  orderInboundId: number;
+  outboundNo: string;
+  customerName: string;
+  itemCode: string;
+  itemName: string;
+  qty: number;
+  outboundDate: string;
+  category: string;
+};
+
+// 수주 출고에서 쓰이는 수주 입고 데이터 조회용 타입 
+export type Inbound = {
+  orderInboundId: number;
+  lotNo: string;
+  customerName: string;
+  itemName: string;
+  itemCode: string;
+  inboundQty: number;
+  category: string;
+  inboundDate: string;
 };
 
 

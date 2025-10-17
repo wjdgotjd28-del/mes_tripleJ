@@ -1,4 +1,5 @@
-import { useState, type ChangeEvent } from "react";
+// src/pages/MasterData/Order/OrderViewPage.tsx
+import { useState, useEffect, type ChangeEvent } from "react";
 import {
   Box,
   Typography,
@@ -17,183 +18,161 @@ import {
   Select,
   type SelectChangeEvent,
   Chip,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
 
 import OrderRegisterModal from "./OrderRegisterModal";
+import OrderDetailModal from "./OrderDetailModal";
 
 // utils
 import { exportToExcel } from "../../../Common/ExcelUtils";
+import { filterOrderItems } from "../components/OrderSearchUtils";
+
+// API
+import {
+  getOrderItems,
+  deleteOrderItems,
+  restoreOrderItems,
+} from "../api/OrderApi";
 
 // 타입
 import type { OrderItems } from "../../../type";
-import OrderDetailModal from "./OrderDetailModal";
 
 export default function OrderViewPage() {
-  // State 정의
-  const [openDetailModal, setOpenDetailModal] = useState(false);
+  // 모달 상태
+  const [openDetailModal, setOpenDetailModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
-  const [openModal, setOpenModal] = useState(false);
+  const [openModal, setOpenModal] = useState<boolean>(false);
+
+  // 데이터
+  const [orderItems, setOrderItems] = useState<OrderItems[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<OrderItems[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 검색
   const [searchValues, setSearchValues] = useState({
     companyName: "",
     itemCode: "",
     itemName: "",
     useYn: "",
   });
-  // 실제 적용된 검색 조건 (검색 버튼 클릭 시 업데이트)
-  const [appliedSearchValues, setAppliedSearchValues] = useState({
-    companyName: "",
-    itemCode: "",
-    itemName: "",
-    useYn: "",
-  });
-  const [orderItems, setOrderItems] = useState<OrderItems[]>([
-    {
-      id: 1,
-      company_name: "일도테크",
-      item_code: "AD21700028",
-      item_name: "핀걸이 스프링",
-      category: "일반",
-      paint_type: "LIQUID",
-      unit_price: 1000,
-      color: "white",
-      note: "품질 검사 필수\n납기일 엄수 요망",
-      use_yn: "Y",
-      status: "Y",
-      image: [
-        {
-          img_url: "https://via.placeholder.com/300x300?text=Product+1",
-          img_ori_name: "product1.jpg",
-          img_name: "1234567890_abc123.jpg",
-        },
-        {
-          img_url: "https://via.placeholder.com/300x300?text=Product+1-2",
-          img_ori_name: "product1_detail.jpg",
-          img_name: "1234567891_def456.jpg",
-        },
-      ],
-      routing: [],
-    },
-    {
-      id: 2,
-      company_name: "일도정공",
-      item_code: "3044705",
-      item_name: "FAN COVER",
-      category: "조선",
-      paint_type: "POWDER",
-      unit_price: 200,
-      color: "red",
-      note: "특수 코팅 필요",
-      use_yn: "N",
-      status: "Y",
-      image: [
-        {
-          img_url: "https://via.placeholder.com/300x300?text=Fan+Cover",
-          img_ori_name: "fan_cover.jpg",
-          img_name: "1234567892_ghi789.jpg",
-        },
-      ],
-      routing: [],
-    },
-    {
-      id: 3,
-      company_name: "일도정공",
-      item_code: "2M95059A",
-      item_name: "FAN COVER",
-      category: "방산",
-      paint_type: "LIQUID",
-      unit_price: 100,
-      color: "blue",
-      note: "",
-      use_yn: "Y",
-      status: "Y",
-      image: [],
-      routing: [],
-    },
-  ]);
+  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
-  // 검색 로직
-  const handleTextChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setSearchValues((prev) => ({ ...prev, [name]: value }));
-  };
+  // 초기 데이터 로드
+  useEffect(() => {
+    void fetchOrderItems();
+  }, []);
 
-  const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    const { name, value } = e.target;
-    setSearchValues((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSearch = () => {
-    setAppliedSearchValues(searchValues);
-  };
-
-  // 검색 조건 및 필터링
-  const filteredData: OrderItems[] = orderItems.filter((item) => {
-    return (
-      (appliedSearchValues.companyName === "" ||
-        item.company_name
-          .toLowerCase()
-          .includes(appliedSearchValues.companyName.toLowerCase())) &&
-      (appliedSearchValues.itemCode === "" ||
-        item.item_code
-          .toLowerCase()
-          .includes(appliedSearchValues.itemCode.toLowerCase())) &&
-      (appliedSearchValues.itemName === "" ||
-        item.item_name
-          .toLowerCase()
-          .includes(appliedSearchValues.itemName.toLowerCase())) &&
-      (appliedSearchValues.useYn === "" ||
-        item.use_yn === appliedSearchValues.useYn)
-    );
-  });
-
-  // CRUD 로직
-  const handleDelete = (
-    id: number,
-    company_name: string,
-    item_name: string
-  ) => {
-    if (
-      window.confirm(
-        `${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`
-      )
-    ) {
-      setOrderItems((prev) => prev.filter((row) => row.id !== id));
+  const fetchOrderItems = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getOrderItems();
+      if (!Array.isArray(res)) {
+        setError("서버 응답 형식이 올바르지 않습니다.");
+        setOrderItems([]);
+        setDisplayedItems([]);
+        return;
+      }
+      setOrderItems(res);
+      setDisplayedItems(res);
+    } catch (err: unknown) {
+      console.error("API 호출 실패:", err);
+      setError("데이터를 불러오는 중 오류가 발생했습니다.");
+      setOrderItems([]);
+      setDisplayedItems([]);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleExcelDownload = () => {
-    exportToExcel(filteredData, "기준정보_수주대상_품목관리조회");
+  // 검색 핸들러
+  const handleTextChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
+    const { name, value } = e.target;
+    setSearchValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmitAdd = (data: OrderItems) => {
-    const newId = Math.max(...orderItems.map((d) => d.id), 0) + 1;
-    setOrderItems([...orderItems, { ...data, id: newId }]);
+  const handleSelectChange = (e: SelectChangeEvent<string>): void => {
+    const { name, value } = e.target;
+    setSearchValues((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleItemClick = (item: OrderItems) => {
+  const handleSearch = (): void => {
+    setAppliedSearchValues(searchValues);
+
+    if (
+      !searchValues.companyName &&
+      !searchValues.itemCode &&
+      !searchValues.itemName &&
+      !searchValues.useYn
+    ) {
+      setDisplayedItems(orderItems);
+      return;
+    }
+
+    const filtered = filterOrderItems(orderItems, searchValues);
+    setDisplayedItems(filtered);
+  };
+
+  // 삭제
+  const handleDelete = async (
+    id: number,
+    companyName: string,
+    itemName: string
+  ): Promise<void> => {
+    if (window.confirm(`${companyName}의 '${itemName}' 데이터를 삭제하시겠습니까?`)) {
+      try {
+        await deleteOrderItems(id);
+        await fetchOrderItems();
+      } catch (err: unknown) {
+        console.error("삭제 실패:", err);
+        alert("삭제 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  // 사용 여부 토글
+  const handleToggleUseYn = async (id: number): Promise<void> => {
+    try {
+      await restoreOrderItems(id);
+      await fetchOrderItems();
+    } catch (err: unknown) {
+      console.error("사용여부 변경 실패:", err);
+      alert("사용여부 변경 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 엑셀 다운로드
+  const handleExcelDownload = (): void => {
+    exportToExcel(displayedItems, "기준정보_수주대상_품목관리조회");
+  };
+
+  // 등록 완료 후
+  const handleSubmitAdd = async (newItem: OrderItems): Promise<void> => {
+    try {
+      // 새 항목 즉시 반영 후 전체 데이터 새로 fetch
+      setOrderItems((prev) => [...prev, newItem]);
+      setDisplayedItems((prev) => [...prev, newItem]);
+      await fetchOrderItems();
+    } catch (err: unknown) {
+      console.error("추가 후 처리 실패:", err);
+    }
+  };
+
+  // 상세 보기 클릭
+  const handleItemClick = (item: OrderItems): void => {
     setSelectedItem(item);
     setOpenDetailModal(true);
   };
 
-  // 상세 모달 내 저장 로직 (업데이트)
-  const handleItemSave = (updatedItem: OrderItems) => {
-    setOrderItems((prev) =>
-      prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
-    );
-  };
-
-  // 추가: use_yn 상태 토글 핸들러
-  const handleToggleUseYn = (id: number) => {
-    setOrderItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, use_yn: item.use_yn === "Y" ? "N" : "Y" }
-          : item
-      )
-    );
+  // 상세 수정 완료 시
+  const handleItemSave = async (): Promise<void> => {
+    await fetchOrderItems(); // ✅ 수정 후 즉시 새로고침
   };
 
   return (
@@ -207,6 +186,12 @@ export default function OrderViewPage() {
       }}
     >
       <Typography variant="h5">수주 대상 품목 관리</Typography>
+
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
       {/* 검색 영역 */}
       <Box
@@ -259,6 +244,7 @@ export default function OrderViewPage() {
             검색
           </Button>
         </Box>
+
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
             + 등록
@@ -275,105 +261,124 @@ export default function OrderViewPage() {
       </Box>
 
       {/* 테이블 영역 */}
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 900 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>ID</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>거래처명</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>품목번호</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>품목명</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>분류</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>도장방식</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>단가</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>비고</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>거래상태</TableCell>
-              <TableCell sx={{ whiteSpace: "nowrap" }}>사용여부</TableCell>
-              <TableCell align="center"></TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredData.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.company_name}</TableCell>
-                <TableCell>{row.item_code}</TableCell>
-                <TableCell>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      textDecoration: "underline",
-                      cursor: "pointer",
-                      "&:hover": {
-                        color: "primary.dark",
-                        fontWeight: "bold",
-                      },
-                    }}
-                    onClick={() => handleItemClick(row)}
-                  >
-                    {row.item_name}
-                  </Typography>
-                </TableCell>
-                <TableCell>{row.category}</TableCell>
-                <TableCell>{row.paint_type}</TableCell>
-                <TableCell>{row.unit_price}</TableCell>
-                <TableCell>{row.note}</TableCell>
-                <TableCell align="center">
-                  <Chip
-                    label={row.status === "Y" ? "거래중" : "거래종료"}
-                    color={row.status === "Y" ? "success" : "error"}
-                    size="small"
-                    sx={{ minWidth: 80 }}
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <Chip
-                    label={row.use_yn === "Y" ? "사용중" : "사용중지"}
-                    color={row.use_yn === "Y" ? "success" : "default"}
-                    size="small"
-                    sx={{ minWidth: 80 }}
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color={row.use_yn === "Y" ? "error" : "success"}
-                    onClick={() => handleToggleUseYn(row.id)}
-                    sx={{ mr: 1 }}
-                  >
-                    {row.use_yn === "Y" ? "사용 중지" : "사용"}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="error"
-                    onClick={() =>
-                      handleDelete(row.id, row.company_name, row.item_name)
-                    }
-                  >
-                    삭제
-                  </Button>
-                </TableCell>
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 900 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>거래처명</TableCell>
+                <TableCell>품목번호</TableCell>
+                <TableCell>품목명</TableCell>
+                <TableCell>분류</TableCell>
+                <TableCell>도장방식</TableCell>
+                <TableCell>단가</TableCell>
+                <TableCell>비고</TableCell>
+                <TableCell>거래상태</TableCell>
+                <TableCell>사용여부</TableCell>
+                <TableCell align="center"></TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {displayedItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
+                    <Typography color="text.secondary">
+                      조회된 수주 대상 품목이 없습니다.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                displayedItems.map((row) => (
+                  <TableRow key={row.order_item_id}>
+                    <TableCell>{row.order_item_id}</TableCell>
+                    <TableCell>{row.company_name}</TableCell>
+                    <TableCell>{row.item_code}</TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: "primary.dark",
+                            fontWeight: "bold",
+                          },
+                        }}
+                        onClick={() => handleItemClick(row)}
+                      >
+                        {row.item_name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>{row.category}</TableCell>
+                    <TableCell>{row.paint_type}</TableCell>
+                    <TableCell>{row.unit_price}</TableCell>
+                    <TableCell>{row.note}</TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={row.status === "Y" ? "거래중" : "거래종료"}
+                        color={row.status === "Y" ? "success" : "error"}
+                        size="small"
+                        sx={{ minWidth: 80 }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={row.use_yn === "Y" ? "사용중" : "사용중지"}
+                        color={row.use_yn === "Y" ? "success" : "default"}
+                        size="small"
+                        sx={{ minWidth: 80 }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color={row.use_yn === "Y" ? "error" : "success"}
+                        onClick={() => handleToggleUseYn(row.order_item_id)}
+                        sx={{ mr: 1 }}
+                      >
+                        {row.use_yn === "Y" ? "사용 중지" : "사용"}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="error"
+                        onClick={() =>
+                          handleDelete(
+                            row.order_item_id,
+                            row.company_name,
+                            row.item_name
+                          )
+                        }
+                      >
+                        삭제
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-      {/* 등록 모달 */}
       <OrderRegisterModal
         open={openModal}
         onClose={() => setOpenModal(false)}
         onSubmit={handleSubmitAdd}
+        routingList={[]} // 필요 시 라우팅 리스트 전달
       />
 
-      {/* 상세 조회 및 수정 모달 */}
       <OrderDetailModal
         open={openDetailModal}
         onClose={() => setOpenDetailModal(false)}
         data={selectedItem}
-        onSave={handleItemSave}
+        onSave={handleItemSave} // ✅ 수정 저장 시 리스트 즉시 반영
         routingList={[]}
       />
     </Box>

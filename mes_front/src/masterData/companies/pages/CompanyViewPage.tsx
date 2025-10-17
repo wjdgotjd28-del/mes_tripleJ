@@ -19,52 +19,68 @@ import {
   Button,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
-import BusinessPartnerDetailModal from "./BusinessPartnerDetailModal";
-import BusinessPartnerRegisterModal from "./BusinessPartnerRegisterModal";
-import type { Company } from "../type";
+import type { Company, StatusType } from "../../../type";
+import { deleteCompany, getCompany, updateTradeStatus } from "../api/companyApi";
+import CompanyRegisterModal from "./CompanyRegisterModal";
+import CompanyDetailModal from "./CompanyDetailModal";
 
-export default function BusinessPartnerViewPage() {
-  const initialData: Company[] = [
-    { companyId: 1, type: "거래처", companyName: "한송상사", ceoName: "김태준", bizRegNo: "123-45-67890", ceoPhone: "010-1111-1111", managerName: "홍길동", managerPhone: "010-2222-2222", managerEmail: "manager@hansong.com", address: "경기도 안산시 단원구 산업로 124", note: "프라이머, 상도 도료 납품", status: "Y" },
-    { companyId: 2, type: "매입처", companyName: "강남제비스", ceoName: "김준형", bizRegNo: "234-56-78901", ceoPhone: "010-3333-3333", managerName: "박영희", managerPhone: "010-4444-4444", managerEmail: "manager@gangnam.com", address: "경기도 화성시 남양읍 공단로 58", note: "도로, 에폭시 공급", status: "Y" },
-    { companyId: 3, type: "매입처", companyName: "페인트메카", ceoName: "박선희", bizRegNo: "345-67-89012", ceoPhone: "010-5555-5555", managerName: "이철수", managerPhone: "010-6666-6666", managerEmail: "manager@paint.com", address: "충청남도 아산시 탕정면 산업단지로 102", note: "프라이머, 상도 도료 공급", status: "N" },
-    { companyId: 4, type: "거래처", companyName: "일도포장", ceoName: "박선호", bizRegNo: "456-78-90123", ceoPhone: "010-7777-7777", managerName: "최민수", managerPhone: "010-8888-8888", managerEmail: "manager@ildo.com", address: "경기도 시흥시 정왕동 산업로 11", note: "포장재 납품", status: "Y" },
-  ];
-
-  const [allRows, setAllRows] = useState<Company[]>(initialData);
+export default function CompanyViewPage() {
+  const [allRows, setAllRows] = useState<Company[]>([]);
   const [filterType, setFilterType] = useState<string>("모든 업체");
+  const [statusFilter, setStatusFilter] = useState<string>("모든 상태");
   const [searchName, setSearchName] = useState("");
   const [searchCeo, setSearchCeo] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
+  React.useEffect(() => {
+    loadCompanyData();
+  }, [])
+  
+  const loadCompanyData = () => {
+    getCompany()
+    .then(res => setAllRows(res))
+    .catch(err => console.log(err))
+  }
+
   const handleAddCompany = (newCompany: Company) => {
     setAllRows((prev) => [...prev, newCompany]);
   };
 
-  const handleDelete = (event: React.MouseEvent, companyId: number, companyName: string) => {
+  const handleDelete = async (event: React.MouseEvent, companyId: number, companyName: string) => {
     event.stopPropagation();
     if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
+      await deleteCompany(companyId);
       setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
     }
   };
 
-  const handleStatusToggle = (event: React.MouseEvent, companyId: number) => {
+  const handleStatusToggle = async (event: React.MouseEvent, companyId: number, currentStatus: StatusType) => {
     event.stopPropagation();
-    setAllRows((prev) =>
-      prev.map((row) =>
-        row.companyId === companyId
-          ? {
-              ...row,
-              status: row.status === "Y" ? "N" : "Y",
-            }
-          : row
-      )
-    );
+    const newStatus = currentStatus === 'Y' ? 'N' : 'Y';
+    if (window.confirm(`거래 상태를 '${newStatus === 'Y' ? '거래중' : '거래 종료'}'(으)로 변경하시겠습니까?`)) {
+      try {
+        await updateTradeStatus(companyId, newStatus);
+        setAllRows((prev) =>
+          prev.map((row) =>
+            row.companyId === companyId
+              ? { ...row, status: newStatus }
+              : row
+          )
+        );
+      } catch (error) {
+        console.error("Failed to update status:", error);
+        alert("상태 변경에 실패했습니다.");
+      }
+    }
   };
 
   const handleFilterChange = (event: SelectChangeEvent<string>) => {
     setFilterType(event.target.value as string);
+  };
+
+  const handleStatusFilterChange = (event: SelectChangeEvent<string>) => {
+    setStatusFilter(event.target.value as string);
   };
 
   const handleRowClick = (company: Company) => {
@@ -80,6 +96,7 @@ export default function BusinessPartnerViewPage() {
 
   const filteredRows = allRows.filter((row) => {
     if (filterType !== "모든 업체" && row.type !== filterType) return false;
+    if (statusFilter !== "모든 상태" && row.status !== statusFilter) return false;
     if (searchName && !row.companyName.includes(searchName)) return false;
     if (searchCeo && !row.ceoName.includes(searchCeo)) return false;
     return true;
@@ -108,6 +125,19 @@ export default function BusinessPartnerViewPage() {
           </Select>
         </FormControl>
 
+        <FormControl sx={{ minWidth: 150 }} size="small">
+          <InputLabel>거래 상태</InputLabel>
+          <Select
+            value={statusFilter}
+            label="거래 상태"
+            onChange={handleStatusFilterChange}
+          >
+            <MenuItem value="모든 상태">모든 상태</MenuItem>
+            <MenuItem value="Y">거래중</MenuItem>
+            <MenuItem value="N">거래 종료</MenuItem>
+          </Select>
+        </FormControl>
+
         <TextField
           size="small"
           label="업체명 검색"
@@ -122,7 +152,7 @@ export default function BusinessPartnerViewPage() {
         />
 
         <Box sx={{ ml: "auto" }}>
-          <BusinessPartnerRegisterModal onAdd={handleAddCompany} />
+          <CompanyRegisterModal onAdd={handleAddCompany} />
         </Box>
       </Box>
 
@@ -168,7 +198,7 @@ export default function BusinessPartnerViewPage() {
                     variant="outlined"
                     size="small"
                     color={row.status === "Y" ? "warning" : "success"}
-                    onClick={(e) => handleStatusToggle(e, row.companyId as number)}
+                    onClick={(e) => handleStatusToggle(e, row.companyId as number, row.status)}
                     sx={{ mr: "1px" }}
                   >
                     {row.status === "Y" ? "거래 종료" : "거래 재개"}
@@ -189,7 +219,7 @@ export default function BusinessPartnerViewPage() {
       </TableContainer>
 
       {/* 상세 모달 */}
-      <BusinessPartnerDetailModal
+      <CompanyDetailModal
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
         company={selectedCompany}

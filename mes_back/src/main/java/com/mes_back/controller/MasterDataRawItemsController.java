@@ -46,8 +46,8 @@ public class MasterDataRawItemsController {
         return ResponseEntity.ok(updatedItem);
     }
 
-    // 원자재 품목 삭제 (soft delete)
-    @PostMapping("/raw/delete/{id}")
+    // 원자재 품목 삭제
+    @DeleteMapping("/raw/delete/{id}")
     public ResponseEntity<String> deleteRawItem(@PathVariable Long id) {
         masterDataRawItemsService.deleteMaterialItem(id);
         return ResponseEntity.ok("삭제 완료");

@@ -13,4 +13,6 @@ public interface RoutingRepository extends JpaRepository<Routing, Long> {
       @return 해당 공정 코드가 존재하면 true, 아니면 false
      */
     boolean existsByProcessCode(String processCode);
+
+//    Routing findByRoutingId(Long routingId);
 }
