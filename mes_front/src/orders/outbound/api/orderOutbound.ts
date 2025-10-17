@@ -16,4 +16,10 @@ export const getOrderOutbound = async (): Promise<OrderOutbound[]> => {
     return response.data;
 };
 
+// 출고된 이력 수정
+export const updateOrderOutbound = async (order: OrderOutbound): Promise<OrderOutbound> => {
+    const response = await axios.patch(`${BASE_URL}/orderitem/outbound`, order);
+    return response.data;
+}
+
 
