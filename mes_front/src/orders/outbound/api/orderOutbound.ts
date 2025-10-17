@@ -22,4 +22,10 @@ export const updateOrderOutbound = async (order: OrderOutbound): Promise<OrderOu
     return response.data;
 }
 
+//출고한 이력 삭제
+export const deleteOrderOutbound = async (id: number): Promise<OrderOutbound> => {
+    const response = await axios.delete(`${BASE_URL}/orderitem/outbound/${id}`);
+    return response.data;
+}
+
 
