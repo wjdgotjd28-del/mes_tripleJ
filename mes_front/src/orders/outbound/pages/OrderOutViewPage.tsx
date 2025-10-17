@@ -331,9 +331,6 @@ export default function OrderOutViewPage() {
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
         >
-          <TextField label="출고번호" value={editData?.outboundNo} disabled />
-          <TextField label="거래처명" value={editData?.customerName} disabled />
-          <TextField label="품목명" value={editData?.itemName} disabled />
           <TextField
             label="출고 수량"
             type="number"
@@ -355,6 +352,12 @@ export default function OrderOutViewPage() {
             }
             InputLabelProps={{ shrink: true }}
           />
+          <TextField label="출고번호" value={editData?.outboundNo} disabled />
+          <TextField label="거래처명" value={editData?.customerName} disabled />
+          <TextField label="품목번호" value={editData?.itemCode} disabled />
+          <TextField label="품목명" value={editData?.itemName} disabled />
+          <TextField label="분류" value={editData?.category} disabled />
+          
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditData(null)}>취소</Button>
