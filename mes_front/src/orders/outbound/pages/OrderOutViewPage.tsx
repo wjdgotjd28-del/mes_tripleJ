@@ -48,6 +48,18 @@ export default function OrderOutViewPage() {
     loadOrderOutboundData();
   }, []);
 
+  // allRows 또는 search 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
+  useEffect(() => {
+    const filtered = allRows.filter(
+      (row) =>
+        (row.customerName ?? "").includes(search.customerName) &&
+        (row.itemCode ?? "").includes(search.itemCode) &&
+        (row.itemName ?? "").includes(search.itemName) &&
+        (row.outboundNo ?? "").includes(search.outboundNo)
+    );
+    setDisplayedRows(filtered);
+  }, [allRows, search]);
+
   const loadOrderOutboundData = () => {
     getOrderOutbound()
       .then((res) => {
@@ -192,7 +204,9 @@ export default function OrderOutViewPage() {
   // ✅ 수정 저장
   const handleEditSave = () => {
     if (!editData) return;
-    setAllRows((prev) => prev.map((r) => (r.id === editData.id ? editData : r)));
+    setAllRows((prev) =>
+      prev.map((r) => (r.id === editData.id ? editData : r))
+    );
     setEditData(null);
   };
 
@@ -248,11 +262,23 @@ export default function OrderOutViewPage() {
           value={search.itemName}
           onChange={(e) => setSearch({ ...search, itemName: e.target.value })}
         />
-        <Button variant="contained" onClick={handleSearch} sx={{ ml: 1, height: 40 }}> {/* height 추가 */}
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+          sx={{ ml: 1, height: 40 }}
+        >
+          {" "}
+          {/* height 추가 */}
           검색
         </Button>
         <Box sx={{ flex: 1 }} />
-        <Button variant="outlined" endIcon={<FileDownloadIcon />} sx={{ height: 40 }}> {/* height 추가 */}
+        <Button
+          variant="outlined"
+          endIcon={<FileDownloadIcon />}
+          sx={{ height: 40 }}
+        >
+          {" "}
+          {/* height 추가 */}
           Excel
         </Button>
         <Button
@@ -260,7 +286,7 @@ export default function OrderOutViewPage() {
           color="success"
           endIcon={<AddIcon />}
           onClick={() => setRegisterOpen(true)}
-          sx={{ height: 40 }} 
+          sx={{ height: 40 }}
           // {/* height 추가 */}
         >
           출고 등록
@@ -292,7 +318,9 @@ export default function OrderOutViewPage() {
                 <TableCell>{row.outboundDate}</TableCell>
                 <TableCell>{translateCategory(row.category)}</TableCell>
                 <TableCell align="center">
-                  <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                  <Box
+                    sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                  >
                     <Button
                       variant="outlined"
                       size="small"
@@ -326,23 +354,39 @@ export default function OrderOutViewPage() {
         </Table>
       </TableContainer>
       {/* 수정 모달 */}
-      <Dialog open={!!editData} onClose={() => setEditData(null)} fullWidth>
-        <DialogTitle>출고 정보 수정</DialogTitle>
+      <Dialog
+        open={!!editData}
+        onClose={() => setEditData(null)}
+        fullWidth
+        maxWidth="sm"
+        scroll="paper"
+      >
+        <DialogTitle sx={{ fontWeight: 600, mt: 1 }}>
+          출고 정보 수정
+        </DialogTitle>
+
         <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            mt: 2,
+            overflow: "visible", // 라벨 잘림 방지
+          }}
         >
-          <TextField label="출고번호" value={editData?.outboundNo} disabled />
-          <TextField label="거래처명" value={editData?.customerName} disabled />
-          <TextField label="품목명" value={editData?.itemName} disabled />
           <TextField
             label="출고 수량"
             type="number"
             value={editData?.qty ?? ""}
-            onChange={(e) =>
+            onChange={(e) => {
+              const inputValue = e.target.value;
               setEditData((prev) =>
-                prev ? { ...prev, qty: Number(e.target.value) } : prev
-              )
-            }
+                prev
+                  ? { ...prev, qty: inputValue === "" ? 0 : Number(inputValue) }
+                  : prev
+              );
+            }}
+            fullWidth
           />
           <TextField
             label="출고 일자"
@@ -354,16 +398,58 @@ export default function OrderOutViewPage() {
               )
             }
             InputLabelProps={{ shrink: true }}
+            fullWidth
+          />
+          <TextField
+            label="출고번호"
+            value={editData?.outboundNo}
+            disabled
+            fullWidth
+          />
+          <TextField
+            label="거래처명"
+            value={editData?.customerName}
+            disabled
+            fullWidth
+          />
+          <TextField
+            label="품목번호"
+            value={editData?.itemCode}
+            disabled
+            fullWidth
+          />
+          <TextField
+            label="품목명"
+            value={editData?.itemName}
+            disabled
+            fullWidth
+          />
+          <TextField
+            label="분류"
+            value={editData?.category}
+            disabled
+            fullWidth
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditData(null)}>취소</Button>
+
+        <DialogActions
+          sx={{
+            p: 2,
+            pr: 3,
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 1,
+          }}
+        >
+          <Button onClick={() => setEditData(null)} variant="outlined">
+            취소
+          </Button>
           <Button variant="contained" onClick={handleEditSave}>
-            {" "}
-            저장{" "}
+            저장
           </Button>
         </DialogActions>
       </Dialog>
+
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
         open={registerOpen}
