@@ -11,10 +11,6 @@ import {
   TableBody,
   TableContainer,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import EditIcon from "@mui/icons-material/Edit";
@@ -38,8 +34,7 @@ export default function OrderOutViewPage() {
     outboundNo: "",
   });
 
-  // ✅ 수정 모달 상태
-  const [editData, setEditData] = useState<OrderOutbound | null>(null);
+
 
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -189,12 +184,7 @@ export default function OrderOutViewPage() {
     setDisplayedRows(filtered);
   };
 
-  // ✅ 수정 저장
-  const handleEditSave = () => {
-    if (!editData) return;
-    setAllRows((prev) => prev.map((r) => (r.id === editData.id ? editData : r)));
-    setEditData(null);
-  };
+
 
   // ✅ 삭제
   const handleDelete = (id: number) => {
@@ -325,45 +315,7 @@ export default function OrderOutViewPage() {
           </TableBody>
         </Table>
       </TableContainer>
-      {/* 수정 모달 */}
-      <Dialog open={!!editData} onClose={() => setEditData(null)} fullWidth>
-        <DialogTitle>출고 정보 수정</DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
-        >
-          <TextField label="출고번호" value={editData?.outboundNo} disabled />
-          <TextField label="거래처명" value={editData?.customerName} disabled />
-          <TextField label="품목명" value={editData?.itemName} disabled />
-          <TextField
-            label="출고 수량"
-            type="number"
-            value={editData?.qty ?? ""}
-            onChange={(e) =>
-              setEditData((prev) =>
-                prev ? { ...prev, qty: Number(e.target.value) } : prev
-              )
-            }
-          />
-          <TextField
-            label="출고 일자"
-            type="date"
-            value={editData?.outboundDate ?? ""}
-            onChange={(e) =>
-              setEditData((prev) =>
-                prev ? { ...prev, outboundDate: e.target.value } : prev
-              )
-            }
-            InputLabelProps={{ shrink: true }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditData(null)}>취소</Button>
-          <Button variant="contained" onClick={handleEditSave}>
-            {" "}
-            저장{" "}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
         open={registerOpen}
