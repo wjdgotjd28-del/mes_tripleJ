@@ -132,6 +132,7 @@ public class OrderOutboundService {
 
     }
 
+    @Transactional
     public Long deleteOrderOutbound(Long id) {
         orderOutboundRepository.deleteById(id);
         return id;
