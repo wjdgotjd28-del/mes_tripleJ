@@ -18,7 +18,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
-import { addOrderOutbound, getOrderOutbound, updateOrderOutbound } from "../api/orderOutbound";
+import { addOrderOutbound, deleteOrderOutbound, getOrderOutbound, updateOrderOutbound } from "../api/orderOutbound";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import EditOrderOutModal from "./EditOrderOutModal";
@@ -219,6 +219,7 @@ export default function OrderOutViewPage() {
   // ✅ 삭제
   const handleDelete = (id: number) => {
     if (window.confirm("이 출고 정보를 삭제하시겠습니까?")) {
+      deleteOrderOutbound(id);
       setAllRows((prev) => prev.filter((r) => r.id !== id));
     }
   };
