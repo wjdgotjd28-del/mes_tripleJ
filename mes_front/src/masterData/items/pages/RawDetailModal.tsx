@@ -91,7 +91,7 @@ export default function RawDetailModal({ open, onClose, data, onSave }: RawDetai
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Typography variant="h6">품목 상세 정보</Typography>
+        <Typography variant="h6" component="span">품목 상세 정보</Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
             onClick={isEditing ? handleSubmit : toggleEditMode}

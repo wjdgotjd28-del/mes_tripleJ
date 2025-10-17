@@ -252,7 +252,7 @@ export default function OrderDetailModal({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h6">품목 상세 정보</Typography>
+        <Typography variant="h6" component="span">품목 상세 정보</Typography>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button onClick={isEditing ? handleSubmit : toggleEditMode} color="primary" size="small" variant={isEditing ? "contained" : "outlined"}>
             {isEditing ? "저장" : "수정"}
