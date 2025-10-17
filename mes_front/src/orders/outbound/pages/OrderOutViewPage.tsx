@@ -16,7 +16,6 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReceiptIcon from "@mui/icons-material/Receipt";
@@ -24,6 +23,9 @@ import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
 import { addOrderOutbound, getOrderOutbound } from "../api/orderOutbound";
+import { exportToExcel } from "../../../Common/ExcelUtils";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -252,7 +254,13 @@ export default function OrderOutViewPage() {
           검색
         </Button>
         <Box sx={{ flex: 1 }} />
-        <Button variant="outlined" endIcon={<FileDownloadIcon />} sx={{ height: 40 }}> {/* height 추가 */}
+        {/*  오른쪽: 엑셀 다운로드 버튼 */}
+        <Button 
+          variant="outlined" 
+          endIcon={<FileDownloadIcon />} 
+          sx={{ height: 40 }} 
+          onClick={() => exportToExcel(displayedRows, "출고 이력")}> 
+        {/* height 추가 */}
           Excel
         </Button>
         <Button
@@ -326,44 +334,72 @@ export default function OrderOutViewPage() {
         </Table>
       </TableContainer>
       {/* 수정 모달 */}
-      <Dialog open={!!editData} onClose={() => setEditData(null)} fullWidth>
-        <DialogTitle>출고 정보 수정</DialogTitle>
-        <DialogContent
-          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
-        >
-          <TextField label="출고번호" value={editData?.outboundNo} disabled />
-          <TextField label="거래처명" value={editData?.customerName} disabled />
-          <TextField label="품목명" value={editData?.itemName} disabled />
-          <TextField
-            label="출고 수량"
-            type="number"
-            value={editData?.qty ?? ""}
-            onChange={(e) =>
-              setEditData((prev) =>
-                prev ? { ...prev, qty: Number(e.target.value) } : prev
-              )
-            }
-          />
-          <TextField
-            label="출고 일자"
-            type="date"
-            value={editData?.outboundDate ?? ""}
-            onChange={(e) =>
-              setEditData((prev) =>
-                prev ? { ...prev, outboundDate: e.target.value } : prev
-              )
-            }
-            InputLabelProps={{ shrink: true }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditData(null)}>취소</Button>
-          <Button variant="contained" onClick={handleEditSave}>
-            {" "}
-            저장{" "}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Dialog
+  open={!!editData}
+  onClose={() => setEditData(null)}
+  fullWidth
+  maxWidth="sm"
+  scroll="paper"
+>
+  <DialogTitle sx={{ fontWeight: 600, mt: 1 }}>출고 정보 수정</DialogTitle>
+
+  <DialogContent
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 2,
+      mt: 2,
+      overflow: "visible", // 라벨 잘림 방지
+    }}
+  >
+    <TextField
+      label="출고 수량"
+      type="number"
+      value={editData?.qty ?? ""}
+      onChange={(e) =>
+        setEditData((prev) =>
+          prev ? { ...prev, qty: Number(e.target.value) } : prev
+        )
+      }
+      fullWidth
+    />
+    <TextField
+      label="출고 일자"
+      type="date"
+      value={editData?.outboundDate ?? ""}
+      onChange={(e) =>
+        setEditData((prev) =>
+          prev ? { ...prev, outboundDate: e.target.value } : prev
+        )
+      }
+      InputLabelProps={{ shrink: true }}
+      fullWidth
+    />
+    <TextField label="출고번호" value={editData?.outboundNo} disabled fullWidth />
+    <TextField label="거래처명" value={editData?.customerName} disabled fullWidth />
+    <TextField label="품목번호" value={editData?.itemCode} disabled fullWidth />
+    <TextField label="품목명" value={editData?.itemName} disabled fullWidth />
+    <TextField label="분류" value={editData?.category} disabled fullWidth />
+  </DialogContent>
+
+  <DialogActions
+    sx={{
+      p: 2,
+      pr: 3,
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 1,
+    }}
+  >
+    <Button onClick={() => setEditData(null)} variant="outlined">
+      취소
+    </Button>
+    <Button variant="contained" onClick={handleEditSave}>
+      저장
+    </Button>
+  </DialogActions>
+</Dialog>
+
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
         open={registerOpen}
