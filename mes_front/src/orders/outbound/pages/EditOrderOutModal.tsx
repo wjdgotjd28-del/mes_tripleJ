@@ -8,6 +8,10 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { OrderOutbound } from "../../../type";
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs, { type Dayjs } from 'dayjs';
 
 interface EditOrderOutModalProps {
   open: boolean;
@@ -29,6 +33,7 @@ export default function EditOrderOutModal({
     data: null,
     tempQtyInput: "",
   });
+  const [dateValue, setDateValue] = useState<Dayjs | null>(null);
 
   useEffect(() => {
     if (editData) {
@@ -36,11 +41,13 @@ export default function EditOrderOutModal({
         data: editData,
         tempQtyInput: editData.qty.toString(),
       });
+      setDateValue(editData.outboundDate ? dayjs(editData.outboundDate) : null);
     } else {
       setEditState({
         data: null,
         tempQtyInput: "",
       });
+      setDateValue(null);
     }
   }, [editData]);
 
@@ -51,12 +58,14 @@ export default function EditOrderOutModal({
     const apiPayload = {
       ...editState.data,
       qty: parsedQty,
+      outboundDate: dateValue ? dateValue.format('YYYY-MM-DD') : '',
     };
     onSave(apiPayload);
   };
 
   const isSaveDisabled =
-    !editState.data?.outboundDate ||
+    !dateValue ||
+    !dateValue.isValid() ||
     editState.tempQtyInput.trim() === '' ||
     isNaN(Number(editState.tempQtyInput)) ||
     Number(editState.tempQtyInput) < 0;
@@ -86,19 +95,29 @@ export default function EditOrderOutModal({
           fullWidth
           InputProps={{ inputProps: { min: 0 } }}
         />
-        <TextField
-          label="출고 일자"
-          type="date"
-          value={String(editState.data?.outboundDate ?? "")}
-          onChange={(e) => {
-            setEditState((prev) => ({
-              ...prev,
-              data: prev.data ? { ...prev.data, outboundDate: e.target.value } : null,
-            }));
-          }}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="출고 일자"
+            value={dateValue}
+            onChange={(newValue) => {
+              setDateValue(newValue);
+            }}
+            format="YYYY-MM-DD"
+            slotProps={{
+              textField: {
+                fullWidth: true,
+              },
+              popper: {
+                placement: 'bottom-end',
+              },
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderWidth: '1px',
+              },
+            }}
+          />
+        </LocalizationProvider>
         <TextField
           label="출고번호"
           value={editState.data?.outboundNo ?? ""}
