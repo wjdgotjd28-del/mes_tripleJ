@@ -86,15 +86,15 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
 
   const handleRoutingToggle = (routing: RoutingFormData) => {
     setSelectedRouting(prev => {
-      const exists = prev.find(r => r.routingId === routing.routingId);
-      if (exists) return prev.filter(r => r.routingId !== routing.routingId);
+      const exists = prev.find(r => r.routing_id === routing.routing_id);
+      if (exists) return prev.filter(r => r.routing_id !== routing.routing_id);
       return [...prev, { ...routing, process_no: prev.length + 1 }];
     });
   };
 
   const handleOrderChange = (id: number, newOrder: number) => {
     if (newOrder < 1) newOrder = 1;
-    setSelectedRouting(prev => prev.map(r => r.routingId === id ? { ...r, process_no: newOrder } : r));
+    setSelectedRouting(prev => prev.map(r => r.routing_id === id ? { ...r, process_no: newOrder } : r));
   };
 
   // const parseDuration = (timeStr: string | undefined) => {
@@ -128,7 +128,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
 
     if (selectedRouting.length > 0) {
       const routingData = selectedRouting.sort((a, b) => a.process_no - b.process_no).map((r, i) => ({
-        routing_id: r.routingId,
+        routing_id: r.routing_id,
         process_no: i + 1,
         // process_code: r.processCode,
         // process_name: r.processName,
@@ -340,9 +340,9 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
                   </TableHead>
                   <TableBody>
                     {routingList.map((r, idx) => {
-                      const checked = selectedRouting.some((sr) => sr.routingId === r.routingId);
+                      const checked = selectedRouting.some((sr) => sr.routing_id === r.routing_id);
                       return (
-                        <TableRow key={r.routingId} hover>
+                        <TableRow key={r.routing_id} hover>
                           <TableCell padding="checkbox">
                             <Checkbox
                               checked={checked}
@@ -350,9 +350,9 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
                             />
                           </TableCell>
                           <TableCell>{idx + 1}</TableCell>
-                          <TableCell>{r.processCode}</TableCell>
-                          <TableCell>{r.processName}</TableCell>
-                          <TableCell>{r.processTime}</TableCell>
+                          <TableCell>{r.process_code}</TableCell>
+                          <TableCell>{r.process_name}</TableCell>
+                          <TableCell>{r.process_time}</TableCell>
                           <TableCell>{r.note || "-"}</TableCell>
                         </TableRow>
                       );
@@ -382,7 +382,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
                     </TableHead>
                     <TableBody>
                       {sortedSelectedRouting.map((r) => (
-                        <TableRow key={r.routingId}>
+                        <TableRow key={r.routing_id}>
                           <TableCell>
                             <TextField
                               type="number"
@@ -391,13 +391,13 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
                               inputProps={{ min: 1, style: { width: 50 } }}
                               onChange={(e) => {
                                 const val = parseInt(e.target.value, 10);
-                                if (!isNaN(val) && val > 0) handleOrderChange(r.routingId, val);
+                                if (!isNaN(val) && val > 0) handleOrderChange(r.routing_id, val);
                               }}
                             />
                           </TableCell>
-                          <TableCell>{r.processCode}</TableCell>
-                          <TableCell>{r.processName}</TableCell>
-                          <TableCell>{r.processTime}</TableCell>
+                          <TableCell>{r.process_code}</TableCell>
+                          <TableCell>{r.process_name}</TableCell>
+                          <TableCell>{r.process_time}</TableCell>
                           <TableCell>{r.note || "-"}</TableCell>
                         </TableRow>
                       ))}
