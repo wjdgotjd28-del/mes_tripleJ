@@ -4,7 +4,11 @@ import com.mes_back.constant.OrderCategory;
 import lombok.*;
 import java.time.LocalDate;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class OrderOutboundDto {
     private Long id;
     private Long orderInboundId;
