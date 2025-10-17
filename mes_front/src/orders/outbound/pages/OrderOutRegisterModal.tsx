@@ -27,6 +27,7 @@ type Props = {
   inbounds: Inbound[];
 };
 
+ 
 // Read-only 필드에 적용할 공통 스타일 정의
 const ReadOnlyInputProps = {
     readOnly: true,
@@ -45,13 +46,24 @@ export default function OrderOutRegisterModal({
   open,
   onClose,
   onSubmit,
-  inbounds,
 }: Props) {
   const [selected, setSelected] = useState<Inbound | null>(null);
   const [form, setForm] = useState({
     outboundQty: "",
     outboundDate: "",
   });
+
+  const [inbounds] = useState<Inbound[]>([
+    {
+      orderInboundId: 101,
+      lotNo: "LOT-20251016-01",
+      customerName: "일도테크",
+      itemName: "페인트",
+      itemCode: "ITE001",
+      inboundQty: 100,
+      category: "방산",
+      inboundDate: "2025-10-16",
+ }])
 
   const [search, setSearch] = useState({
     customerName: "",
