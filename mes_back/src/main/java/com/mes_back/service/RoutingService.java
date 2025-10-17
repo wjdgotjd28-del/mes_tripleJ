@@ -3,6 +3,7 @@ package com.mes_back.service;
 import com.mes_back.dto.RoutingDTO;
 import com.mes_back.entity.Routing;
 import com.mes_back.repository.RoutingRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,15 +11,11 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class RoutingService {
 
     // Routing 엔티티에 대한 데이터 접근을 위한 Repository 의존성 주입
     private final RoutingRepository routingRepository;
-
-    // 생성자 주입 방식으로 Repository를 주입받음
-    public RoutingService(RoutingRepository routingRepository) {
-        this.routingRepository = routingRepository;
-    }
 
     /**
      * 새로운 공정 정보를 저장합니다.

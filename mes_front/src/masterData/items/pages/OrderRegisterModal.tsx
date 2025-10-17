@@ -121,7 +121,6 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
       paint_type: newData.paint_type,
       note: newData.note || "",
       use_yn: newData.use_yn,
-      status: newData.status
     };
 
     formData.append("orderItem", new Blob([JSON.stringify(orderItemData)], { type: "application/json" }));
@@ -166,7 +165,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }} component="div">
         <Typography variant="h6">수주 대상 품목 등록</Typography>
         <Box>
           <Button onClick={handleSubmit} variant="contained" color="primary">등록</Button>
@@ -229,7 +228,6 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
                 value={newData.category ?? "GENERAL"}
                 onChange={(e) => {
                   const selectedValue = e.target.value;
-                  console.log("Select onChange - selected value:", selectedValue); // 디버깅
                   handleChange("category", selectedValue);
                 }}
                 size="small"

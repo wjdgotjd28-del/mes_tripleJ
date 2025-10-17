@@ -71,7 +71,6 @@ public class Company {
         this.managerPhone = companyDto.getManagerPhone();
         this.managerEmail = companyDto.getManagerEmail();
         this.status = companyDto.getStatus();
-
     }
 
     public void updateStatus(String status) {

@@ -33,6 +33,13 @@
   }
 }
 
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
 .card {
   padding: 2em;
 }

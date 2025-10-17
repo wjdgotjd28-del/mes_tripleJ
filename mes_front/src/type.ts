@@ -27,7 +27,7 @@ export interface OrderItems {
 
 // 원자재 품목 데이터 타입
 export interface RawItems {
-  material_item_id: number;
+  material_item_id?: number;
   company_name: string;
   item_code: string;
   item_name: string;

@@ -298,6 +298,14 @@ export default function OrderDetailModal({
               <Typography color="text.secondary" alignSelf="center">단가</Typography>
               <TextField type="number" value={editData.unit_price ?? 0} onChange={e=>handleChange("unit_price", parseInt(e.target.value, 10) || 0)} size="small" fullWidth InputProps={{ readOnly: !isEditing }} />
 
+              <Typography color="text.secondary" alignSelf="center">도장방식</Typography>
+              <FormControl>
+                <RadioGroup row value={editData.paint_type ?? "LIQUID"} onChange={e=>handleChange("paint_type", e.target.value)}>
+                  <FormControlLabel value="LIQUID" control={<Radio />} label="액체" disabled={!isEditing}/>
+                  <FormControlLabel value="POWDER" control={<Radio />} label="분체" disabled={!isEditing}/>
+                </RadioGroup>
+              </FormControl>
+
               <Typography color="text.secondary" alignSelf="center">사용여부</Typography>
               <FormControl>
                 <RadioGroup row value={editData.use_yn ?? "Y"} onChange={e=>handleChange("use_yn", e.target.value)}>

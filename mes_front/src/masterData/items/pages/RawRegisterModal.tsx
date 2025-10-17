@@ -8,13 +8,9 @@ import {
   DialogTitle,
   DialogContent,
   MenuItem,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
   Typography,
   IconButton,
+  Divider
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import type { RawItems } from "../../../type";
@@ -27,7 +23,7 @@ interface RawRegisterModalProps {
 }
 
 export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegisterModalProps) {
-  const [newData, setNewData] = useState<Partial<RawItems>>({
+  const [newData, setNewData] = useState<RawItems>({
     company_name: "",
     item_code: "",
     item_name: "",
@@ -40,7 +36,12 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
     use_yn: "Y",
   });
 
-  // 한글 ↔ 영어 카테고리 매핑
+  const categoryMapReverse: Record<string, string> = {
+    PAINT: "페인트",
+    THINNER: "신나",
+    CLEANER: "세척제",
+    HARDENER: "경화제",
+  };
   const categoryMap: Record<string, string> = {
     페인트: "PAINT",
     신나: "THINNER",
@@ -49,7 +50,7 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
   };
 
   const handleChange = (field: keyof RawItems, value: string | number) => {
-    setNewData((prev) => ({ ...prev, [field]: value }));
+    setNewData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
@@ -62,14 +63,7 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
       return;
     }
 
-    // 카테고리 한글 → 영어로 변환
-    const payload: RawItems = {
-      ...(newData as RawItems),
-      category: (categoryMap[newData.category as string] || newData.category!) as RawItems["category"],
-    };
-
-
-    await createRawItems(payload);
+    await createRawItems(newData);
     onSubmit();
     handleClose();
   };
@@ -92,102 +86,125 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-      <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }} component="div">
         <Typography variant="h6">원자재 품목 등록</Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Box>
           <Button onClick={handleSubmit} variant="contained" color="primary">등록</Button>
-          <IconButton onClick={handleClose} size="small"><CloseIcon /></IconButton>
+          <IconButton onClick={handleClose}><CloseIcon /></IconButton>
         </Box>
       </DialogTitle>
 
-      <DialogContent>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
-          <TextField
-            label="업체명"
-            value={newData.company_name}
-            onChange={(e) => handleChange("company_name", e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="품목번호"
-            value={newData.item_code}
-            onChange={(e) => handleChange("item_code", e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="품목명"
-            value={newData.item_name}
-            onChange={(e) => handleChange("item_name", e.target.value)}
-            fullWidth
-            required
-          />
-          <TextField
-            label="제조사"
-            value={newData.manufacturer}
-            onChange={(e) => handleChange("manufacturer", e.target.value)}
-            fullWidth
-          />
-
-          <TextField
-            label="분류"
-            select
-            fullWidth
-            value={Object.keys(categoryMap).find(k => categoryMap[k] === newData.category) || ""}
-            onChange={(e) => handleChange("category", e.target.value)}
-            required
-          >
-            {Object.keys(categoryMap).map((v) => (
-              <MenuItem key={v} value={v}>{v}</MenuItem>
-            ))}
-          </TextField>
-
-          <Box sx={{ display: "flex", gap: 1 }}>
+      <DialogContent dividers>
+        {/* 기본정보 */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" color="primary" gutterBottom>기본정보</Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Box sx={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 2 }}>
+            <Typography color="text.secondary" alignSelf="center">업체명</Typography>
             <TextField
-              label="규격(양)"
-              type="number"
-              value={newData.spec_qty ?? ""}
-              onChange={(e) => handleChange("spec_qty", parseInt(e.target.value) || 0)}
+              value={newData.company_name}
+              onChange={(e) => handleChange("company_name", e.target.value)}
+              size="small"
               fullWidth
               required
             />
+
+            <Typography color="text.secondary" alignSelf="center">품목번호</Typography>
             <TextField
-              label="규격(단위)"
+              value={newData.item_code}
+              onChange={(e) => handleChange("item_code", e.target.value)}
+              size="small"
+              fullWidth
+              required
+            />
+
+            <Typography color="text.secondary" alignSelf="center">품목명</Typography>
+            <TextField
+              value={newData.item_name}
+              onChange={(e) => handleChange("item_name", e.target.value)}
+              size="small"
+              fullWidth
+              required
+            />
+
+            <Typography color="text.secondary" alignSelf="center">분류</Typography>
+            <TextField
+              select
+              value={categoryMapReverse[newData.category] || newData.category}
+              onChange={(e) => handleChange("category", categoryMap[e.target.value])}
+              size="small"
+              fullWidth
+              required
+            >
+              {Object.keys(categoryMap).map((value) => (
+                <MenuItem key={value} value={value}>{value}</MenuItem>
+              ))}
+            </TextField>
+          </Box>
+        </Box>
+
+        {/* 상세정보 */}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" color="primary" gutterBottom>상세정보</Typography>
+          <Divider sx={{ mb: 2 }} />
+          <Box sx={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 2 }}>
+            <Typography color="text.secondary" alignSelf="center">규격(양)</Typography>
+            <TextField
+              type="number"
+              value={newData.spec_qty}
+              onChange={(e) => handleChange("spec_qty", Number(e.target.value))}
+              size="small"
+              fullWidth
+              required
+            />
+
+            <Typography color="text.secondary" alignSelf="center">규격(단위)</Typography>
+            <TextField
               value={newData.spec_unit}
               onChange={(e) => handleChange("spec_unit", e.target.value)}
+              size="small"
               fullWidth
               required
             />
+
+            <Typography color="text.secondary" alignSelf="center">제조사</Typography>
+            <TextField
+              value={newData.manufacturer}
+              onChange={(e) => handleChange("manufacturer", e.target.value)}
+              size="small"
+              fullWidth
+            />
+
+            <Typography color="text.secondary" alignSelf="center">색상</Typography>
+            <TextField
+              value={newData.color}
+              onChange={(e) => handleChange("color", e.target.value)}
+              size="small"
+              fullWidth
+            />
+
+            {/* <Typography color="text.secondary" alignSelf="center">사용여부</Typography>
+            <FormControl component="fieldset">
+              <RadioGroup
+                row
+                value={newData.use_yn}
+                onChange={(e) => handleChange("use_yn", e.target.value as RawItems["use_yn"])}
+              >
+                <FormControlLabel value="Y" control={<Radio />} label="Y" />
+                <FormControlLabel value="N" control={<Radio />} label="N" />
+              </RadioGroup>
+            </FormControl> */}
+
+            <Typography color="text.secondary" alignSelf="center">비고</Typography>
+            <TextField
+              value={newData.note}
+              onChange={(e) => handleChange("note", e.target.value)}
+              size="small"
+              fullWidth
+              multiline
+              minRows={3}
+            />
           </Box>
-
-          <TextField
-            label="색상"
-            value={newData.color}
-            onChange={(e) => handleChange("color", e.target.value)}
-            fullWidth
-          />
-
-          <FormControl component="fieldset">
-            <FormLabel>사용여부</FormLabel>
-            <RadioGroup
-              row
-              value={newData.use_yn || "Y"}
-              onChange={(e) => handleChange("use_yn", e.target.value)}
-            >
-              <FormControlLabel value="Y" control={<Radio />} label="Y" />
-              <FormControlLabel value="N" control={<Radio />} label="N" />
-            </RadioGroup>
-          </FormControl>
-
-          <TextField
-            label="비고"
-            value={newData.note}
-            onChange={(e) => handleChange("note", e.target.value)}
-            fullWidth
-            multiline
-            rows={3}
-          />
         </Box>
       </DialogContent>
     </Dialog>

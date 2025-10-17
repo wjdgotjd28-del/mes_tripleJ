@@ -36,15 +36,15 @@ export default function RawViewPage() {
 
   // ✅ 영어 → 한글 매핑 (표시용)
   const categoryMap: Record<string, string> = {
-    paint: "페인트",
-    thinner: "신나",
-    cleaner: "세척제",
-    hardener: "경화제",
+    "PAINT": "페인트",
+    "THINNER": "신나",
+    "CLEANER": "세척제",
+    "HARDENER": "경화제",
   };
 
   const useYnMap: Record<string, string> = {
-    Y: "사용중",
-    N: "사용중지",
+    "Y": "사용중",
+    "N": "사용중지",
   };
 
   useEffect(() => {
@@ -57,8 +57,6 @@ export default function RawViewPage() {
       setError(null);
 
       const res = await getRawItems();
-      console.log("✅ API 응답:", res);
-
       if (!Array.isArray(res)) {
         console.error("❌ API 응답이 배열이 아닙니다:", res);
         setError("서버 응답 형식이 올바르지 않습니다.");
@@ -234,6 +232,7 @@ export default function RawViewPage() {
                 <TableCell>비고</TableCell>
                 <TableCell>사용여부</TableCell>
                 <TableCell></TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -276,15 +275,17 @@ export default function RawViewPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button onClick={() => handleToggleUseYn(row.material_item_id)} size="small">
+                      <Button onClick={() => handleToggleUseYn(row.material_item_id!)} size="small">
                         {row.use_yn === "Y" ? "사용 중지" : "복원"}
                       </Button>
+                    </TableCell>
+                    <TableCell>
                       <Button
                         variant="outlined"
                         size="small"
                         color="error"
                         onClick={() =>
-                          handleDelete(row.material_item_id, row.company_name, row.item_name)
+                          handleDelete(row.material_item_id!, row.company_name, row.item_name)
                         }
                       >
                         삭제
