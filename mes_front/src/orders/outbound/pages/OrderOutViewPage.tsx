@@ -16,7 +16,6 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ReceiptIcon from "@mui/icons-material/Receipt";
@@ -24,6 +23,9 @@ import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { Inbound, OrderOutbound } from "../../../type";
 import { addOrderOutbound, getOrderOutbound } from "../api/orderOutbound";
+import { exportToExcel } from "../../../Common/ExcelUtils";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -252,7 +254,13 @@ export default function OrderOutViewPage() {
           검색
         </Button>
         <Box sx={{ flex: 1 }} />
-        <Button variant="outlined" endIcon={<FileDownloadIcon />} sx={{ height: 40 }}> {/* height 추가 */}
+        {/*  오른쪽: 엑셀 다운로드 버튼 */}
+        <Button 
+          variant="outlined" 
+          endIcon={<FileDownloadIcon />} 
+          sx={{ height: 40 }} 
+          onClick={() => exportToExcel(displayedRows, "출고 이력")}> 
+        {/* height 추가 */}
           Excel
         </Button>
         <Button
