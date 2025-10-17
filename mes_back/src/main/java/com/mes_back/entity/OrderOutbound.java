@@ -58,7 +58,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
     @Entity
     @Table(name = "order_outbound")
@@ -66,6 +70,8 @@ import java.time.LocalDate;
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
+    @SQLDelete(sql = "UPDATE order_outbound SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
+    @Where(clause = "deleted_at IS NULL")
     public class OrderOutbound {
 
         @Id
@@ -99,6 +105,9 @@ import java.time.LocalDate;
 
         @Column(name = "outbound_date", nullable = false)
         private LocalDate outboundDate;
+
+        @Column(name = "deleted_at", columnDefinition = "TIMESTAMP(0)", nullable = true)
+        private LocalDateTime deletedAt;
 
         public void updateOrderOutbound(OrderOutboundDto orderOutboundDto){
             this.qty = orderOutboundDto.getQty();
