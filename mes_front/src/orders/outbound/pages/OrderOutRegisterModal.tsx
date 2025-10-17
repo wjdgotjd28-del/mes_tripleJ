@@ -24,7 +24,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: OrderOutbound) => void;
-  inbounds: Inbound[];
+ 
 };
 
  
