@@ -55,7 +55,7 @@ export default function OrderOutRegisterModal({
 
   const [inbounds] = useState<Inbound[]>([
     {
-      orderInboundId: 101,
+      orderInboundId: 1,
       lotNo: "LOT-20251016-01",
       customerName: "일도테크",
       itemName: "페인트",

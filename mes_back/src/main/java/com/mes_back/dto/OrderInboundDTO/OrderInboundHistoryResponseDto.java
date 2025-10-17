@@ -3,10 +3,7 @@ package com.mes_back.dto.OrderInboundDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mes_back.constant.OrderCategory;
 import com.mes_back.constant.PaintType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -14,6 +11,8 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@RequiredArgsConstructor
+
 public class OrderInboundHistoryResponseDto {
 
     @JsonProperty("order_inbound_id")
@@ -45,4 +44,6 @@ public class OrderInboundHistoryResponseDto {
 
     @JsonProperty("paint_type")
     private PaintType paintType;
+
+
 }

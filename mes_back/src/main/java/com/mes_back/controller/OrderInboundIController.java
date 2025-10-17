@@ -1,6 +1,8 @@
 package com.mes_back.controller;
 
+import com.mes_back.dto.OrderInboundDTO.OrderInboundHistoryResponseDto;
 import com.mes_back.dto.OrderInboundDTO.OrderInboundItemRequestDto;
+import com.mes_back.entity.OrderInbound;
 import com.mes_back.service.OrderInboundService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,4 +26,11 @@ public class OrderInboundIController {
         List<OrderInboundItemRequestDto> OrderInboundItemRequestDtos = orderInboundService.findAllByOrderInbound();
         return ResponseEntity.ok(OrderInboundItemRequestDtos);
     }
+
+    // 수주 출고 등록에서 쓰이는 입고 조회용
+    @GetMapping("/outbound")
+    public List<OrderInboundHistoryResponseDto> findInboundForOutbound() {
+        return orderInboundService.findInboundForOutbound();
+    }
+
 }
