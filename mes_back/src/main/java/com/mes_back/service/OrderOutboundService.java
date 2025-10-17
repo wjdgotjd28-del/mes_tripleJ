@@ -126,7 +126,7 @@ public class OrderOutboundService {
     @Transactional
     public OrderOutboundDto updateOrderOutbound(OrderOutboundDto orderOutboundDto) {
         OrderOutbound orderOutbound = orderOutboundRepository.findById(orderOutboundDto.getId())
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException("OrderOutbound not found with id: " + orderOutboundDto.getId()));
         orderOutbound.updateOrderOutbound(orderOutboundDto);
         return orderOutboundDto;
 
