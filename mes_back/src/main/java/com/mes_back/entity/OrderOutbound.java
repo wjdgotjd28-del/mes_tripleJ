@@ -52,6 +52,7 @@
     package com.mes_back.entity;
 
 import com.mes_back.constant.OrderCategory;
+import com.mes_back.dto.OrderOutboundDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -98,6 +99,11 @@ import java.time.LocalDate;
 
         @Column(name = "outbound_date", nullable = false)
         private LocalDate outboundDate;
+
+        public void updateOrderOutbound(OrderOutboundDto orderOutboundDto){
+            this.qty = orderOutboundDto.getQty();
+            this.outboundDate = orderOutboundDto.getOutboundDate();
+        }
      }
 
 
