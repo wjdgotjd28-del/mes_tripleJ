@@ -17,7 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
-import type { Inbound, OrderOutbound } from "../../../type";
+import type { OrderOutbound } from "../../../type";
 import { addOrderOutbound, deleteOrderOutbound, getOrderOutbound, updateOrderOutbound } from "../api/orderOutbound";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -68,109 +68,8 @@ export default function OrderOutViewPage() {
       .catch((err) => console.log(err));
   };
 
-  // ✅ 등록 모달용 입고 데이터 샘플
-  const [inbounds] = useState<Inbound[]>([
-    {
-      orderInboundId: 101,
-      lotNo: "LOT-20251016-01",
-      customerName: "일도테크",
-      itemName: "페인트",
-      itemCode: "ITE001",
-      inboundQty: 100,
-      category: "방산",
-      inboundDate: "2025-10-16",
-    },
-    {
-      orderInboundId: 102,
-      lotNo: "LOT-20251016-02",
-      customerName: "삼성전자",
-      itemName: "컴퓨터",
-      itemCode: "ITE002",
-      inboundQty: 30,
-      category: "전자",
-      inboundDate: "2025-10-15",
-    },
-    {
-      orderInboundId: 103,
-      lotNo: "LOT-20251016-03",
-      customerName: "LG화학",
-      itemName: "화학물질A",
-      itemCode: "LGC001",
-      inboundQty: 200,
-      category: "화학",
-      inboundDate: "2025-10-14",
-    },
-    {
-      orderInboundId: 104,
-      lotNo: "LOT-20251016-04",
-      customerName: "현대모비스",
-      itemName: "자동차부품",
-      itemCode: "HMB001",
-      inboundQty: 500,
-      category: "자동차",
-      inboundDate: "2025-10-13",
-    },
-    {
-      orderInboundId: 105,
-      lotNo: "LOT-20251016-05",
-      customerName: "셀트리온",
-      itemName: "바이오시밀러",
-      itemCode: "CEL001",
-      inboundQty: 150,
-      category: "바이오",
-      inboundDate: "2025-10-12",
-    },
-    {
-      orderInboundId: 106,
-      lotNo: "LOT-20251016-06",
-      customerName: "포스코",
-      itemName: "철강코일",
-      itemCode: "POS001",
-      inboundQty: 1000,
-      category: "철강",
-      inboundDate: "2025-10-11",
-    },
-    {
-      orderInboundId: 107,
-      lotNo: "LOT-20251016-07",
-      customerName: "삼성SDI",
-      itemName: "배터리",
-      itemCode: "SDI001",
-      inboundQty: 300,
-      category: "전자",
-      inboundDate: "2025-10-10",
-    },
-    {
-      orderInboundId: 108,
-      lotNo: "LOT-20251016-08",
-      customerName: "SK하이닉스",
-      itemName: "반도체웨이퍼",
-      itemCode: "SKH001",
-      inboundQty: 800,
-      category: "반도체",
-      inboundDate: "2025-10-09",
-    },
-    {
-      orderInboundId: 109,
-      lotNo: "LOT-20251016-09",
-      customerName: "아모레퍼시픽",
-      itemName: "화장품원료",
-      itemCode: "AMO001",
-      inboundQty: 250,
-      category: "화장품",
-      inboundDate: "2025-10-08",
-    },
-    {
-      orderInboundId: 110,
-      lotNo: "LOT-20251016-10",
-      customerName: "CJ제일제당",
-      itemName: "식품첨가물",
-      itemCode: "CJF001",
-      inboundQty: 400,
-      category: "식품",
-      inboundDate: "2025-10-07",
-    },
-  ]);
+  
+   
 
   // ✅ 출고 등록 처리
   const handleRegister = async (data: OrderOutbound) => {
@@ -365,7 +264,6 @@ export default function OrderOutViewPage() {
         open={registerOpen}
         onClose={() => setRegisterOpen(false)}
         onSubmit={handleRegister}
-        inbounds={inbounds} // ✅ 모달에서 요구하는 inbounds prop
       />
     </Box>
   );
