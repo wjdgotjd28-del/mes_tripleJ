@@ -29,5 +29,10 @@ public class OrderInboundIController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/history")
+    public ResponseEntity<List<OrderInboundDTO>> findAllHistory() {
+        List<OrderInboundDTO> orderInboundDTOS = orderInboundService.findAllByOrderInbound();
+        return ResponseEntity.ok(orderInboundDTOS);
+    }
 
 }
