@@ -1,7 +1,7 @@
 package com.mes_back.controller;
 
 
-import com.mes_back.dto.OrderInboundDto;
+import com.mes_back.dto.OrderInboundDTO;
 import com.mes_back.service.OrderInboundService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import java.util.List;
 public class OrderInboundIController {
 
     private final OrderInboundService orderInboundService;
-]
+
 //    @GetMapping("/items")
 //    public ResponseEntity<List<OrderInboundItemRequestDto> findAllItems() {
 //        List<OrderInboundItemRequestDto> OrderInboundItemRequestDtos = orderInboundService.findAllByOrderInbound();
@@ -44,8 +44,8 @@ public class OrderInboundIController {
 //        return ResponseEntity.ok(OrderInboundItemRequestDtos);
 //    }
 
-    @GetMapping("/orderoutbound")
-    public List<OrderInboundDto> findInboundHistoriesForOutbound() {
-        return orderInboundService.findInboundHistoriesForOutbound();
-    }
+//    @GetMapping("/orderoutbound")
+//    public List<OrderInboundDto> findInboundHistoriesForOutbound() {
+//        return orderInboundService.findInboundHistoriesForOutbound();
+//    }
 }
