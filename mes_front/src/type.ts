@@ -77,6 +77,7 @@ export type RoutingFormData = RoutingCreateData & {
 
 export type RoutingFormDataWithProcessNo = RoutingFormData & {
   process_no: number;
+  id?: number;
 };
 
 // 수주 출고 
@@ -104,7 +105,6 @@ export type Inbound = {
   inboundDate: string;
 };
 
-
 // 원자재 재고 현황 테이블 타입
 export type RawMaterialInventoryStatus = {
   id: number;
@@ -115,7 +115,6 @@ export type RawMaterialInventoryStatus = {
   unit: string;
 };
 
-
 export type OrderInView = {
   id: number;
   customer_name: string;
@@ -125,3 +124,11 @@ export type OrderInView = {
   category: string;
   note: string;
 }
+
+export type OrderProcessTracking = {
+  id: number;
+  order_inbound_id: number;
+  order_item_routing_id: number;
+  process_start_time: string | null;
+  process_status: number;
+};

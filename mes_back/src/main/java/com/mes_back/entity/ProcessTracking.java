@@ -1,11 +1,15 @@
 package com.mes_back.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "process_tracking")
+@Getter
+@Setter
 public class ProcessTracking {
 
     @Id
@@ -21,5 +25,9 @@ public class ProcessTracking {
     private OrderItemRouting orderItemRouting;
 
     @Column(name = "process_start_time", nullable = false)
-    private LocalDate processStartTime;
+    private LocalDateTime processStartTime;
+
+    @Column(name = "process_status", nullable = false)
+    private Integer processStatus;
+
 }

@@ -27,7 +27,7 @@ import {
 import { getOrderItemsdtl } from "../../../masterData/items/api/OrderApi";
 import OrdersInDocModal from "./OrdersInDocModal";
 import type { OrderItems, RoutingFormData } from "../../../type";
-import OrdersProcessStatus from "../../processStatus/pages/ordersProcessStatus";
+import OrdersProcessStatus from "../../processStatus/pages/OrdersProcessTrackings";
 //  샘플 데이터 (입고된 수주 목록)
 const sampleData = [
   {
@@ -168,13 +168,15 @@ export default function InboundHistoryPage() {
   // Lot 번호 클릭
   const [openProcessModal, setOpenProcessModal] = useState(false);
   const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<RoutingFormData[]>([]);
+  const [selectedInboundId, setSelectedInboundId] = useState<number>();
   
-  const handleLotClick = async (itemId: number, lot_no: string) => {
+  const handleLotClick = async (itemId: number, lot_no: string, inboundId: number) => {
     try {
       const data = await getOrderItemsdtl(itemId);
       setSelectedItem(data);
       setSelectedRoutingSteps(data.routing || []);
       setSelectedLotNo(lot_no);
+      setSelectedInboundId(inboundId);
       setOpenProcessModal(true);
     } catch (err) {
       console.error("공정 현황 조회 실패", err);
@@ -295,7 +297,7 @@ export default function InboundHistoryPage() {
                         cursor: "pointer",
                         "&:hover": { color: "primary.dark", fontWeight: "bold" },
                       }}
-                      onClick={() => handleLotClick(row.id, row.lot_no)}
+                      onClick={() => handleLotClick(row.id, row.lot_no, row.id)}
                     >
                     {row.lot_no}
                   </Typography>
@@ -410,6 +412,7 @@ export default function InboundHistoryPage() {
           lotNo={selectedLotNo}
           orderItem={selectedItem}
           routingSteps={selectedRoutingSteps}
+          inboundId={selectedInboundId}
         />
       )}
     </Box>
