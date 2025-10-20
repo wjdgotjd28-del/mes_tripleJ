@@ -33,6 +33,13 @@ export default function CompanyViewPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
+  const [appliedFilters, setAppliedFilters] = useState({
+    filterType: "모든 업체",
+    statusFilter: "모든 상태",
+    searchName: "",
+    searchCeo: "",
+  });
+
   React.useEffect(() => {
     loadCompanyData();
   }, [])
@@ -83,6 +90,15 @@ export default function CompanyViewPage() {
     setStatusFilter(event.target.value as string);
   };
 
+  const handleSearch = () => {
+    setAppliedFilters({
+      filterType,
+      statusFilter,
+      searchName,
+      searchCeo,
+    });
+  };
+
   const handleRowClick = (company: Company) => {
     setSelectedCompany(company);
     setDetailOpen(true);
@@ -105,10 +121,10 @@ export default function CompanyViewPage() {
   };
 
   const filteredRows = allRows.filter((row) => {
-    if (filterType !== "모든 업체" && row.type !== filterType) return false;
-    if (statusFilter !== "모든 상태" && row.status !== statusFilter) return false;
-    if (searchName && !row.companyName.includes(searchName)) return false;
-    if (searchCeo && !row.ceoName.includes(searchCeo)) return false;
+    if (appliedFilters.filterType !== "모든 업체" && row.type !== appliedFilters.filterType) return false;
+    if (appliedFilters.statusFilter !== "모든 상태" && row.status !== appliedFilters.statusFilter) return false;
+    if (appliedFilters.searchName && !row.companyName.includes(appliedFilters.searchName)) return false;
+    if (appliedFilters.searchCeo && !row.ceoName.includes(appliedFilters.searchCeo)) return false;
     return true;
   });
 
@@ -160,6 +176,7 @@ export default function CompanyViewPage() {
           value={searchCeo}
           onChange={(e) => setSearchCeo(e.target.value)}
         />
+        <Button variant="contained" onClick={handleSearch}>검색</Button>
 
         <Box sx={{ ml: "auto" }}>
           <CompanyRegisterModal onAdd={handleAddCompany} />
