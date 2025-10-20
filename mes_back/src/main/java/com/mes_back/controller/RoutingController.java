@@ -15,7 +15,6 @@ import java.util.List;
 @RequestMapping("/routing")
 @RequiredArgsConstructor
 @Slf4j
-
 public class RoutingController {
 
     // RoutingService를 주입받아 비즈니스 로직을 처리
