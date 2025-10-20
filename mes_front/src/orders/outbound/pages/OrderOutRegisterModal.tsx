@@ -131,8 +131,8 @@ export default function OrderOutRegisterModal({
     if (qty <= 0)
       return alert("출고 수량은 0보다 커야 합니다.");
       
-    if (qty > selected.inboundQty)
-        return alert(`출고 수량(${qty})은 입고 수량(${selected.inboundQty})을 초과할 수 없습니다.`);
+    if (qty > selected.qty)
+        return alert(`출고 수량(${qty})은 입고 수량(${selected.qty})을 초과할 수 없습니다.`);
 
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
@@ -254,7 +254,7 @@ export default function OrderOutRegisterModal({
                   <TableCell align="center">{row.itemCode}</TableCell>
                   <TableCell align="center">{row.itemName}</TableCell>
                   <TableCell align="center">{row.inboundDate}</TableCell>
-                  <TableCell align="center">{row.inboundQty}</TableCell>
+                  <TableCell align="center">{row.qty}</TableCell>
                   <TableCell align="center">{row.category}</TableCell>
                 </TableRow>
               ))}
@@ -302,7 +302,7 @@ export default function OrderOutRegisterModal({
           />
           <TextField
             label="입고수량"
-            value={selected?.inboundQty ?? "-"}
+            value={selected?.qty ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
             sx={{ width: 200 }}
