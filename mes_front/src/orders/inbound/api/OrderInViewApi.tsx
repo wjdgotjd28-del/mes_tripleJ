@@ -24,6 +24,11 @@ export const getInboundForOut = async (): Promise<Inbound[]> => {
  * - POST {VITE_API_URL}/orders/inbound/items
  * @param data OrderInboundDTO
  */
-export async function registerInbound(data: OrderInboundDTO): Promise<void> {
+export async function registerInbound(data: OrderInView): Promise<void> {
   await axios.post(`${BASE_URL}/orders/inbound/items`, data);
+}
+
+export async function fetchInboundHistory(): Promise<OrderInView[]> {
+  const response = await axios.get(`${BASE_URL}/orders/inbound/history`);
+  return response.data;
 }

@@ -54,6 +54,7 @@ public class OrderInboundService {
 
         return orderInboundList.stream()
                 .map(oi -> OrderInboundDTO.builder()
+                        .orderInboundId(oi.getOrderInboundId())
                         .orderItemId(oi.getOrderItem().getOrderItemId())
                         .customerName(oi.getCustomerName())
                         .itemName(oi.getItemName())
