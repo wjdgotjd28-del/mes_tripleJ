@@ -57,6 +57,7 @@ export default function OrderOutRegisterModal({
   });
 
   const [inbounds, setInbounds] = useState<Inbound[]>([]);
+  const [filteredInbounds, setFilteredInbounds] = useState<Inbound[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -64,6 +65,7 @@ export default function OrderOutRegisterModal({
         try {
           const data = await getInboundForOut();
           setInbounds(data);
+          setFilteredInbounds(data);
         } catch (error) {
           console.error("Failed to fetch inbounds:", error);
         }
@@ -120,8 +122,24 @@ export default function OrderOutRegisterModal({
   };
 
   const handleSearchClick = () => {
-    console.log("검색 기준:", search);
-    alert("검색 기능이 실행되었습니다. (현재는 Mock 데이터라 필터링되지 않음)");
+    const lowercasedSearch = {
+      customerName: search.customerName.toLowerCase(),
+      itemCode: search.itemCode.toLowerCase(),
+      itemName: search.itemName.toLowerCase(),
+      lotNo: search.lotNo.toLowerCase(),
+      inboundDate: search.inboundDate,
+    };
+
+    const filtered = inbounds.filter((item) => {
+      return (
+        item.customerName.toLowerCase().includes(lowercasedSearch.customerName) &&
+        item.itemCode.toLowerCase().includes(lowercasedSearch.itemCode) &&
+        item.itemName.toLowerCase().includes(lowercasedSearch.itemName) &&
+        item.lotNo.toLowerCase().includes(lowercasedSearch.lotNo) &&
+        (lowercasedSearch.inboundDate === "" || item.inboundDate === lowercasedSearch.inboundDate)
+      );
+    });
+    setFilteredInbounds(filtered);
   };
 
   const handleSubmit = () => {
@@ -241,7 +259,7 @@ export default function OrderOutRegisterModal({
               </TableRow>
             </TableHead>
             <TableBody>
-              {inbounds.map((row) => (
+              {filteredInbounds.map((row) => (
                 <TableRow key={row.orderInboundId} hover>
                   <TableCell align="center">
                     <Checkbox
@@ -302,7 +320,7 @@ export default function OrderOutRegisterModal({
             InputProps={ReadOnlyInputProps}
             sx={{ width: 200 }}
           />
-      
+
           <TextField
             label="분류"
             value={selected ? categoryKorMap[selected.category] || selected.category : "-"}
@@ -310,7 +328,7 @@ export default function OrderOutRegisterModal({
             InputProps={ReadOnlyInputProps}
             sx={{ width: 200 }}
           />
-            <TextField
+          <TextField
             label="입고수량"
             value={selected?.qty ?? "-"}
             size="small"
