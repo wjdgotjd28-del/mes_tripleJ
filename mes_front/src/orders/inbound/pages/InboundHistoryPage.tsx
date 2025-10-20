@@ -24,6 +24,10 @@ import {
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
+import { getOrderItemsdtl } from "../../../masterData/items/api/OrderApi";
+import OrdersInDocModal from "./OrdersInDocModal";
+import type { OrderItems, RoutingFormData } from "../../../type";
+import OrdersProcessStatus from "../../processStatus/pages/OrdersProcessTrackings";
 //  샘플 데이터 (입고된 수주 목록)
 const sampleData = [
   {
@@ -147,6 +151,48 @@ export default function InboundHistoryPage() {
     setData((prev) => prev.filter((row) => row.id !== id));
   };
 
+  //  작업지시서 모달 상태
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
+  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
+  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
+
+  const handleOpenModal = async (id: number, lotNo: string, qty: number) => {
+    try {
+      const data = await getOrderItemsdtl(id); // 상세조회 API 호출
+      setSelectedItem(data);
+      setSelectedLotNo(lotNo);
+      setSelectedQty(qty);
+      setOpenModal(true);
+    } catch (err) {
+      console.error("작업지시서 조회 실패", err);
+    }
+  };
+
+  // Lot 번호 클릭
+  const [openProcessModal, setOpenProcessModal] = useState(false);
+  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
+    RoutingFormData[]
+  >([]);
+  const [selectedInboundId, setSelectedInboundId] = useState<number>();
+
+  const handleLotClick = async (
+    itemId: number,
+    lot_no: string,
+    inboundId: number
+  ) => {
+    try {
+      const data = await getOrderItemsdtl(itemId);
+      setSelectedItem(data);
+      setSelectedRoutingSteps(data.routing || []);
+      setSelectedLotNo(lot_no);
+      setSelectedInboundId(inboundId);
+      setOpenProcessModal(true);
+    } catch (err) {
+      console.error("공정 현황 조회 실패", err);
+    }
+  };
+
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
       {/*  페이지 제목 */}
@@ -253,7 +299,19 @@ export default function InboundHistoryPage() {
             {filteredData.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.id}</TableCell>
-                <TableCell>{row.lot_no}</TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      "&:hover": { color: "primary.dark", fontWeight: "bold" },
+                    }}
+                    onClick={() => handleLotClick(row.id, row.lot_no, row.id)}
+                  >
+                    {row.lot_no}
+                  </Typography>
+                </TableCell>
                 <TableCell>{row.customer_name}</TableCell>
                 <TableCell>{row.item_code}</TableCell>
                 <TableCell>{row.item_name}</TableCell>
@@ -352,17 +410,27 @@ export default function InboundHistoryPage() {
       </TableContainer>
 
       {/* 작업지시서 모달 */}
-      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
-        <DialogTitle>작업지시서</DialogTitle>
-        <DialogContent>
-          <Typography>
-            LOT번호: {selectedId ? filteredData[selectedId - 1]?.lot_no : "-"}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)}>닫기</Button>
-        </DialogActions>
-      </Dialog>
+      {selectedItem && (
+        <OrdersInDocModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          orderItem={selectedItem}
+          lotNo={selectedLotNo}
+          qty={selectedQty}
+        />
+      )}
+
+      {/* 공정 진행현황 모달 */}
+      {selectedItem && (
+        <OrdersProcessStatus
+          open={openProcessModal}
+          onClose={() => setOpenProcessModal(false)}
+          lotNo={selectedLotNo}
+          orderItem={selectedItem}
+          routingSteps={selectedRoutingSteps}
+          inboundId={selectedInboundId}
+        />
+      )}
     </Box>
   );
 }
