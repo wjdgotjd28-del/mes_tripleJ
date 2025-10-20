@@ -17,7 +17,17 @@ export async function fetchInboundOrderItems(): Promise<OrderInView[]> {
 // 수주 출고에서 사용하는 수주 입고 이력 조회
 export const getInboundForOut = async (): Promise<Inbound[]> => {
   const response = await axios.get(`${BASE_URL}/orders/inbound/orderoutbound`);
-  return response.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return response.data.map((item: any) => ({
+    orderInboundId: item.order_inbound_id,
+    lotNo: item.lot_no,
+    customerName: item.customer_name,
+    itemName: item.item_name,
+    itemCode: item.item_code,
+    qty: item.qty,
+    category: item.category,
+    inboundDate: item.inbound_date,
+  }));
 };
 /**
  * 입고등록 요청

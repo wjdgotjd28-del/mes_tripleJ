@@ -17,7 +17,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 // import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
-import type { Inbound, OrderOutbound } from "../../../type";
+import type { OrderOutbound } from "../../../type";
 import {
   addOrderOutbound,
   deleteOrderOutbound,
@@ -137,20 +137,21 @@ export default function OrderOutViewPage() {
   const translateCategory = (category: string) => {
     return categoryMap[category] || category;
   };
+
   //  작업지시서 모달 상태
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
-  const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
-  const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
-      try {
-        setSelectedOrder(row); // row: OrderOutbound
-        const inbound = inbounds.find(item => item.orderInboundId === orderInboundId);
-        setSelectedInboundDate(inbound?.inboundDate);
-        setOpenModal(true);
-      } catch (err) {
-        console.error("출하증 조회 실패", err);
-      }
-    };
+  // const [openModal, setOpenModal] = useState(false);
+  // const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
+  // const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
+  // const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
+  //     try {
+  //       setSelectedOrder(row); // row: OrderOutbound
+  //       const inbound = inbounds.find(item => item.orderInboundId === orderInboundId);
+  //       setSelectedInboundDate(inbound?.inboundDate);
+  //       setOpenModal(true);
+  //     } catch (err) {
+  //       console.error("출하증 조회 실패", err);
+  //     }
+  //   };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -292,13 +293,14 @@ export default function OrderOutViewPage() {
         onSubmit={handleRegister}
       />
 
-      {/* 작업지시서 모달 */}
+      {/* 작업지시서 모달 
       <OrdersOutDocModal
         open={openModal}
         onClose={() => setOpenModal(false)}
         outItem={selectedOrder}
         inboundDate={selectedInboundDate}
       />
+      */}
     </Box>
   );
 }

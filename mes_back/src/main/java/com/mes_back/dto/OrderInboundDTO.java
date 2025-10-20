@@ -16,55 +16,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-// public class OrderInboundDto {
 
-//     private Long orderInboundId;
-
-//     private OrderItem orderItem;
-
-//     private String customerName;
-
-//     private String itemName;
-
-//     private String itemCode;
-
-//     private Long qty;
-
-//     private OrderCategory category;
-
-//     private String note;
-
-//     private LocalDate inboundDate;
-
-//     private String lotNo;
-
-//         private PaintType paintType;
-
-    
-
-//         // JPQL 프로젝션을 위한 생성자
-
-//         public OrderInboundDto(Long orderInboundId, String lotNo, String customerName, String itemName, String itemCode, LocalDate inboundDate, Long qty, OrderCategory category) {
-
-//             this.orderInboundId = orderInboundId;
-
-//             this.lotNo = lotNo;
-
-//             this.customerName = customerName;
-
-//             this.itemName = itemName;
-
-//             this.itemCode = itemCode;
-
-//             this.inboundDate = inboundDate;
-
-//             this.qty = qty;
-
-//             this.category = category;
-
-//         }
-
-//     }
 public class OrderInboundDTO {
 
     @JsonProperty("order_inbound_id")
@@ -99,4 +51,15 @@ public class OrderInboundDTO {
 
     @JsonProperty("qty")
     private Long qty; // 입고 수량
+
+    public OrderInboundDTO(Long orderInboundId, String lotNo, String customerName, String itemName, String itemCode, LocalDate inboundDate, Long qty, OrderCategory category) {
+        this.orderInboundId = orderInboundId;
+        this.lotNo = lotNo;
+        this.customerName = customerName;
+        this.itemName = itemName;
+        this.itemCode = itemCode;
+        this.inboundDate = inboundDate;
+        this.qty = qty;
+        this.category = category;
+    }
 }
