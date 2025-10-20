@@ -14,6 +14,7 @@ import {
   Checkbox,
   TableContainer,
   Paper,
+  Typography,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import type { Inbound, OrderOutbound } from "../../../type";
@@ -260,25 +261,35 @@ export default function OrderOutRegisterModal({
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredInbounds.map((row) => (
-                <TableRow key={row.orderInboundId} hover>
-                  <TableCell align="center">
-                    <Checkbox
-                      checked={selected?.orderInboundId === row.orderInboundId}
-                      onChange={() => handleSelect(row)}
-                    />
-                  </TableCell>
-                  <TableCell align="center">{row.lotNo}</TableCell>
-                  <TableCell align="center">{row.customerName}</TableCell>
-                  <TableCell align="center">{row.itemCode}</TableCell>
-                  <TableCell align="center">{row.itemName}</TableCell>
-                  <TableCell align="center">{row.inboundDate}</TableCell>
-                  <TableCell align="center">{row.qty}</TableCell>
-                  <TableCell align="center">
-                    {categoryKorMap[row.category] || row.category}
+              {filteredInbounds.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                    <Typography color="text.secondary">
+                      입고된 수주 정보가 없습니다.
+                    </Typography>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredInbounds.map((row) => (
+                  <TableRow key={row.orderInboundId} hover>
+                    <TableCell align="center">
+                      <Checkbox
+                        checked={selected?.orderInboundId === row.orderInboundId}
+                        onChange={() => handleSelect(row)}
+                      />
+                    </TableCell>
+                    <TableCell align="center">{row.lotNo}</TableCell>
+                    <TableCell align="center">{row.customerName}</TableCell>
+                    <TableCell align="center">{row.itemCode}</TableCell>
+                    <TableCell align="center">{row.itemName}</TableCell>
+                    <TableCell align="center">{row.inboundDate}</TableCell>
+                    <TableCell align="center">{row.qty}</TableCell>
+                    <TableCell align="center">
+                      {categoryKorMap[row.category] || row.category}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
