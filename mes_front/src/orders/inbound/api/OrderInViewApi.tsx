@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Inbound, OrderInboundDTO, OrderInView } from "../../../type";
+import type { Inbound, OrderInbound, OrderInView } from "../../../type";
 
 // 환경 변수에서 API 서버 주소를 불러옴
 const BASE_URL = import.meta.env.VITE_API_URL;
@@ -24,7 +24,7 @@ export const getInboundForOut = async (): Promise<Inbound[]> => {
  * - POST {VITE_API_URL}/orders/inbound/items
  * @param data OrderInboundDTO
  */
-export async function registerInbound(data: OrderInView): Promise<void> {
+export async function registerInbound(data: OrderInbound): Promise<void> {
   await axios.post(`${BASE_URL}/orders/inbound/items`, data);
 }
 

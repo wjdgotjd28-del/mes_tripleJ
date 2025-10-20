@@ -19,9 +19,10 @@ import java.util.List;
 public class OrderInboundService {
 
     private final OrderInboundRepository orderInboundRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
-        return orderInboundItemRequestRepository.findInboundHistoriesForOutbound();
+        return orderInboundRepository.findInboundHistoriesForOutbound();
     }
 
 //    public List<OrderInboundItemRequestDto> findAllByOrderInbound() {
@@ -44,11 +45,6 @@ public class OrderInboundService {
 //    }
 
 
-
-}
-    private final OrderItemRepository orderItemRepository;
-
-
     public List<OrderInboundDTO> findAllByOrderInbound() {
         List<OrderInbound> orderInboundList = orderInboundRepository.findAll();
 
@@ -56,7 +52,7 @@ public class OrderInboundService {
                 .map(oi -> OrderInboundDTO.builder()
                         .orderInboundId(oi.getOrderInboundId())
                         .orderItemId(oi.getOrderItem().getOrderItemId())
-                        .customerName(oi.getCustomerName())
+//                        .customerName(oi.getCustomerName())
                         .itemName(oi.getItemName())
                         .itemCode(oi.getItemCode())
                         .qty(oi.getQty())
@@ -76,7 +72,7 @@ public class OrderInboundService {
         OrderInbound entity = OrderInbound.builder()
                 .orderItem(orderItem) // ✅ 객체로 넘김
                 .category(dto.getCategory())
-                .customerName(dto.getCustomerName())
+//                .customerName(dto.getCustomerName())
                 .inboundDate(dto.getInboundDate())
                 .itemCode(dto.getItemCode())
                 .itemName(dto.getItemName())
