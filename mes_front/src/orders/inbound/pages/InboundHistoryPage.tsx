@@ -183,6 +183,48 @@ export default function InboundHistoryPage() {
     }
   };
 
+  //  작업지시서 모달 상태
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
+  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
+  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
+
+  const handleOpenModal = async (id: number, lotNo: string, qty: number) => {
+    try {
+      const data = await getOrderItemsdtl(id); // 상세조회 API 호출
+      setSelectedItem(data);
+      setSelectedLotNo(lotNo);
+      setSelectedQty(qty);
+      setOpenModal(true);
+    } catch (err) {
+      console.error("작업지시서 조회 실패", err);
+    }
+  };
+
+  // Lot 번호 클릭
+  const [openProcessModal, setOpenProcessModal] = useState(false);
+  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
+    RoutingFormData[]
+  >([]);
+  const [selectedInboundId, setSelectedInboundId] = useState<number>();
+
+  const handleLotClick = async (
+    itemId: number,
+    lot_no: string,
+    inboundId: number
+  ) => {
+    try {
+      const data = await getOrderItemsdtl(itemId);
+      setSelectedItem(data);
+      setSelectedRoutingSteps(data.routing || []);
+      setSelectedLotNo(lot_no);
+      setSelectedInboundId(inboundId);
+      setOpenProcessModal(true);
+    } catch (err) {
+      console.error("공정 현황 조회 실패", err);
+    }
+  };
+
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
       {/*  페이지 제목 */}
@@ -247,7 +289,7 @@ export default function InboundHistoryPage() {
           />
 
           <Button variant="contained" onClick={handleSearch}>
-            검색
+            검색이다
           </Button>
           <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
             <IconButton onClick={toggleSortOrder}>

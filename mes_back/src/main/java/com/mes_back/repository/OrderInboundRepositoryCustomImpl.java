@@ -1,6 +1,7 @@
 package com.mes_back.repository;
 
-import com.mes_back.dto.OrderInboundDto;
+
+import com.mes_back.dto.OrderInboundDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -17,7 +18,7 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<OrderInboundDto> findInboundHistoriesForOutbound() {
+    public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
         return queryFactory
                 .select(Projections.constructor(OrderInboundDto.class,
                         orderInbound.orderInboundId,

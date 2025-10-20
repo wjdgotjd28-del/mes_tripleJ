@@ -15,10 +15,11 @@ import java.util.List;
 @Slf4j
 public class OrderInboundService {
 
-    private final OrderInboundRepository orderInboundItemRequestRepository;
+    private final OrderInboundRepository orderInboundRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    public List<OrderInboundDto> findInboundHistoriesForOutbound() {
-        return orderInboundItemRequestRepository.findInboundHistoriesForOutbound();
+    public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
+        return orderInboundRepository.findInboundHistoriesForOutbound();
     }
 
 //    public List<OrderInboundItemRequestDto> findAllByOrderInbound() {
@@ -39,6 +40,80 @@ public class OrderInboundService {
 //            return dto;
 //        }).toList();
 //    }
+
+
+    public List<OrderInboundDTO> findAllByOrderInbound() {
+        List<OrderInbound> orderInboundList = orderInboundRepository.findAll();
+
+        return orderInboundList.stream()
+                .map(oi -> OrderInboundDTO.builder()
+                        .orderInboundId(oi.getOrderInboundId())
+                        .orderItemId(oi.getOrderItem().getOrderItemId())
+//                        .customerName(oi.getCustomerName())
+                        .itemName(oi.getItemName())
+                        .itemCode(oi.getItemCode())
+                        .qty(oi.getQty())
+                        .category(oi.getCategory())
+                        .note(oi.getNote())
+                        .inboundDate(oi.getInboundDate())
+                        .lotNo(oi.getLotNo())
+                        .paintType(oi.getPaintType())
+                        .build()
+                ).toList();
+    }
+
+//    public void save(OrderInboundDTO dto) {
+//        OrderItem orderItem = orderItemRepository.findById(dto.getOrderItemId())
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수주 품목입니다."));
+//
+//        OrderInbound entity = OrderInbound.builder()
+//                .orderItem(orderItem) // ✅ 객체로 넘김
+//                .category(dto.getCategory())
+//                .build();
+////                .customerName(dto.getCustomerName())
+//    }
+
+
+
+//    public List<OrderInboundDTO> findAllByOrderInbound() {
+//        List<OrderInbound> orderInboundList = orderInboundRepository.findAll();
+//
+//        return orderInboundList.stream()
+//                .map(oi -> OrderInboundDTO.builder()
+//                        .orderInboundId(oi.getOrderInboundId())
+//                        .orderItemId(oi.getOrderItem().getOrderItemId())
+////                        .customerName(oi.getCustomerName())
+//                        .itemName(oi.getItemName())
+//                        .itemCode(oi.getItemCode())
+//                        .qty(oi.getQty())
+//                        .category(oi.getCategory())
+//                        .note(oi.getNote())
+//                        .inboundDate(oi.getInboundDate())
+//                        .lotNo(oi.getLotNo())
+//                        .paintType(oi.getPaintType())
+//                        .build()
+//                ).toList();
+//    }
+
+    public void save(OrderInboundDTO dto) {
+        OrderItem orderItem = orderItemRepository.findById(dto.getOrderItemId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수주 품목입니다."));
+
+        OrderInbound entity = OrderInbound.builder()
+                .orderItem(orderItem) // ✅ 객체로 넘김
+                .category(dto.getCategory())
+//                .customerName(dto.getCustomerName())
+                .inboundDate(dto.getInboundDate())
+                .itemCode(dto.getItemCode())
+                .itemName(dto.getItemName())
+                .lotNo(generateLotNo())
+                .note(dto.getNote())
+                .paintType(dto.getPaintType())
+                .qty(dto.getQty())
+                .build();
+
+        orderInboundRepository.save(entity);
+    }
 
 
 

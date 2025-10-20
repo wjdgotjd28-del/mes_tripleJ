@@ -17,13 +17,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 // import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
-import type { OrderOutbound } from "../../../type";
-import { addOrderOutbound, deleteOrderOutbound, getOrderOutbound, updateOrderOutbound } from "../api/orderOutbound";
+import type { Inbound, OrderOutbound } from "../../../type";
+import {
+  addOrderOutbound,
+  deleteOrderOutbound,
+  getOrderOutbound,
+  updateOrderOutbound,
+} from "../api/orderOutbound";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import OrdersOutDocModal from "./OrdersOutDocModal";
 import EditOrderOutModal from "./EditOrderOutModal";
-
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -183,7 +186,13 @@ export default function OrderOutViewPage() {
           value={search.itemName}
           onChange={(e) => setSearch({ ...search, itemName: e.target.value })}
         />
-        <Button variant="contained" onClick={handleSearch} sx={{ ml: 1, height: 40 }}> {/* height 추가 */}
+        <Button
+          variant="contained"
+          onClick={handleSearch}
+          sx={{ ml: 1, height: 40 }}
+        >
+          {" "}
+          {/* height 추가 */}
           검색
         </Button>
         <Box sx={{ flex: 1 }} />
@@ -201,7 +210,7 @@ export default function OrderOutViewPage() {
           color="success"
           endIcon={<AddIcon />}
           onClick={() => setRegisterOpen(true)}
-          sx={{ height: 40 }} 
+          sx={{ height: 40 }}
           // {/* height 추가 */}
         >
           출고 등록
@@ -233,7 +242,9 @@ export default function OrderOutViewPage() {
                 <TableCell>{row.outboundDate}</TableCell>
                 <TableCell>{translateCategory(row.category)}</TableCell>
                 <TableCell align="center">
-                  <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                  <Box
+                    sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                  >
                     <Button
                       variant="outlined"
                       size="small"

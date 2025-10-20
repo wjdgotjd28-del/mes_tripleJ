@@ -132,3 +132,11 @@ export type OrderProcessTracking = {
   process_start_time: string | null;
   process_status: number;
 };
+
+export type OrderInbound = {
+  id: number;
+  order_inbound_id: number;
+  order_item_routing_id: number;
+  process_start_time: string | null;
+  process_status: number;
+};
