@@ -1,19 +1,13 @@
 package com.mes_back.service;
 
-//import com.mes_back.dto.OrderInboundDTO.OrderInboundItemRequestDto;
 import com.mes_back.dto.OrderInboundDto;
-import com.mes_back.entity.OrderInbound;
-
 import com.mes_back.repository.OrderInboundRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -24,18 +18,7 @@ public class OrderInboundService {
     private final OrderInboundRepository orderInboundItemRequestRepository;
 
     public List<OrderInboundDto> findInboundHistoriesForOutbound() {
-        return orderInboundItemRequestRepository.findAll().stream()
-                .map(orderInbound -> OrderInboundDto.builder()
-                        .orderInboundId(orderInbound.getOrderInboundId())
-                        .lotNo(orderInbound.getLotNo())
-                        .customerName(orderInbound.getCompany() != null ? orderInbound.getCompany().getCompanyName() : null)
-                        .itemName(orderInbound.getItemName())
-                        .itemCode(orderInbound.getItemCode())
-                        .inboundDate(orderInbound.getInboundDate())
-                        .qty(orderInbound.getQty())
-                        .category(orderInbound.getCategory())
-                        .build())
-                .toList();
+        return orderInboundItemRequestRepository.findInboundHistoriesForOutbound();
     }
 
 //    public List<OrderInboundItemRequestDto> findAllByOrderInbound() {
