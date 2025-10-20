@@ -11,21 +11,19 @@ import {
   TableBody,
   TableContainer,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 // import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
-import type { Inbound, OrderOutbound } from "../../../type";
-import { addOrderOutbound, getOrderOutbound } from "../api/orderOutbound";
+import type { OrderOutbound } from "../../../type";
+import { addOrderOutbound, deleteOrderOutbound, getOrderOutbound, updateOrderOutbound } from "../api/orderOutbound";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import OrdersOutDocModal from "./OrdersOutDocModal";
+import EditOrderOutModal from "./EditOrderOutModal";
+
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -50,6 +48,18 @@ export default function OrderOutViewPage() {
     loadOrderOutboundData();
   }, []);
 
+  // allRows 또는 search 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
+  useEffect(() => {
+    const filtered = allRows.filter(
+      (row) =>
+        (row.customerName ?? "").includes(search.customerName) &&
+        (row.itemCode ?? "").includes(search.itemCode) &&
+        (row.itemName ?? "").includes(search.itemName) &&
+        (row.outboundNo ?? "").includes(search.outboundNo)
+    );
+    setDisplayedRows(filtered);
+  }, [allRows, search]);
+
   const loadOrderOutboundData = () => {
     getOrderOutbound()
       .then((res) => {
@@ -59,109 +69,8 @@ export default function OrderOutViewPage() {
       .catch((err) => console.log(err));
   };
 
-  // ✅ 등록 모달용 입고 데이터 샘플
-  const [inbounds] = useState<Inbound[]>([
-    {
-      orderInboundId: 101,
-      lotNo: "LOT-20251016-01",
-      customerName: "일도테크",
-      itemName: "페인트",
-      itemCode: "ITE001",
-      inboundQty: 100,
-      category: "방산",
-      inboundDate: "2025-10-16",
-    },
-    {
-      orderInboundId: 102,
-      lotNo: "LOT-20251016-02",
-      customerName: "삼성전자",
-      itemName: "컴퓨터",
-      itemCode: "ITE002",
-      inboundQty: 30,
-      category: "전자",
-      inboundDate: "2025-10-15",
-    },
-    {
-      orderInboundId: 103,
-      lotNo: "LOT-20251016-03",
-      customerName: "LG화학",
-      itemName: "화학물질A",
-      itemCode: "LGC001",
-      inboundQty: 200,
-      category: "화학",
-      inboundDate: "2025-10-14",
-    },
-    {
-      orderInboundId: 104,
-      lotNo: "LOT-20251016-04",
-      customerName: "현대모비스",
-      itemName: "자동차부품",
-      itemCode: "HMB001",
-      inboundQty: 500,
-      category: "자동차",
-      inboundDate: "2025-10-13",
-    },
-    {
-      orderInboundId: 105,
-      lotNo: "LOT-20251016-05",
-      customerName: "셀트리온",
-      itemName: "바이오시밀러",
-      itemCode: "CEL001",
-      inboundQty: 150,
-      category: "바이오",
-      inboundDate: "2025-10-12",
-    },
-    {
-      orderInboundId: 106,
-      lotNo: "LOT-20251016-06",
-      customerName: "포스코",
-      itemName: "철강코일",
-      itemCode: "POS001",
-      inboundQty: 1000,
-      category: "철강",
-      inboundDate: "2025-10-11",
-    },
-    {
-      orderInboundId: 107,
-      lotNo: "LOT-20251016-07",
-      customerName: "삼성SDI",
-      itemName: "배터리",
-      itemCode: "SDI001",
-      inboundQty: 300,
-      category: "전자",
-      inboundDate: "2025-10-10",
-    },
-    {
-      orderInboundId: 108,
-      lotNo: "LOT-20251016-08",
-      customerName: "SK하이닉스",
-      itemName: "반도체웨이퍼",
-      itemCode: "SKH001",
-      inboundQty: 800,
-      category: "반도체",
-      inboundDate: "2025-10-09",
-    },
-    {
-      orderInboundId: 109,
-      lotNo: "LOT-20251016-09",
-      customerName: "아모레퍼시픽",
-      itemName: "화장품원료",
-      itemCode: "AMO001",
-      inboundQty: 250,
-      category: "화장품",
-      inboundDate: "2025-10-08",
-    },
-    {
-      orderInboundId: 110,
-      lotNo: "LOT-20251016-10",
-      customerName: "CJ제일제당",
-      itemName: "식품첨가물",
-      itemCode: "CJF001",
-      inboundQty: 400,
-      category: "식품",
-      inboundDate: "2025-10-07",
-    },
-  ]);
+  
+   
 
   // ✅ 출고 등록 처리
   const handleRegister = async (data: OrderOutbound) => {
@@ -192,15 +101,25 @@ export default function OrderOutViewPage() {
   };
 
   // ✅ 수정 저장
-  const handleEditSave = () => {
-    if (!editData) return;
-    setAllRows((prev) => prev.map((r) => (r.id === editData.id ? editData : r)));
-    setEditData(null);
+  const handleEditSave = async (apiPayload: OrderOutbound) => {
+    try {
+      // Call the API to update the order
+      const response = await updateOrderOutbound(apiPayload);
+
+      setAllRows((prev) =>
+        prev.map((r) => (r.id === response.id ? response : r))
+      );
+      setEditData(null); // Close the modal
+    } catch (error) {
+      console.error("출고 정보 수정 실패:", error);
+      alert("출고 정보 수정에 실패했습니다.");
+    }
   };
 
   // ✅ 삭제
   const handleDelete = (id: number) => {
     if (window.confirm("이 출고 정보를 삭제하시겠습니까?")) {
+      deleteOrderOutbound(id);
       setAllRows((prev) => prev.filter((r) => r.id !== id));
     }
   };
@@ -348,78 +267,18 @@ export default function OrderOutViewPage() {
         </Table>
       </TableContainer>
       {/* 수정 모달 */}
-      <Dialog
-  open={!!editData}
-  onClose={() => setEditData(null)}
-  fullWidth
-  maxWidth="sm"
-  scroll="paper"
->
-  <DialogTitle sx={{ fontWeight: 600, mt: 1 }}>출고 정보 수정</DialogTitle>
-
-  <DialogContent
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 2,
-      mt: 2,
-      overflow: "visible", // 라벨 잘림 방지
-    }}
-  >
-    <TextField
-      label="출고 수량"
-      type="number"
-      value={editData?.qty ?? ""}
-      onChange={(e) =>
-        setEditData((prev) =>
-          prev ? { ...prev, qty: Number(e.target.value) } : prev
-        )
-      }
-      fullWidth
-    />
-    <TextField
-      label="출고 일자"
-      type="date"
-      value={editData?.outboundDate ?? ""}
-      onChange={(e) =>
-        setEditData((prev) =>
-          prev ? { ...prev, outboundDate: e.target.value } : prev
-        )
-      }
-      InputLabelProps={{ shrink: true }}
-      fullWidth
-    />
-    <TextField label="출고번호" value={editData?.outboundNo} disabled fullWidth />
-    <TextField label="거래처명" value={editData?.customerName} disabled fullWidth />
-    <TextField label="품목번호" value={editData?.itemCode} disabled fullWidth />
-    <TextField label="품목명" value={editData?.itemName} disabled fullWidth />
-    <TextField label="분류" value={editData?.category} disabled fullWidth />
-  </DialogContent>
-
-  <DialogActions
-    sx={{
-      p: 2,
-      pr: 3,
-      display: "flex",
-      justifyContent: "flex-end",
-      gap: 1,
-    }}
-  >
-    <Button onClick={() => setEditData(null)} variant="outlined">
-      취소
-    </Button>
-    <Button variant="contained" onClick={handleEditSave}>
-      저장
-    </Button>
-  </DialogActions>
-</Dialog>
+      <EditOrderOutModal
+        open={!!editData}
+        onClose={() => setEditData(null)}
+        editData={editData}
+        onSave={handleEditSave}
+      />
 
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
         open={registerOpen}
         onClose={() => setRegisterOpen(false)}
         onSubmit={handleRegister}
-        inbounds={inbounds} // ✅ 모달에서 요구하는 inbounds prop
       />
 
       {/* 작업지시서 모달 */}

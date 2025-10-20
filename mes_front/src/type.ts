@@ -100,7 +100,7 @@ export type Inbound = {
   customerName: string;
   itemName: string;
   itemCode: string;
-  inboundQty: number;
+  qty: number;
   category: string;
   inboundDate: string;
 };
