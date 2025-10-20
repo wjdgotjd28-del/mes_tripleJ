@@ -64,8 +64,9 @@ export default function OrderOutRegisterModal({
       const fetchInbounds = async () => {
         try {
           const data = await getInboundForOut();
-          setInbounds(data);
-          setFilteredInbounds(data);
+          const availableInbounds = data.filter(item => item.qty > 0);
+          setInbounds(availableInbounds);
+          setFilteredInbounds(availableInbounds);
         } catch (error) {
           console.error("Failed to fetch inbounds:", error);
         }
