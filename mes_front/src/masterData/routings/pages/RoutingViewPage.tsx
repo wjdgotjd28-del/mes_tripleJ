@@ -47,8 +47,14 @@ export default function RoutingViewPage() {
   }, []);
 
   // 등록 완료 시 호출되는 콜백
-  const handleRegister = (saved: RoutingFormData) => {
-    setRoutingData((prev) => [...prev, saved]); // 새 데이터 추가
+  const handleRegister = async () => {
+    try {
+      const data = await fetchRoutings(); // 전체 데이터 다시 불러오기
+      setRoutingData(data);
+      alert("등록되었습니다.");
+    } catch (err) {
+      console.error("등록 후 데이터 재조회 실패", err);
+    }
     setOpenModal(false); // 모달 닫기
   };
 
@@ -113,7 +119,7 @@ export default function RoutingViewPage() {
               <TableCell>공정 명</TableCell>
               <TableCell>공정 시간</TableCell>
               <TableCell>비고</TableCell>
-              <TableCell align="center">삭제</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
