@@ -19,7 +19,7 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
     @Override
     public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
         return queryFactory
-                .select(Projections.constructor(OrderInboundDto.class,
+                .select(Projections.constructor(OrderInboundDTO.class,
                         orderInbound.orderInboundId,
                         orderInbound.lotNo,
                         orderInbound.company.companyName,
@@ -35,5 +35,16 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
                 ))
                 .from(orderInbound)
                 .fetch();
+    }
+
+    @Override
+    public String findLastLotNoByInboundDate(String datePrefix) {
+        return queryFactory
+                .select(orderInbound.lotNo)
+                .from(orderInbound)
+                .where(orderInbound.lotNo.like("LOT-" + datePrefix + "%"))
+                .orderBy(orderInbound.lotNo.desc())
+                .limit(1)
+                .fetchOne();
     }
 }

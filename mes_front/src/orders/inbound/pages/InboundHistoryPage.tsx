@@ -22,9 +22,18 @@ import {
   FileDownload as FileDownloadIcon,
 } from "@mui/icons-material";
 import { exportToExcel } from "../../../Common/ExcelUtils";
-import type { OrderInbound } from "../../../type";
+import type { OrderInbound, OrderItems, RoutingFormData } from "../../../type";
 import { filterInboundHistory } from "./InboundSearchUtils";
-import { deleteInboundHistory } from "../api/InboundHistoryApi";
+import {
+  deleteInboundHistory,
+  updateInboundHistory,
+} from "../api/InboundHistoryApi";
+import OrdersProcessStatus from "../../processStatus/pages/OrdersProcessTrackings";
+import OrdersInDocModal from "./OrdersInDocModal";
+import { getOrderItemsdtl } from "../../../masterData/items/api/OrderApi";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs, { Dayjs } from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -43,11 +52,27 @@ export default function InboundHistoryPage() {
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
+  const [editRowId, setEditRowId] = useState<number | null>(null);
+  const [values, setValues] = useState<{
+    [key: number]: { qty: number; date: string };
+  }>({});
+
   // 데이터 상태
   const [data, setData] = useState<OrderInbound[]>([]);
   const [displayedData, setDisplayedData] = useState<OrderInbound[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortAsc, setSortAsc] = useState(true);
+
+  const [openProcessModal, setOpenProcessModal] = useState(false);
+  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
+    RoutingFormData[]
+  >([]);
+  const [selectedInboundId, setSelectedInboundId] = useState<number>();
+
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
+  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
+  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
 
   /** -----------------------------
    * 📌 초기 데이터 로드
@@ -64,10 +89,12 @@ export default function InboundHistoryPage() {
       );
       setData(res.data);
       setDisplayedData(res.data);
+      return res.data;
     } catch (err) {
       console.error("데이터 가져오기 실패:", err);
       setData([]);
       setDisplayedData([]);
+      return [];
     } finally {
       setLoading(false);
     }
@@ -129,7 +156,11 @@ export default function InboundHistoryPage() {
 
     try {
       await deleteInboundHistory(order_inbound_id);
+
       setData((prev) =>
+        prev.filter((item) => item.order_inbound_id !== order_inbound_id)
+      );
+      setDisplayedData((prev) =>
         prev.filter((item) => item.order_inbound_id !== order_inbound_id)
       );
     } catch (err) {
@@ -137,11 +168,57 @@ export default function InboundHistoryPage() {
     }
   };
 
-  //  작업지시서 모달 상태
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
-  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
-  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
+  const handleUpdate = (id: number) => {
+    setEditRowId(id);
+    const row = data.find((item) => item.order_inbound_id === id);
+    if (row) {
+      setValues((prev) => ({
+        ...prev,
+        [id]: {
+          qty: row.qty,
+          date: row.inbound_date,
+        },
+      }));
+    }
+  };
+  const fetchData = async () => {
+    const response = await fetchInboundHistory();
+    setData(response);
+  };
+
+  const handleSave = async (id: number) => {
+    const { qty, date } = values[id];
+
+    try {
+      await updateInboundHistory(id, { qty, inbound_date: date }); // ✅ API 호출
+      setEditRowId(null); // ✅ 수정 모드 종료
+      fetchData(); // ✅ 데이터 재조회 또는 상태 갱신
+    } catch (err) {
+      console.error("수정 실패:", err);
+    }
+  };
+
+  const handleQtyChange = (id: number, newQty: string) => {
+    setValues((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        qty: Number(newQty),
+      },
+    }));
+  };
+
+  const handleDateChange = (id: number, newDate: Dayjs | null) => {
+    setValues((prev) => ({
+      ...prev,
+      [id]: {
+        ...prev[id],
+        date: newDate ? newDate.format("YYYY-MM-DD") : "",
+      },
+    }));
+  };
+
+  //작업지시서 모달 상태
 
   const handleOpenModal = async (id: number, lotNo: string, qty: number) => {
     try {
@@ -156,11 +233,6 @@ export default function InboundHistoryPage() {
   };
 
   // Lot 번호 클릭
-  const [openProcessModal, setOpenProcessModal] = useState(false);
-  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
-    RoutingFormData[]
-  >([]);
-  const [selectedInboundId, setSelectedInboundId] = useState<number>();
 
   const handleLotClick = async (
     itemId: number,
@@ -206,7 +278,7 @@ export default function InboundHistoryPage() {
             />
           ))}
           <Button variant="contained" onClick={handleSearch}>
-            검색이다
+            검색
           </Button>
           <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
             <IconButton onClick={toggleSortOrder}>
@@ -243,9 +315,9 @@ export default function InboundHistoryPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredData.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
+            {sortedData.map((row: OrderInbound) => (
+              <TableRow key={row.order_inbound_id}>
+                <TableCell>{row.order_inbound_id}</TableCell>
                 <TableCell>
                   <Typography
                     variant="body2"
@@ -262,8 +334,47 @@ export default function InboundHistoryPage() {
                 <TableCell>{row.customer_name}</TableCell>
                 <TableCell>{row.item_code}</TableCell>
                 <TableCell>{row.item_name}</TableCell>
-                <TableCell>{row.qty}</TableCell>
-                <TableCell>{row.inbound_date}</TableCell>
+                {/* 수량 */}
+                <TableCell align="center">
+                  {editRowId === row.order_inbound_id ? (
+                    <TextField
+                      size="small"
+                      type="number"
+                      value={values[row.order_inbound_id]?.qty ?? ""}
+                      onChange={(e) =>
+                        handleQtyChange(row.order_inbound_id, e.target.value)
+                      }
+                      sx={{ width: 70 }}
+                    />
+                  ) : (
+                    row.qty
+                  )}
+                </TableCell>
+
+                {/* 입고일자 */}
+                <TableCell align="center">
+                  {editRowId === row.order_inbound_id ? (
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        value={
+                          values[row.order_inbound_id]?.date
+                            ? dayjs(values[row.order_inbound_id].date)
+                            : null
+                        }
+                        onChange={(newDate) =>
+                          handleDateChange(row.order_inbound_id, newDate)
+                        }
+                        format="YYYY-MM-DD"
+                        slotProps={{
+                          textField: { size: "small", sx: { width: 147 } },
+                        }}
+                      />
+                    </LocalizationProvider>
+                  ) : (
+                    row.inbound_date
+                  )}
+                </TableCell>
+
                 <TableCell>
                   {paintLableMap[row.paint_type] || row.paint_type}
                 </TableCell>
@@ -275,16 +386,31 @@ export default function InboundHistoryPage() {
                     variant="outlined"
                     size="small"
                     sx={{ color: "#ff8c00", borderColor: "#ff8c00" }}
+                    onClick={() =>
+                      handleOpenModal(row.order_inbound_id, row.lot_no, row.qty)
+                    }
                   >
                     작업지시서
                   </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => handleUpdate(row.order_inbound_id)}
-                  >
-                    수정
-                  </Button>
+
+                  {editRowId === row.order_inbound_id ? (
+                    <Button
+                      variant="contained"
+                      size="small"
+                      onClick={() => handleSave(row.order_inbound_id)}
+                    >
+                      완료
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => handleUpdate(row.order_inbound_id)}
+                    >
+                      수정
+                    </Button>
+                  )}
+
                   <Button
                     variant="outlined"
                     color="error"

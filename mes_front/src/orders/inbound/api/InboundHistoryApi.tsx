@@ -14,3 +14,10 @@ export const deleteInboundHistory = async (id: number) => {
   );
   return response.data; // 서버에서 반환된 삭제 결과
 };
+
+export const updateInboundHistory = async (
+  id: number,
+  payload: { qty: number; inbound_date: string }
+) => {
+  await axios.put(`${BASE_URL}/orders/inbound/history/${id}`, payload); // ✅ 수정 완료
+};
