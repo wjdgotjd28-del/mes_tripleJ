@@ -22,7 +22,7 @@ public class RoutingDTO {
     @JsonProperty("process_name")
     private String processName;
     @JsonProperty("process_time")
-    private String processTime;
+    private Integer processTime;
     private String note;
 }
 
