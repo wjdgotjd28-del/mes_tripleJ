@@ -26,7 +26,7 @@ public class Routing {
     private String processName;
 
     @Column(name = "process_time", nullable = false)
-    private String processTime;
+    private Integer processTime;
 
     @Column(length = 255)
     private String note;
