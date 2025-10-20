@@ -35,6 +35,30 @@ public class OrderInboundDto {
 
     private String lotNo;
 
-    private PaintType paintType;
+        private PaintType paintType;
 
-}
+    
+
+        // JPQL 프로젝션을 위한 생성자
+
+        public OrderInboundDto(Long orderInboundId, String lotNo, String customerName, String itemName, String itemCode, LocalDate inboundDate, Long qty, OrderCategory category) {
+
+            this.orderInboundId = orderInboundId;
+
+            this.lotNo = lotNo;
+
+            this.customerName = customerName;
+
+            this.itemName = itemName;
+
+            this.itemCode = itemCode;
+
+            this.inboundDate = inboundDate;
+
+            this.qty = qty;
+
+            this.category = category;
+
+        }
+
+    }
