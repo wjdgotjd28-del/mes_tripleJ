@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import type { Inbound, OrderOutbound } from "../../../type";
-
+import { getInboundForOut } from "../../inbound/api/OrderInViewApi";
 
 
 type Props = {
@@ -53,17 +53,21 @@ export default function OrderOutRegisterModal({
     outboundDate: "",
   });
 
-  const [inbounds] = useState<Inbound[]>([
-    {
-      orderInboundId: 101,
-      lotNo: "LOT-20251016-01",
-      customerName: "일도테크",
-      itemName: "페인트",
-      itemCode: "ITE001",
-      inboundQty: 100,
-      category: "방산",
-      inboundDate: "2025-10-16",
- }])
+  const [inbounds, setInbounds] = useState<Inbound[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      const fetchInbounds = async () => {
+        try {
+          const data = await getInboundForOut();
+          setInbounds(data);
+        } catch (error) {
+          console.error("Failed to fetch inbounds:", error);
+        }
+      };
+      fetchInbounds();
+    }
+  }, [open]);
 
   const [search, setSearch] = useState({
     customerName: "",
