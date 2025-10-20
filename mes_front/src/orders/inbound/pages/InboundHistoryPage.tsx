@@ -384,7 +384,7 @@ export default function InboundHistoryPage() {
                     size="small"
                     sx={{ color: "#ff8c00", borderColor: "#ff8c00" }}
                     onClick={() =>
-                      handleOpenModal(row.order_inbound_id, row.lot_no, row.qty)
+                      handleOpenModal(row.order_item_id, row.lot_no, row.qty)
                     }
                   >
                     작업지시서
