@@ -344,6 +344,7 @@ export default function InboundHistoryPage() {
                       onChange={(e) =>
                         handleQtyChange(row.order_inbound_id, e.target.value)
                       }
+                      inputProps={{ min: 1 }}
                       sx={{ width: 70 }}
                     />
                   ) : (
@@ -385,7 +386,7 @@ export default function InboundHistoryPage() {
                   <Button
                     variant="outlined"
                     size="small"
-                    sx={{ color: "#ff8c00", borderColor: "#ff8c00" }}
+                    sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
                     onClick={() =>
                       handleOpenModal(row.order_inbound_id, row.lot_no, row.qty)
                     }
@@ -416,6 +417,7 @@ export default function InboundHistoryPage() {
                     color="error"
                     size="small"
                     onClick={() => handleDelete(row.order_inbound_id)}
+                    sx={{ ml: 0.3 }}
                   >
                     삭제
                   </Button>

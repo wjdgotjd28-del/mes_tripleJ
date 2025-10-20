@@ -47,8 +47,13 @@ export default function RoutingViewPage() {
   }, []);
 
   // 등록 완료 시 호출되는 콜백
-  const handleRegister = (saved: RoutingFormData) => {
-    setRoutingData((prev) => [...prev, saved]); // 새 데이터 추가
+  const handleRegister = async () => {
+    try {
+      const data = await fetchRoutings(); // 등록 후 전체 데이터 재조회
+      setRoutingData(data);
+    } catch (err) {
+      console.error("등록 후 데이터 재조회 실패", err);
+    }
     setOpenModal(false); // 모달 닫기
   };
 

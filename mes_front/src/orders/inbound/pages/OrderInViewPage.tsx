@@ -14,13 +14,19 @@ import {
   Chip,
   Alert,
   CircularProgress,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
 
-import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
+import {
+  ArrowDownward,
+  ArrowUpward,
+  FileDownload as FileDownloadIcon,
+} from "@mui/icons-material";
 
 import OrderDetailModal from "../../../masterData/items/pages/OrderDetailModal";
 
@@ -48,7 +54,7 @@ export default function OrderInViewPage() {
   const [inputValues, setInputValues] = useState<
     Record<string, { qty: string; date: string }>
   >({});
-
+  const [sortAsc, setSortAsc] = useState(true);
   // 전체 품목 데이터
   const [orderItems, setOrderItems] = useState<OrderItems[]>([]);
   // 화면에 표시되는 품목 데이터 (검색 필터 적용됨)
@@ -104,7 +110,12 @@ export default function OrderInViewPage() {
       setLoading(false);
     }
   };
-
+  const toggleSortOrder = () => setSortAsc((prev) => !prev);
+  const sortedItems = [...displayedItems].sort((a, b) =>
+    sortAsc
+      ? a.order_item_id - b.order_item_id
+      : b.order_item_id - a.order_item_id
+  );
   /** -----------------------------
    * 📌 검색 관련 핸들러
    * ----------------------------- */
@@ -239,6 +250,11 @@ export default function OrderInViewPage() {
           <Button variant="contained" color="primary" onClick={handleSearch}>
             검색
           </Button>
+          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+            <IconButton onClick={toggleSortOrder}>
+              {sortAsc ? <ArrowUpward /> : <ArrowDownward />}
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/* 엑셀 다운로드 버튼 */}
@@ -281,7 +297,7 @@ export default function OrderInViewPage() {
 
             {/* 테이블 본문 */}
             <TableBody>
-              {displayedItems.length === 0 ? (
+              {sortedItems.length === 0 ? (
                 // 표시할 데이터 없을 때
                 <TableRow>
                   <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
@@ -292,7 +308,7 @@ export default function OrderInViewPage() {
                 </TableRow>
               ) : (
                 // 품목 데이터 반복 렌더링
-                displayedItems.map((row) => {
+                sortedItems.map((row) => {
                   const id = row.order_item_id.toString();
                   const values = inputValues[id] || { qty: "", date: "" };
 
@@ -344,6 +360,7 @@ export default function OrderInViewPage() {
                           type="number"
                           value={values.qty}
                           onChange={(e) => handleQtyChange(id, e.target.value)}
+                          inputProps={{ min: 1 }}
                           sx={{ width: 70 }}
                         />
                       </TableCell>
