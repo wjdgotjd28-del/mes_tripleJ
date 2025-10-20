@@ -14,7 +14,7 @@ interface OrdersDocModalProps {
   onClose: () => void;
   orderItem: OrderItems;
   lotNo?: string;
-  qty?: number
+  qty?: number;
 }
 
 export default function OrdersInDocModal({
@@ -28,28 +28,29 @@ export default function OrdersInDocModal({
 
   const mainImage = orderItem.image?.reduce((prev, curr) => {
     if (!prev) return curr;
-    return (curr.order_item_img_id ?? Infinity) < (prev.order_item_img_id ?? Infinity)
+    return (curr.order_item_img_id ?? Infinity) <
+      (prev.order_item_img_id ?? Infinity)
       ? curr
       : prev;
   }, orderItem.image[0]);
 
   // category 매핑 테이블
   const CATEGORY_LABELS: Record<string, string> = {
-    "DEFENSE": "방산",
-    "GENERAL": "일반",
-    "AUTOMOTIVE": "자동차",
-    "SHIPBUILDING": "조선",
+    DEFENSE: "방산",
+    GENERAL: "일반",
+    AUTOMOTIVE: "자동차",
+    SHIPBUILDING: "조선",
   };
   const PAINT_LABELS: Record<string, string> = {
-    "LIQUID": "액체",
-    "POWDER": "분체",
+    LIQUID: "액체",
+    POWDER: "분체",
   };
 
   const handlePrint = () => {
     const printArea = document.getElementById("work-order-print");
     if (printArea) {
-        const newWindow = window.open("", "_blank");
-        if (newWindow) {
+      const newWindow = window.open("", "_blank");
+      if (newWindow) {
         newWindow.document.write(`
             <html>
             <head>
@@ -129,16 +130,18 @@ export default function OrdersInDocModal({
         newWindow.focus();
         newWindow.onafterprint = () => newWindow.close();
         newWindow.print();
-        }
+      }
     }
-    };
+  };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>작업지시서</DialogTitle>
       <DialogContent>
-        <Box id="work-order-print" className="sheet"
-            sx={{
+        <Box
+          id="work-order-print"
+          className="sheet"
+          sx={{
             border: "1px solid #000",
             p: 2,
             "& table": {
@@ -159,15 +162,21 @@ export default function OrdersInDocModal({
               textAlign: "center",
             },
             // 상단 정보 테이블 컬럼
-            "& table:first-of-type td:nth-of-type(1), & table:first-of-type td:nth-of-type(3)": {
+            "& table:first-of-type td:nth-of-type(1), & table:first-of-type td:nth-of-type(3)":
+              {
                 backgroundColor: "#f0f0f0",
                 fontWeight: "bold",
-            },
+              },
           }}
         >
-          <Typography 
+          <Typography
             className="title"
-            sx={{ textAlign: "center", fontSize: "18px", fontWeight: "bold", mb: 1 }}
+            sx={{
+              textAlign: "center",
+              fontSize: "18px",
+              fontWeight: "bold",
+              mb: 1,
+            }}
           >
             작 업 지 시 서
           </Typography>
@@ -176,43 +185,109 @@ export default function OrdersInDocModal({
           <table>
             <tbody>
               <tr>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    거래처</td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  거래처
+                </td>
                 <td>{orderItem.company_name}</td>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    LOT 번호</td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  LOT 번호
+                </td>
                 <td>{lotNo ?? "-"}</td>
               </tr>
               <tr>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    품목명</td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  품목명
+                </td>
                 <td>{orderItem.item_name}</td>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    품목번호</td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  품목번호
+                </td>
                 <td>{orderItem.item_code}</td>
               </tr>
               <tr>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    분류</td>
-                <td>{CATEGORY_LABELS[orderItem.category] || orderItem.category}</td>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    도장방식</td>
-                <td>{PAINT_LABELS[orderItem.paint_type] || orderItem.paint_type}</td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  분류
+                </td>
+                <td>
+                  {CATEGORY_LABELS[orderItem.category] || orderItem.category}
+                </td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  도장방식
+                </td>
+                <td>
+                  {PAINT_LABELS[orderItem.paint_type] || orderItem.paint_type}
+                </td>
               </tr>
               <tr>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    색상</td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  색상
+                </td>
                 <td>{orderItem.color ?? "-"}</td>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    수량</td>
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  수량
+                </td>
                 <td>{qty}</td>
               </tr>
               <tr>
-                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
-                    비고
+                <td
+                  style={{
+                    width: "80px",
+                    backgroundColor: "#f0f0f0",
+                    fontWeight: "bold",
+                  }}
+                >
+                  비고
                 </td>
                 <td colSpan={3} style={{ textAlign: "center" }}>
-                    {orderItem.note ?? "-"}
+                  {orderItem.note ?? "-"}
                 </td>
               </tr>
             </tbody>
