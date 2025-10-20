@@ -30,27 +30,34 @@ import { filterOrderItems } from "../../../masterData/items/components/OrderSear
 
 // API
 import { getOrderItems } from "../../../masterData/items/api/OrderApi";
-
-// 타입
-import type { OrderItems } from "../../../type";
 import { registerInbound } from "../api/OrderInViewApi";
 
+// 타입
+import type { OrderInView, OrderItems } from "../../../type";
+
 export default function OrderInViewPage() {
-  // 모달 상태
+  /** -----------------------------
+   * 📌 상태 관리
+   * ----------------------------- */
+
+  // 상세 모달 상태
   const [openDetailModal, setOpenDetailModal] = useState<boolean>(false);
   const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
 
+  // 각 품목별 수량 & 입고일 입력값 상태
   const [inputValues, setInputValues] = useState<
     Record<string, { qty: string; date: string }>
   >({});
 
-  // 데이터
+  // 전체 품목 데이터
   const [orderItems, setOrderItems] = useState<OrderItems[]>([]);
+  // 화면에 표시되는 품목 데이터 (검색 필터 적용됨)
   const [displayedItems, setDisplayedItems] = useState<OrderItems[]>([]);
+  // 로딩 & 에러 상태
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 검색
+  // 검색 관련 상태
   const [searchValues, setSearchValues] = useState({
     companyName: "",
     itemCode: "",
@@ -58,17 +65,22 @@ export default function OrderInViewPage() {
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
-  // 초기 데이터 로드
+  /** -----------------------------
+   * 📌 초기 데이터 로드
+   * ----------------------------- */
   useEffect(() => {
     void fetchOrderItems();
   }, []);
 
+  // 서버에서 거래 중인 품목 데이터 불러오기
   const fetchOrderItems = async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
+
       const res = await getOrderItems();
 
+      // 서버 응답이 배열이 아닌 경우 방어 처리
       if (!Array.isArray(res)) {
         setError("서버 응답 형식이 올바르지 않습니다.");
         setOrderItems([]);
@@ -76,6 +88,7 @@ export default function OrderInViewPage() {
         return;
       }
 
+      // 사용/거래 상태가 Y인 품목만 표시
       const filtered = res.filter(
         (item: OrderItems) => item.use_yn === "Y" && item.status === "Y"
       );
@@ -92,7 +105,11 @@ export default function OrderInViewPage() {
     }
   };
 
-  // 검색 핸들러
+  /** -----------------------------
+   * 📌 검색 관련 핸들러
+   * ----------------------------- */
+
+  // 검색창 입력 시 상태 업데이트
   const handleTextChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
@@ -100,9 +117,11 @@ export default function OrderInViewPage() {
     setSearchValues((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 검색 버튼 클릭 시 필터 적용
   const handleSearch = (): void => {
     setAppliedSearchValues(searchValues);
 
+    // 검색 조건이 비어있으면 전체 표시
     if (
       !searchValues.companyName &&
       !searchValues.itemCode &&
@@ -112,21 +131,29 @@ export default function OrderInViewPage() {
       return;
     }
 
+    // 유틸 함수로 검색 필터 적용
     const filtered = filterOrderItems(orderItems, searchValues);
     setDisplayedItems(filtered);
   };
 
-  // 엑셀 다운로드
+  /** -----------------------------
+   * 📌 엑셀 다운로드
+   * ----------------------------- */
   const handleExcelDownload = (): void => {
     exportToExcel(displayedItems, "기준정보_수주대상_거래중품목조회");
   };
 
-  // 상세 보기 클릭
+  /** -----------------------------
+   * 📌 상세보기 모달
+   * ----------------------------- */
   const handleItemClick = (item: OrderItems): void => {
     setSelectedItem(item);
     setOpenDetailModal(true);
   };
 
+  /** -----------------------------
+   * 📌 입력값 변경 핸들러 (수량 & 입고일)
+   * ----------------------------- */
   const handleQtyChange = (id: string, value: string) => {
     setInputValues((prev) => ({
       ...prev,
@@ -141,6 +168,19 @@ export default function OrderInViewPage() {
     }));
   };
 
+  /** -----------------------------
+   * 📌 카테고리 한글 매핑
+   * ----------------------------- */
+  const categoryLabelMap: Record<OrderItems["category"], string> = {
+    DEFENSE: "방산",
+    GENERAL: "일반",
+    AUTOMOTIVE: "자동차",
+    SHIPBUILDING: "조선",
+  };
+
+  /** -----------------------------
+   * 📌 UI 렌더링
+   * ----------------------------- */
   return (
     <Box
       sx={{
@@ -151,15 +191,17 @@ export default function OrderInViewPage() {
         gap: 3,
       }}
     >
+      {/* 페이지 제목 */}
       <Typography variant="h5">거래중 품목 조회</Typography>
 
+      {/* 에러 메시지 */}
       {error && (
         <Alert severity="error" onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
 
-      {/* 검색 영역 */}
+      {/* 🔍 검색 영역 */}
       <Box
         sx={{
           display: "flex",
@@ -168,6 +210,7 @@ export default function OrderInViewPage() {
           alignItems: "center",
         }}
       >
+        {/* 검색 입력창들 */}
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
@@ -198,6 +241,7 @@ export default function OrderInViewPage() {
           </Button>
         </Box>
 
+        {/* 엑셀 다운로드 버튼 */}
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
             color="success"
@@ -210,14 +254,16 @@ export default function OrderInViewPage() {
         </Box>
       </Box>
 
-      {/* 테이블 영역 */}
+      {/* 📋 테이블 영역 */}
       {loading ? (
+        // 로딩 스피너
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />
         </Box>
       ) : (
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 900 }}>
+            {/* 테이블 헤더 */}
             <TableHead>
               <TableRow>
                 <TableCell align="center">ID</TableCell>
@@ -232,8 +278,11 @@ export default function OrderInViewPage() {
                 <TableCell align="center">입고등록</TableCell>
               </TableRow>
             </TableHead>
+
+            {/* 테이블 본문 */}
             <TableBody>
               {displayedItems.length === 0 ? (
+                // 표시할 데이터 없을 때
                 <TableRow>
                   <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
@@ -242,6 +291,7 @@ export default function OrderInViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
+                // 품목 데이터 반복 렌더링
                 displayedItems.map((row) => {
                   const id = row.order_item_id.toString();
                   const values = inputValues[id] || { qty: "", date: "" };
@@ -251,6 +301,8 @@ export default function OrderInViewPage() {
                       <TableCell align="center">{row.order_item_id}</TableCell>
                       <TableCell align="center">{row.company_name}</TableCell>
                       <TableCell align="center">{row.item_code}</TableCell>
+
+                      {/* 클릭 시 상세보기 모달 */}
                       <TableCell align="center">
                         <Typography
                           variant="body2"
@@ -267,8 +319,15 @@ export default function OrderInViewPage() {
                           {row.item_name}
                         </Typography>
                       </TableCell>
-                      <TableCell align="center">{row.category}</TableCell>
+
+                      {/* 카테고리 한글 변환 */}
+                      <TableCell align="center">
+                        {categoryLabelMap[row.category] || row.category}
+                      </TableCell>
+
                       <TableCell align="center">{row.note}</TableCell>
+
+                      {/* 거래 상태 */}
                       <TableCell align="center">
                         <Chip
                           label="거래중"
@@ -277,6 +336,8 @@ export default function OrderInViewPage() {
                           sx={{ minWidth: 10 }}
                         />
                       </TableCell>
+
+                      {/* 입고 수량 입력 */}
                       <TableCell align="center">
                         <TextField
                           size="small"
@@ -286,6 +347,8 @@ export default function OrderInViewPage() {
                           sx={{ width: 70 }}
                         />
                       </TableCell>
+
+                      {/* 입고 일자 선택 */}
                       <TableCell align="center">
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
@@ -300,14 +363,18 @@ export default function OrderInViewPage() {
                           />
                         </LocalizationProvider>
                       </TableCell>
+
+                      {/* 입고 등록 버튼 */}
                       <TableCell align="center">
                         <Button
                           variant="outlined"
                           size="small"
                           sx={{ color: "#452f8eff", borderColor: "#452f8eff" }}
-                          disabled={!values.qty || !values.date}
+                          disabled={!values.qty || !values.date} // 수량/일자 없으면 비활성화
                           onClick={async () => {
-                            const payload = {
+                            // 등록 payload 구성
+                            const payload: OrderInView = {
+                              id: 0, // 필수값, 서버에서 실제 id 생성
                               order_item_id: row.order_item_id,
                               category: row.category,
                               customer_name: row.company_name,
@@ -323,8 +390,20 @@ export default function OrderInViewPage() {
                             try {
                               await registerInbound(payload);
                               console.log("입고등록 완료:", payload);
+
+                              // ✅ 입력값 초기화
+                              setInputValues((prev) => ({
+                                ...prev,
+                                [id]: { qty: "", date: "" },
+                              }));
+
+                              // ✅ 최신 데이터 다시 불러오기
+                              await fetchOrderItems();
+
+                              alert("입고가 등록되었습니다.");
                             } catch (err) {
                               console.error("입고등록 실패:", err);
+                              alert("입고 등록 중 오류가 발생했습니다.");
                             }
                           }}
                         >

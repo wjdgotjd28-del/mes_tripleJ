@@ -27,3 +27,8 @@ export const getInboundForOut = async (): Promise<Inbound[]> => {
 export async function registerInbound(data: OrderInbound): Promise<void> {
   await axios.post(`${BASE_URL}/orders/inbound/items`, data);
 }
+
+export async function fetchInboundHistory(): Promise<OrderInView[]> {
+  const response = await axios.get(`${BASE_URL}/orders/inbound/history`);
+  return response.data;
+}
