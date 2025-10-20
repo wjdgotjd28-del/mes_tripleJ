@@ -39,7 +39,7 @@ public class OrderInboundProcessTrackingService {
                         dto.setOrderItemRoutingId(entity.getOrderItemRouting().getId());
 
                         if(entity.getOrderItemRouting().getOrderItem() != null) {
-                            dto.setOrderItemId(entity.getOrderItemRouting().getOrderItem().getOrderItemId());
+                            dto.setOrderItemId(entity.getOrderItemRouting().getOrderItemId());
                         }
 
                         if(entity.getOrderItemRouting().getRouting() != null) {
@@ -84,7 +84,7 @@ public class OrderInboundProcessTrackingService {
             resultDto.setOrderItemRoutingId(saved.getOrderItemRouting().getId());
 
             if (saved.getOrderItemRouting().getOrderItem() != null) {
-                resultDto.setOrderItemId(saved.getOrderItemRouting().getOrderItem().getOrderItemId());
+                resultDto.setOrderItemId(saved.getOrderItemRouting().getOrderItemId());
             }
 
             if (saved.getOrderItemRouting().getRouting() != null) {
@@ -150,7 +150,7 @@ public class OrderInboundProcessTrackingService {
         if (entity.getOrderItemRouting() != null) {
             resultDto.setOrderItemRoutingId(entity.getOrderItemRouting().getId());
             if (entity.getOrderItemRouting().getOrderItem() != null) {
-                resultDto.setOrderItemId(entity.getOrderItemRouting().getOrderItem().getOrderItemId());
+                resultDto.setOrderItemId(entity.getOrderItemRouting().getOrderItemId());
             }
             if (entity.getOrderItemRouting().getRouting() != null) {
                 resultDto.setProcessName(entity.getOrderItemRouting().getRouting().getProcessName());
