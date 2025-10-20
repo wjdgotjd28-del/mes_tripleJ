@@ -44,8 +44,4 @@ public class OrderInboundIController {
 //        return ResponseEntity.ok(OrderInboundItemRequestDtos);
 //    }
 
-//    @GetMapping("/orderoutbound")
-//    public List<OrderInboundDto> findInboundHistoriesForOutbound() {
-//        return orderInboundService.findInboundHistoriesForOutbound();
-//    }
 }

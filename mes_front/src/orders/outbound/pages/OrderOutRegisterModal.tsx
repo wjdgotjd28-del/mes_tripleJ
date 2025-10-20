@@ -66,7 +66,9 @@ export default function OrderOutRegisterModal({
         try {
           const data = await getInboundForOut();
           console.log(data);
-          const availableInbounds = data.filter(item => item.qty > 0);
+          const availableInbounds = data.filter(
+            (item) => item.qty > 0 && item.processStatus === 2
+          );
           setInbounds(availableInbounds);
           setFilteredInbounds(availableInbounds);
         } catch (error) {

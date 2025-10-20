@@ -52,7 +52,9 @@ public class OrderInboundDTO {
     @JsonProperty("qty")
     private Long qty; // 입고 수량
 
-    public OrderInboundDTO(Long orderInboundId, String lotNo, String customerName, String itemName, String itemCode, LocalDate inboundDate, Long qty, OrderCategory category) {
+    private Integer processStatus;
+
+    public OrderInboundDTO(Long orderInboundId, String lotNo, String customerName, String itemName, String itemCode, LocalDate inboundDate, Long qty, OrderCategory category, Integer processStatus) {
         this.orderInboundId = orderInboundId;
         this.lotNo = lotNo;
         this.customerName = customerName;
@@ -61,5 +63,6 @@ public class OrderInboundDTO {
         this.inboundDate = inboundDate;
         this.qty = qty;
         this.category = category;
+        this.processStatus = processStatus;
     }
 }

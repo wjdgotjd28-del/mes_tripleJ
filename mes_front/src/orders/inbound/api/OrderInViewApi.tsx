@@ -27,6 +27,7 @@ export const getInboundForOut = async (): Promise<Inbound[]> => {
     qty: item.qty,
     category: item.category,
     inboundDate: item.inbound_date,
+    processStatus: item.processStatus,
   }));
 };
 /**

@@ -1,6 +1,5 @@
 package com.mes_back.repository;
 
-
 import com.mes_back.dto.OrderInboundDTO;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
@@ -11,6 +10,7 @@ import java.util.List;
 
 import static com.mes_back.entity.QOrderInbound.orderInbound;
 import static com.mes_back.entity.QOrderOutbound.orderOutbound;
+import static com.mes_back.entity.QProcessTracking.processTracking;
 
 @RequiredArgsConstructor
 public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryCustom {
@@ -32,9 +32,14 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
                                         .from(orderOutbound)
                                         .where(orderOutbound.orderInbound.eq(orderInbound))
                         ),
-                        orderInbound.category
+                        orderInbound.category,
+                        processTracking.processStatus
                 ))
                 .from(orderInbound)
+                .leftJoin(processTracking)
+                .on(processTracking.orderInbound.eq(orderInbound))
+                // ✅ 추가: processStatus == 2 조건
+                .where(processTracking.processStatus.eq(2))
                 .fetch();
     }
 }

@@ -103,6 +103,7 @@ export type Inbound = {
   qty: number;
   category: string;
   inboundDate: string;
+  processStatus: number;
 };
 
 // 원자재 재고 현황 테이블 타입
