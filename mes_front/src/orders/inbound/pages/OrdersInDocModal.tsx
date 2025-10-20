@@ -24,17 +24,23 @@ export default function OrdersInDocModal({
   lotNo,
   qty,
 }: OrdersDocModalProps) {
-  if (!orderItem) return null;
-
-  const mainImage = orderItem.image?.reduce((prev, curr) => {
+  // ✅ Hook은 항상 호출
+  const mainImage = orderItem?.image?.reduce<
+    NonNullable<OrderItems["image"]>[number] | undefined
+  >((prev, curr) => {
     if (!prev) return curr;
     return (curr.order_item_img_id ?? Infinity) <
       (prev.order_item_img_id ?? Infinity)
       ? curr
       : prev;
-  }, orderItem.image[0]);
+  }, orderItem?.image?.[0]);
 
-  // category 매핑 테이블
+  // orderItem이 없으면 단순히 null 렌더링
+  if (!orderItem) {
+    return null; // ✅ 이건 JSX 반환이므로 Hook 호출과 상관없음
+  }
+
+  // ✅ category / paint 타입 안전 매핑
   const CATEGORY_LABELS: Record<string, string> = {
     DEFENSE: "방산",
     GENERAL: "일반",
@@ -52,79 +58,64 @@ export default function OrdersInDocModal({
       const newWindow = window.open("", "_blank");
       if (newWindow) {
         newWindow.document.write(`
-            <html>
+          <html>
             <head>
-                <title>작업지시서</title>
-                <style>
-                @page {
-                    size: A4;
-                    margin: 15mm;
-                }
-
+              <title>작업지시서</title>
+              <style>
+                @page { size: A4; margin: 15mm; }
                 body {
-                    font-family: 'Malgun Gothic', Arial, sans-serif;
-                    padding: 10px;
-                    background: white;
+                  font-family: 'Malgun Gothic', Arial, sans-serif;
+                  padding: 10px;
+                  background: white;
                 }
-
-                .sheet {
-                    width: 100%;
-                    box-sizing: border-box;
-                }
-
+                .sheet { width: 100%; box-sizing: border-box; }
                 table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 6px;
-                    border: 0.5pt solid #000;
+                  width: 100%;
+                  border-collapse: collapse;
+                  margin-top: 6px;
+                  border: 0.5pt solid #000;
                 }
-
                 th, td {
-                    border: 0.5pt solid #000;
-                    padding: 6px 8px;
-                    font-size: 11pt;
-                    line-height: 1.4;
-                    text-align: center;
-                    vertical-align: middle;
+                  border: 0.5pt solid #000;
+                  padding: 6px 8px;
+                  font-size: 11pt;
+                  line-height: 1.4;
+                  text-align: center;
+                  vertical-align: middle;
                 }
-
                 th {
-                    background-color: #f5f5f5 !important;
-                    font-weight: bold;
+                  background-color: #f5f5f5 !important;
+                  font-weight: bold;
                 }
-
                 .title {
-                    text-align: center;
-                    font-size: 18pt;
-                    font-weight: bold;
-                    margin: 10px 0 15px;
+                  text-align: center;
+                  font-size: 18pt;
+                  font-weight: bold;
+                  margin: 10px 0 15px;
                 }
-
                 .image-box {
-                    width: 100%;
-                    height: 150px;
-                    border: 0.5pt solid #000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin: 10px 0;
+                  width: 100%;
+                  height: 150px;
+                  border: 0.5pt solid #000;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin: 10px 0;
                 }
-
                 img {
-                    max-height: 140px;
-                    object-fit: contain;
+                  max-height: 140px;
+                  object-fit: contain;
                 }
-
                 @media print {
-                    * {
+                  * {
                     -webkit-print-color-adjust: exact !important;
                     print-color-adjust: exact !important;
-                    }
+                  }
                 }
-                </style>
+              </style>
             </head>
             <body>${printArea.innerHTML}</body>
-            </html>
+          </html>
         `);
         newWindow.document.close();
         newWindow.focus();
@@ -302,7 +293,7 @@ export default function OrdersInDocModal({
             )}
           </div>
 
-          {/* 작업 순서 / 공정 */}
+          {/* 공정 정보 */}
           <table>
             <thead>
               <tr>
@@ -314,7 +305,7 @@ export default function OrdersInDocModal({
             </thead>
             <tbody>
               {orderItem.routing?.length ? (
-                orderItem.routing.map((route: RoutingFormData, i) => (
+                orderItem.routing.map((route: RoutingFormData, i: number) => (
                   <tr key={route.routing_id}>
                     <td>{i + 1}</td>
                     <td>{route.process_name}</td>
@@ -324,7 +315,7 @@ export default function OrdersInDocModal({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} style={{ textAlign: "center" }}>
+                  <td colSpan={4} style={{ textAlign: "center" }}>
                     라우팅 정보 없음
                   </td>
                 </tr>
@@ -343,3 +334,9 @@ export default function OrdersInDocModal({
     </Dialog>
   );
 }
+
+// const titleCellStyle: React.CSSProperties = {
+//   width: "80px",
+//   backgroundColor: "#f0f0f0",
+//   fontWeight: "bold",
+// };

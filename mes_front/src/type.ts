@@ -131,6 +131,7 @@ export interface OrderInView {
 }
 
 export type OrderProcessTracking = {
+  id?: number;
   order_inbound_id: number;
   order_item_routing_id?: number;
   process_status: number;
