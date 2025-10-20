@@ -1,14 +1,11 @@
 package com.mes_back.controller;
 
-import com.mes_back.dto.CompanyDto;
-import com.mes_back.entity.Company;
+import com.mes_back.dto.CompanyDTO;
 import com.mes_back.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RequestMapping("/companies")
@@ -19,38 +16,38 @@ public class CompanyController {
 
     // 업체 등록
     @PostMapping("/new")
-    public CompanyDto addCompany(@RequestBody CompanyDto companyDto) {
+    public CompanyDTO addCompany(@RequestBody CompanyDTO companyDto) {
         return companyService.addCompany(companyDto);
     }
 
     // 업체 조회
     @GetMapping("")
-    public List<CompanyDto> getCompanies() {
+    public List<CompanyDTO> getCompanies() {
         return companyService.findAll();
     }
 
     // 업체 수정
     @PutMapping("")
-    public CompanyDto updateCompany(@RequestBody CompanyDto companyDto) {
+    public CompanyDTO updateCompany(@RequestBody CompanyDTO companyDto) {
         return companyService.updateCompany(companyDto);
     }
 
     // 거래 상태 버튼 클릭 -> 거래 상태 변경
     @PatchMapping("/{companyId}/updateTradeStatus")
-    public ResponseEntity<CompanyDto> updateTradeStatus(@PathVariable Long companyId, @RequestBody CompanyDto companyDto) {
-         CompanyDto newStatus = companyService.updateTradeStatus(companyId, companyDto.getStatus());
+    public ResponseEntity<CompanyDTO> updateTradeStatus(@PathVariable Long companyId, @RequestBody CompanyDTO companyDto) {
+         CompanyDTO newStatus = companyService.updateTradeStatus(companyId, companyDto.getStatus());
          return ResponseEntity.ok(newStatus);
     }
 
     // 일반 페이지용 (거래중 & 삭제 안된 업체)
     @GetMapping("/active")
-    public List<CompanyDto> getActiveCompanies() {
+    public List<CompanyDTO> getActiveCompanies() {
         return companyService.findAllActive();
     }
 
     // 삭제된 업체 조회
     @GetMapping("/deleted")
-    public List<CompanyDto> getDeletedCompanies() {
+    public List<CompanyDTO> getDeletedCompanies() {
         return companyService.findAllDeleted();
     }
 

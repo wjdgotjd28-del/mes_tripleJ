@@ -66,18 +66,18 @@ export type RoutingCreateData = {
   process_code: string;
   process_name: string;
   process_time: string;
-  note: string;
+  note: string | null;
   process_no?: number;
 };
 
 // 라우팅 조회 타입
 export type RoutingFormData = RoutingCreateData & {
   routing_id: number;
+  order_item_id?: number;
 };
 
 export type RoutingFormDataWithProcessNo = RoutingFormData & {
   process_no: number;
-  id?: number;
 };
 
 // 수주 출고 
@@ -131,11 +131,15 @@ export interface OrderInView {
 }
 
 export type OrderProcessTracking = {
-  id: number;
+  id?: number;
   order_inbound_id: number;
-  order_item_routing_id: number;
-  process_start_time: string | null;
+  order_item_routing_id?: number;
   process_status: number;
+  process_start_time: string | null;
+  routing_id?: number;
+  process_no?: number;
+  process_name?: string;
+  process_time?: number;
 };
 
 export type OrderInbound = {

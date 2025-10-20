@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class ProcessTrackingDTO {
+
     private Long id;
     @JsonProperty("order_inbound_id")
     private Long orderInboundId;
@@ -23,4 +24,6 @@ public class ProcessTrackingDTO {
     private LocalDateTime processStartTime;
     @JsonProperty("process_status")
     private Integer processStatus;
+    @JsonProperty("process_no")
+    private Integer processNo;
 }

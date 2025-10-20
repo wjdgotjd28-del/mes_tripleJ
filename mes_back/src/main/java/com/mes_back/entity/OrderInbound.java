@@ -30,6 +30,9 @@ public class OrderInbound {
     @JoinColumn(name = "company_id")
     private Company company;
 
+    @Column(name = "customer_name", nullable = false, length = 255)
+    private String customerName;
+
     @Column(name = "item_name", nullable = false, length = 255)
     private String itemName;
 

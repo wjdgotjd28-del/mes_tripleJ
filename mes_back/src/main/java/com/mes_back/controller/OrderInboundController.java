@@ -14,22 +14,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/orders/inbound")
 @Slf4j
-public class OrderInboundIController {
+public class OrderInboundController {
 
     private final OrderInboundService orderInboundService;
-]
-//    @GetMapping("/items")
-//    public ResponseEntity<List<OrderInboundItemRequestDto> findAllItems() {
-//        List<OrderInboundItemRequestDto> OrderInboundItemRequestDtos = orderInboundService.findAllByOrderInbound();
-//        return ResponseEntity.ok(OrderInboundItemRequestDtos);
-//    }
-
-//    @GetMapping("/items")
-//    public ResponseEntity<List<OrderInboundItemRequestDto> findAllItems() {
-//        List<OrderInboundItemRequestDto> OrderInboundItemRequestDtos = orderInboundService.findAllByOrderInbound();
-//        return ResponseEntity.ok(OrderInboundItemRequestDtos);
-//    }
-
     @GetMapping("/orderoutbound")
     public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
         return orderInboundService.findInboundHistoriesForOutbound();

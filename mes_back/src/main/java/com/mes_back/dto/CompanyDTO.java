@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CompanyDto {
+public class CompanyDTO {
     private Long companyId;
 
     private CompanyType type; // 거래처 / 매입처

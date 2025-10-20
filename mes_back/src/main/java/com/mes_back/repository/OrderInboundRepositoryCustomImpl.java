@@ -19,7 +19,7 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
     @Override
     public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
         return queryFactory
-                .select(Projections.constructor(OrderInboundDto.class,
+                .select(Projections.constructor(OrderInboundDTO.class,
                         orderInbound.orderInboundId,
                         orderInbound.lotNo,
                         orderInbound.company.companyName,

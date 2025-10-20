@@ -22,9 +22,12 @@ import {
   FileDownload as FileDownloadIcon,
 } from "@mui/icons-material";
 import { exportToExcel } from "../../../Common/ExcelUtils";
-import type { OrderInbound } from "../../../type";
+import type { OrderInbound, OrderItems, RoutingFormData } from "../../../type";
 import { filterInboundHistory } from "./InboundSearchUtils";
 import { deleteInboundHistory } from "../api/InboundHistoryApi";
+import { getOrderItemsdtl } from "../../../masterData/items/api/OrderApi";
+import OrdersInDocModal from "./OrdersInDocModal";
+import OrdersProcessTrackings from "../../processStatus/pages/OrdersProcessTrackings";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -48,6 +51,17 @@ export default function InboundHistoryPage() {
   const [displayedData, setDisplayedData] = useState<OrderInbound[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortAsc, setSortAsc] = useState(true);
+  //  작업지시서 모달 상태
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
+  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
+  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
+  // Lot 번호 클릭
+  const [openProcessModal, setOpenProcessModal] = useState(false);
+  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
+    RoutingFormData[]
+  >([]);
+  const [selectedInboundId, setSelectedInboundId] = useState<number>();
 
   /** -----------------------------
    * 📌 초기 데이터 로드
@@ -113,15 +127,15 @@ export default function InboundHistoryPage() {
     );
 
   const categoryLabelMap: Record<OrderInbound["category"], string> = {
-    DEFENSE: "방산",
-    GENERAL: "일반",
-    AUTOMOTIVE: "자동차",
-    SHIPBUILDING: "조선",
+    "DEFENSE": "방산",
+    "GENERAL": "일반",
+    "AUTOMOTIVE": "자동차",
+    "SHIPBUILDING": "조선",
   };
 
   const paintLableMap: Record<OrderInbound["paint_type"], string> = {
-    POWDER: "분체",
-    LIQUID: "액체",
+    "POWDER": "분체",
+    "LIQUID": "액체",
   };
 
   const handleDelete = async (order_inbound_id: number) => {
@@ -137,13 +151,7 @@ export default function InboundHistoryPage() {
     }
   };
 
-  //  작업지시서 모달 상태
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
-  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
-  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
-
-  const handleOpenModal = async (id: number, lotNo: string, qty: number) => {
+  const handleOpenModal = async (order_item_id: number, lotNo: string, qty: number) => {
     try {
       const data = await getOrderItemsdtl(id); // 상세조회 API 호출
       setSelectedItem(data);
@@ -155,28 +163,21 @@ export default function InboundHistoryPage() {
     }
   };
 
-  // Lot 번호 클릭
-  const [openProcessModal, setOpenProcessModal] = useState(false);
-  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
-    RoutingFormData[]
-  >([]);
-  const [selectedInboundId, setSelectedInboundId] = useState<number>();
-
   const handleLotClick = async (
-    itemId: number,
-    lot_no: string,
-    inboundId: number
-  ) => {
-    try {
-      const data = await getOrderItemsdtl(itemId);
-      setSelectedItem(data);
-      setSelectedRoutingSteps(data.routing || []);
-      setSelectedLotNo(lot_no);
-      setSelectedInboundId(inboundId);
-      setOpenProcessModal(true);
-    } catch (err) {
-      console.error("공정 현황 조회 실패", err);
-    }
+      itemId: number,
+      lot_no: string,
+      inboundId: number
+    ) => {
+      try {
+        const data = await getOrderItemsdtl(itemId);
+        setSelectedItem(data);
+        setSelectedRoutingSteps(data.routing || []);
+        setSelectedLotNo(lot_no);
+        setSelectedInboundId(inboundId);
+        setOpenProcessModal(true);
+      } catch (err) {
+        console.error("공정 현황 조회 실패", err);
+      }
   };
 
   return (
@@ -243,7 +244,7 @@ export default function InboundHistoryPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredData.map((row) => (
+            {data.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.id}</TableCell>
                 <TableCell>
@@ -254,7 +255,7 @@ export default function InboundHistoryPage() {
                       cursor: "pointer",
                       "&:hover": { color: "primary.dark", fontWeight: "bold" },
                     }}
-                    onClick={() => handleLotClick(row.id, row.lot_no, row.id)}
+                    onClick={() => handleLotClick(row.order_item_id, row.lot_no, row.order_inbound_id)}
                   >
                     {row.lot_no}
                   </Typography>
@@ -275,13 +276,15 @@ export default function InboundHistoryPage() {
                     variant="outlined"
                     size="small"
                     sx={{ color: "#ff8c00", borderColor: "#ff8c00" }}
+                    onClick={() => handleOpenModal(row.id, row.lot_no, row.qty)}
+                    
                   >
                     작업지시서
                   </Button>
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => handleUpdate(row.order_inbound_id)}
+                    // onClick={() => handleUpdate(row.order_inbound_id)}
                   >
                     수정
                   </Button>
@@ -305,21 +308,20 @@ export default function InboundHistoryPage() {
         <OrdersInDocModal
           open={openModal}
           onClose={() => setOpenModal(false)}
-          orderItem={selectedItem}
+          orderItem={selectedItem!}
           lotNo={selectedLotNo}
           qty={selectedQty}
         />
       )}
-
       {/* 공정 진행현황 모달 */}
       {selectedItem && (
-        <OrdersProcessStatus
+        <OrdersProcessTrackings
           open={openProcessModal}
           onClose={() => setOpenProcessModal(false)}
           lotNo={selectedLotNo}
           orderItem={selectedItem}
           routingSteps={selectedRoutingSteps}
-          inboundId={selectedInboundId}
+          inboundId={selectedInboundId!}
         />
       )}
     </Box>
