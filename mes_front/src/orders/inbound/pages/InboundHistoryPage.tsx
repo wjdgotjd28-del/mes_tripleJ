@@ -164,7 +164,7 @@ export default function InboundHistoryPage() {
             />
           ))}
           <Button variant="contained" onClick={handleSearch}>
-            검색
+            검색이다
           </Button>
           <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
             <IconButton onClick={toggleSortOrder}>
