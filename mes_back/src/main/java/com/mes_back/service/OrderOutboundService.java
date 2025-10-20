@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,21 @@ public class OrderOutboundService {
         OrderInbound orderInbound = orderInboundRepository.findById(dto.getOrderInboundId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 입고 정보를 찾을 수 없습니다. id=" + dto.getOrderInboundId()));
 
+        // 🔹 현재까지 출고된 수량 조회
+        Long currentTotalOutboundQty = orderOutboundRepository.sumOutboundQtyByOrderInbound(orderInbound)
+                .orElse(0L); // 출고된 수량이 없으면 0으로 간주
+
+        // 🔹 잔여 수량 계산
+        Long availableQty = orderInbound.getQty() - currentTotalOutboundQty;
+
+        // 🔹 출고 가능 여부 검증
+        if (dto.getQty() <= 0) {
+            throw new IllegalArgumentException("출고 수량은 0보다 커야 합니다.");
+        }
+        if (dto.getQty() > availableQty) {
+            throw new IllegalArgumentException("출고 수량이 입고 잔여 수량(" + availableQty + ")을 초과할 수 없습니다.");
+        }
+
         // 🔹 트랜잭션 안에서 안전하게 출고번호 생성
         String outboundNo = generateOutboundNo();
 
@@ -92,9 +108,10 @@ public class OrderOutboundService {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "OUT-" + today + "-";
 
-        String lastNo = orderOutboundRepository.findMaxOutboundNo(prefix);
+        Optional<String> lastNoOptional = orderOutboundRepository.findMaxOutboundNoNative(prefix);
         int nextSeq = 1;
-        if (lastNo != null) {
+        if (lastNoOptional.isPresent()) {
+            String lastNo = lastNoOptional.get();
             String lastSeq = lastNo.substring(lastNo.lastIndexOf("-") + 1);
             nextSeq = Integer.parseInt(lastSeq) + 1;
         }
