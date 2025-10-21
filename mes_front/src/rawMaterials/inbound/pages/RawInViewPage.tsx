@@ -175,7 +175,7 @@ export default function RawInViewPage() {
         gap: 3,
       }}
     >
-      <Typography variant="h5">원자재 품목 관리 (활성 데이터만)</Typography>
+      <Typography variant="h5">원자재 품목 관리</Typography>
 
       {error && (
         <Alert severity="error" onClose={() => setError(null)}>
@@ -221,9 +221,7 @@ export default function RawInViewPage() {
           </Button>
         </Box>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button variant="outlined" onClick={() => setOpenModal(true)}>
-            + 등록
-          </Button>
+         
           <Button
             color="success"
             variant="outlined"
