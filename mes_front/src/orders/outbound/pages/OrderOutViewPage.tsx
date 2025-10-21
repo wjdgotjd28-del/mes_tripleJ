@@ -222,26 +222,28 @@ export default function OrderOutViewPage() {
         <Table sx={{ minWidth: 900 }}>
           <TableHead>
             <TableRow>
-              <TableCell>출고번호</TableCell>
-              <TableCell>거래처명</TableCell>
-              <TableCell>품목번호</TableCell>
-              <TableCell>품목명</TableCell>
-              <TableCell>출고 수량</TableCell>
-              <TableCell>출고 일자</TableCell>
-              <TableCell>분류</TableCell>
+              <TableCell align="center">ID</TableCell>
+              <TableCell align="center">출고번호</TableCell>
+              <TableCell align="center">거래처명</TableCell>
+              <TableCell align="center">품목번호</TableCell>
+              <TableCell align="center">품목명</TableCell>
+              <TableCell align="center">출고 수량</TableCell>
+              <TableCell align="center">출고 일자</TableCell>
+              <TableCell align="center">분류</TableCell>
               <TableCell align="center">기능</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {displayedRows.map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.outboundNo}</TableCell>
-                <TableCell>{row.customerName}</TableCell>
-                <TableCell>{row.itemCode}</TableCell>
-                <TableCell>{row.itemName}</TableCell>
-                <TableCell>{row.qty}</TableCell>
-                <TableCell>{row.outboundDate}</TableCell>
-                <TableCell>{translateCategory(row.category)}</TableCell>
+                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{row.outboundNo}</TableCell>
+                <TableCell align="center">{row.customerName}</TableCell>
+                <TableCell align="center">{row.itemCode}</TableCell>
+                <TableCell align="center">{row.itemName}</TableCell>
+                <TableCell align="center">{row.qty}</TableCell>
+                <TableCell align="center">{row.outboundDate}</TableCell>
+                <TableCell align="center">{translateCategory(row.category)}</TableCell>
                 <TableCell align="center">
                   <Box
                     sx={{ display: "flex", gap: 1, justifyContent: "center" }}
