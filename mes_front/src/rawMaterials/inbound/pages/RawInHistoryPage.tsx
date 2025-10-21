@@ -5,6 +5,7 @@ import {
 } from "@mui/material";
 
 import type { MaterialInbound } from "../../../type";
+import { getMaterialInbound } from "../api/rawInboundApi";
 
 export default function RawInHistoryPage() {
   const [materialInboundHistory, setMaterialInboundHistory] = useState<MaterialInbound[]>([]);
@@ -21,58 +22,17 @@ export default function RawInHistoryPage() {
       setLoading(true);
       setError(null);
 
-      // TODO: 실제 API 호출 로직으로 대체
-      // 예: const res = await getMaterialInboundHistory();
-      const mockData: MaterialInbound[] = [
-        {
-          id: 1,
-          materialItemId: 101,
-          supplierName: "A업체",
-          itemName: "페인트-RED",
-          itemCode: "P-RED-001",
-          specQty: 10,
-          specUnit: "L",
-          manufacturer: "제조사A",
-          manufacteDate: "2023-01-15",
-          qty: 50,
-          inboundDate: "2023-02-01",
-          inboundNo: "INB-20230201-001",
-          totalQty: 50,
-        },
-        {
-          id: 2,
-          materialItemId: 102,
-          supplierName: "B업체",
-          itemName: "신나-표준",
-          itemCode: "T-STD-002",
-          specQty: 20,
-          specUnit: "L",
-          manufacturer: "제조사B",
-          manufacteDate: "2023-01-20",
-          qty: 100,
-          inboundDate: "2023-02-05",
-          inboundNo: "INB-20230205-002",
-          totalQty: 100,
-        },
-        {
-          id: 3,
-          materialItemId: 101,
-          supplierName: "A업체",
-          itemName: "페인트-RED",
-          itemCode: "P-RED-001",
-          specQty: 10,
-          specUnit: "L",
-          manufacturer: "제조사A",
-          manufacteDate: "2023-02-01",
-          qty: 30,
-          inboundDate: "2023-02-10",
-          inboundNo: "INB-20230210-003",
-          totalQty: 80,
-        },
-      ];
+      const res = await getMaterialInbound();
+      if (!Array.isArray(res)) {
+        console.error("❌ API 응답이 배열이 아닙니다:", res);
+        setError("서버 응답 형식이 올바르지 않습니다.");
+        setMaterialInboundHistory([]);
+        setDisplayedHistory([]);
+        return;
+      }
 
-      setMaterialInboundHistory(mockData);
-      setDisplayedHistory(mockData);
+      setMaterialInboundHistory(res);
+      setDisplayedHistory(res);
     } catch (err) {
       console.error("❌ API 호출 실패:", err);
       setError("데이터를 불러오는 중 오류가 발생했습니다.");

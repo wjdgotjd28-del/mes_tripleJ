@@ -1,7 +1,15 @@
 package com.mes_back.dto;
 
+import lombok.*;
+import org.springframework.web.bind.annotation.GetMapping;
+
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MaterialInboundDTO {
     private Long id;
     private Long materialItemId;
