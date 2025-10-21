@@ -1,7 +1,7 @@
 package com.mes_back.entity;
 
 import com.mes_back.constant.CompanyType;
-import com.mes_back.dto.CompanyDto;
+import com.mes_back.dto.CompanyDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,7 +59,7 @@ public class Company {
     @Column(name = "status", nullable = false, length = 1)
     private String status; // 거래상태: Y/N
 
-    public void updateCompany(CompanyDto companyDto) {
+    public void updateCompany(CompanyDTO companyDto) {
         this.type = companyDto.getType();
         this.companyName = companyDto.getCompanyName();
         this.ceoName = companyDto.getCeoName();

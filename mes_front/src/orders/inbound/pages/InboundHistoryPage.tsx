@@ -28,12 +28,12 @@ import {
   deleteInboundHistory,
   updateInboundHistory,
 } from "../api/InboundHistoryApi";
-import OrdersProcessStatus from "../../processStatus/pages/OrdersProcessTrackings";
 import OrdersInDocModal from "./OrdersInDocModal";
 import { getOrderItemsdtl } from "../../../masterData/items/api/OrderApi";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import OrdersProcessTrackings from "../../processStatus/pages/OrdersProcessTrackings";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -62,17 +62,17 @@ export default function InboundHistoryPage() {
   const [displayedData, setDisplayedData] = useState<OrderInbound[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortAsc, setSortAsc] = useState(true);
-
+  //  작업지시서 모달 상태
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
+  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
+  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
+  // Lot 번호 클릭
   const [openProcessModal, setOpenProcessModal] = useState(false);
   const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
     RoutingFormData[]
   >([]);
   const [selectedInboundId, setSelectedInboundId] = useState<number>();
-
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
-  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
-  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
 
   /** -----------------------------
    * 📌 초기 데이터 로드
@@ -233,7 +233,6 @@ export default function InboundHistoryPage() {
   };
 
   // Lot 번호 클릭
-
   const handleLotClick = async (
     itemId: number,
     lot_no: string,
@@ -394,7 +393,7 @@ export default function InboundHistoryPage() {
                     size="small"
                     sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
                     onClick={() =>
-                      handleOpenModal(row.order_inbound_id, row.lot_no, row.qty)
+                      handleOpenModal(row.order_item_id, row.lot_no, row.qty)
                     }
                   >
                     작업지시서
@@ -439,21 +438,20 @@ export default function InboundHistoryPage() {
         <OrdersInDocModal
           open={openModal}
           onClose={() => setOpenModal(false)}
-          orderItem={selectedItem}
+          orderItem={selectedItem!}
           lotNo={selectedLotNo}
           qty={selectedQty}
         />
       )}
-
       {/* 공정 진행현황 모달 */}
       {selectedItem && (
-        <OrdersProcessStatus
+        <OrdersProcessTrackings
           open={openProcessModal}
           onClose={() => setOpenProcessModal(false)}
           lotNo={selectedLotNo}
           orderItem={selectedItem}
           routingSteps={selectedRoutingSteps}
-          inboundId={selectedInboundId}
+          inboundId={selectedInboundId!}
         />
       )}
     </Box>

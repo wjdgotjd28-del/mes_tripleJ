@@ -24,7 +24,7 @@ public class ProcessTracking {
     @JoinColumn(name = "order_item_routing_id", nullable = false)
     private OrderItemRouting orderItemRouting;
 
-    @Column(name = "process_start_time", nullable = false)
+    @Column(name = "process_start_time", nullable = true)
     private LocalDateTime processStartTime;
 
     @Column(name = "process_status", nullable = false)

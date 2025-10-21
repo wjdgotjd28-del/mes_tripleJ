@@ -2,7 +2,6 @@ package com.mes_back.controller;
 
 
 import com.mes_back.dto.OrderInboundDTO;
-import com.mes_back.entity.OrderInbound;
 import com.mes_back.service.OrderInboundService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,11 +16,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/orders/inbound")
 @Slf4j
-public class OrderInboundIController {
+public class OrderInboundController {
 
     private final OrderInboundService orderInboundService;
-
-
     @GetMapping("/orderoutbound")
     public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
         return orderInboundService.findInboundHistoriesForOutbound();
