@@ -154,7 +154,7 @@ export default function CommonLayout() {
       sub: "원자재 입고",
       third: "원자재 품목 입고",
     },
-    "/raw-materials/history/history": {
+    "/raw-materials/inbound/history": {
       main: "원자재 관리",
       sub: "원자재 입고",
       third: "원자재 입고 이력 조회",
