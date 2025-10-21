@@ -17,12 +17,23 @@ import {
   Paper,
   TextField,
   Button,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import type { Company, StatusType } from "../../../type";
-import { deleteCompany, getCompany, updateTradeStatus } from "../api/companyApi";
+import {
+  deleteCompany,
+  getCompany,
+  updateTradeStatus,
+} from "../api/companyApi";
 import CompanyRegisterModal from "./CompanyRegisterModal";
 import CompanyDetailModal from "./CompanyDetailModal";
+import { usePagination } from "../../../Common/usePagination";
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 
 export default function CompanyViewPage() {
   const [allRows, setAllRows] = useState<Company[]>([]);
@@ -32,6 +43,7 @@ export default function CompanyViewPage() {
   const [searchCeo, setSearchCeo] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [sortAsc, setSortAsc] = useState(true);
 
   const [appliedFilters, setAppliedFilters] = useState({
     filterType: "모든 업체",
@@ -42,19 +54,23 @@ export default function CompanyViewPage() {
 
   React.useEffect(() => {
     loadCompanyData();
-  }, [])
-  
+  }, []);
+
   const loadCompanyData = () => {
     getCompany()
-    .then(res => setAllRows(res))
-    .catch(err => console.log(err))
-  }
+      .then((res) => setAllRows(res))
+      .catch((err) => console.log(err));
+  };
 
   const handleAddCompany = (newCompany: Company) => {
     setAllRows((prev) => [...prev, newCompany]);
   };
 
-  const handleDelete = async (event: React.MouseEvent, companyId: number, companyName: string) => {
+  const handleDelete = async (
+    event: React.MouseEvent,
+    companyId: number,
+    companyName: string
+  ) => {
     event.stopPropagation();
     if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
       await deleteCompany(companyId);
@@ -62,17 +78,25 @@ export default function CompanyViewPage() {
     }
   };
 
-  const handleStatusToggle = async (event: React.MouseEvent, companyId: number, currentStatus: StatusType) => {
+  const handleStatusToggle = async (
+    event: React.MouseEvent,
+    companyId: number,
+    currentStatus: StatusType
+  ) => {
     event.stopPropagation();
-    const newStatus = currentStatus === 'Y' ? 'N' : 'Y';
-    if (window.confirm(`거래 상태를 '${newStatus === 'Y' ? '거래중' : '거래 종료'}'(으)로 변경하시겠습니까?`)) {
+    const newStatus = currentStatus === "Y" ? "N" : "Y";
+    if (
+      window.confirm(
+        `거래 상태를 '${
+          newStatus === "Y" ? "거래중" : "거래 종료"
+        }'(으)로 변경하시겠습니까?`
+      )
+    ) {
       try {
         await updateTradeStatus(companyId, newStatus);
         setAllRows((prev) =>
           prev.map((row) =>
-            row.companyId === companyId
-              ? { ...row, status: newStatus }
-              : row
+            row.companyId === companyId ? { ...row, status: newStatus } : row
           )
         );
       } catch (error) {
@@ -106,14 +130,16 @@ export default function CompanyViewPage() {
 
   const handleSaveDetail = (updatedCompany: Company) => {
     setAllRows((prev) =>
-      prev.map((row) => (row.companyId === updatedCompany.companyId ? updatedCompany : row))
+      prev.map((row) =>
+        row.companyId === updatedCompany.companyId ? updatedCompany : row
+      )
     );
   };
 
   // ✅ 업체 유형 영-한 변환
   const companyTypeMap: { [key: string]: string } = {
-    CUSTOMER: '거래처',
-    PURCHASER: '매입처',
+    CUSTOMER: "거래처",
+    PURCHASER: "매입처",
   };
 
   const translateCompanyType = (type: string) => {
@@ -121,12 +147,36 @@ export default function CompanyViewPage() {
   };
 
   const filteredRows = allRows.filter((row) => {
-    if (appliedFilters.filterType !== "모든 업체" && row.type !== appliedFilters.filterType) return false;
-    if (appliedFilters.statusFilter !== "모든 상태" && row.status !== appliedFilters.statusFilter) return false;
-    if (appliedFilters.searchName && !row.companyName.includes(appliedFilters.searchName)) return false;
-    if (appliedFilters.searchCeo && !row.ceoName.includes(appliedFilters.searchCeo)) return false;
+    if (
+      appliedFilters.filterType !== "모든 업체" &&
+      row.type !== appliedFilters.filterType
+    )
+      return false;
+    if (
+      appliedFilters.statusFilter !== "모든 상태" &&
+      row.status !== appliedFilters.statusFilter
+    )
+      return false;
+    if (
+      appliedFilters.searchName &&
+      !row.companyName.includes(appliedFilters.searchName)
+    )
+      return false;
+    if (
+      appliedFilters.searchCeo &&
+      !row.ceoName.includes(appliedFilters.searchCeo)
+    )
+      return false;
     return true;
   });
+  const sortedRows = [...filteredRows].sort((a, b) =>
+    sortAsc
+      ? (a.companyId ?? 0) - (b.companyId ?? 0)
+      : (b.companyId ?? 0) - (a.companyId ?? 0)
+  );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedRows, 20); // 한 페이지당 20개
 
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
@@ -176,8 +226,14 @@ export default function CompanyViewPage() {
           value={searchCeo}
           onChange={(e) => setSearchCeo(e.target.value)}
         />
-        <Button variant="contained" onClick={handleSearch}>검색</Button>
-
+        <Button variant="contained" onClick={handleSearch}>
+          검색
+        </Button>
+        <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+          <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+            {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+          </IconButton>
+        </Tooltip>
         <Box sx={{ ml: "auto" }}>
           <CompanyRegisterModal onAdd={handleAddCompany} />
         </Box>
@@ -199,51 +255,97 @@ export default function CompanyViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredRows.map((row) => (
-              <TableRow
-                key={row.companyId}
-                hover
-                sx={{ cursor: "pointer" }}
-                onClick={() => handleRowClick(row)}
-              >
-                <TableCell align="center">{row.companyId}</TableCell>
-                <TableCell align="center">{translateCompanyType(row.type)}</TableCell>
-                <TableCell align="center">{row.companyName}</TableCell>
-                <TableCell align="center">{row.ceoName}</TableCell>
-                <TableCell align="center">{row.address}</TableCell>
-                <TableCell align="center">{row.note}</TableCell>
-                <TableCell align="center">
-                  <Chip
-                    label={row.status === "Y" ? "거래중" : "거래 종료"}
-                    color={row.status === "Y" ? "success" : "default"}
-                    size="small"
-                    sx={{ minWidth: 80 }}
-                  />
-                </TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color={row.status === "Y" ? "warning" : "success"}
-                    onClick={(e) => handleStatusToggle(e, row.companyId as number, row.status)}
-                    sx={{ mr: "1px" }}
-                  >
-                    {row.status === "Y" ? "거래 종료" : "거래 재개"}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="error"
-                    onClick={(e) => handleDelete(e, row.companyId as number, row.companyName)}
-                  >
-                    삭제
-                  </Button>
+            {paginatedData.length === 0 ? (
+              // 표시할 데이터 없을 때
+              <TableRow>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">
+                    거래중인 업체가 없습니다.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedData.map((row) => (
+                <TableRow
+                  key={row.companyId}
+                  hover
+                  sx={{ cursor: "pointer" }}
+                  onClick={() => handleRowClick(row)}
+                >
+                  <TableCell align="center">{row.companyId}</TableCell>
+                  <TableCell align="center">
+                    {translateCompanyType(row.type)}
+                  </TableCell>
+                  <TableCell align="center">{row.companyName}</TableCell>
+                  <TableCell align="center">{row.ceoName}</TableCell>
+                  <TableCell align="center">{row.address}</TableCell>
+                  <TableCell align="center">{row.note}</TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={row.status === "Y" ? "거래중" : "거래 종료"}
+                      color={row.status === "Y" ? "success" : "default"}
+                      size="small"
+                      sx={{ minWidth: 80 }}
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color={row.status === "Y" ? "warning" : "success"}
+                      onClick={(e) =>
+                        handleStatusToggle(
+                          e,
+                          row.companyId as number,
+                          row.status
+                        )
+                      }
+                      sx={{ mr: "1px" }}
+                    >
+                      {row.status === "Y" ? "거래 종료" : "거래 재개"}
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="error"
+                      onClick={(e) =>
+                        handleDelete(
+                          e,
+                          row.companyId as number,
+                          row.companyName
+                        )
+                      }
+                    >
+                      삭제
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
 
       {/* 상세 모달 */}
       <CompanyDetailModal

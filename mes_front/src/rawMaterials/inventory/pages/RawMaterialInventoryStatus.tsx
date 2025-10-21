@@ -82,7 +82,7 @@ export default function RawMaterialInventoryStatus() {
 
   //  페이지네이션 처리
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
-    usePagination(filteredData, 10); // 한 페이지당 10개
+    usePagination(sortedData, 20); // 한 페이지당 20개
 
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
@@ -159,40 +159,46 @@ export default function RawMaterialInventoryStatus() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell align="center">{row.id}</TableCell>
-                <TableCell align="center">{row.company_name}</TableCell>
-                <TableCell align="center">{row.item_code}</TableCell>
-                <TableCell align="center">{row.item_name}</TableCell>
-                <TableCell align="center">
-                  {row.total_qty}
-                  {row.unit}
+            {paginatedData.length === 0 ? (
+              // 표시할 데이터 없을 때
+              <TableRow>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">
+                    원자재 재고가 없습니다.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedData.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell align="center">{row.id}</TableCell>
+                  <TableCell align="center">{row.company_name}</TableCell>
+                  <TableCell align="center">{row.item_code}</TableCell>
+                  <TableCell align="center">{row.item_name}</TableCell>
+                  <TableCell align="center">
+                    {row.total_qty}
+                    {row.unit}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
       {/*  페이지네이션 컨트롤 */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          mt: 2,
-          gap: 1,
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <Button
           disabled={currentPage === 1}
           onClick={() => setCurrentPage(currentPage - 1)}
         >
           〈
         </Button>
-        <Typography variant="body2" sx={{ px: 2 }}>
-          페이지 {currentPage} / {totalPages}
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
         </Typography>
         <Button
           disabled={currentPage === totalPages}

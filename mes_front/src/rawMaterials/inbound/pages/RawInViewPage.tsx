@@ -13,9 +13,15 @@ import {
   TextField,
   Alert,
   CircularProgress,
+  Tooltip,
+  IconButton,
   // MenuItem, FormControl, InputLabel, Select, type SelectChangeEvent, Chip,
 } from "@mui/material";
-import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
+import {
+  FileDownload as FileDownloadIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 
 import RawRegisterModal from "../../../masterData/items/pages/RawRegisterModal";
 import RawDetailModal from "../../../masterData/items/pages/RawDetailModal";
@@ -23,6 +29,7 @@ import { exportToExcel } from "../../../Common/ExcelUtils";
 import type { MaterialInbound } from "../../../type";
 import { getRawItems } from "../../../masterData/items/api/RawApi";
 import { filterRawItems } from "../../../masterData/items/components/RawSearchUtils";
+import { usePagination } from "../../../Common/usePagination";
 
 export default function RawInViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
@@ -40,6 +47,7 @@ export default function RawInViewPage() {
     itemName: "",
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
+  const [sortAsc, setSortAsc] = useState(true);
 
   const categoryMap: Record<string, string> = {
     PAINT: "페인트",
@@ -113,6 +121,16 @@ export default function RawInViewPage() {
     setOpenDetailModal(true);
   };
 
+  // 정렬된 데이터 (routing_id 기준)
+  const sortedData = [...displayedItems].sort((a, b) =>
+    sortAsc
+      ? a.material_item_id - b.material_item_id
+      : b.material_item_id - a.material_item_id
+  );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedData, 20); // 한 페이지당 20개
+
   return (
     <Box
       sx={{
@@ -167,6 +185,12 @@ export default function RawInViewPage() {
           <Button variant="contained" color="primary" onClick={handleSearch}>
             검색
           </Button>
+          {/* 정렬 토글 버튼 */}
+          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+            <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+              {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+            </IconButton>
+          </Tooltip>
         </Box>
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
@@ -202,7 +226,7 @@ export default function RawInViewPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedItems.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
@@ -211,8 +235,8 @@ export default function RawInViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedItems.map((row) => (
-                  <TableRow key={row.material_item_id}>
+                paginatedData.map((row) => (
+                  <TableRow key={row.id}>
                     <TableCell>{row.material_item_id}</TableCell>
                     <TableCell>{row.company_name}</TableCell>
                     <TableCell>{row.item_code}</TableCell>
@@ -244,6 +268,27 @@ export default function RawInViewPage() {
           </Table>
         </TableContainer>
       )}
+
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center", mx: 2 }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
 
       <RawRegisterModal
         open={openModal}

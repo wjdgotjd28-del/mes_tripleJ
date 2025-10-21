@@ -20,8 +20,14 @@ import {
   Chip,
   Alert,
   CircularProgress,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
-import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
+import {
+  FileDownload as FileDownloadIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 
 import OrderRegisterModal from "./OrderRegisterModal";
 import OrderDetailModal from "./OrderDetailModal";
@@ -39,6 +45,7 @@ import {
 
 // 타입
 import type { OrderItems } from "../../../type";
+import { usePagination } from "../../../Common/usePagination";
 
 export default function OrderViewPage() {
   // 모달 상태
@@ -60,18 +67,20 @@ export default function OrderViewPage() {
     useYn: "",
   });
 
+  const [sortAsc, setSortAsc] = useState(true);
+
   // category 매핑 테이블
   const CATEGORY_LABELS: Record<string, string> = {
-    "DEFENSE": "방산",
-    "GENERAL": "일반",
-    "AUTOMOTIVE": "자동차",
-    "SHIPBUILDING": "조선",
+    DEFENSE: "방산",
+    GENERAL: "일반",
+    AUTOMOTIVE: "자동차",
+    SHIPBUILDING: "조선",
   };
   const PAINT_LABELS: Record<string, string> = {
-    "LIQUID": "액체",
-    "POWDER": "분체",
+    LIQUID: "액체",
+    POWDER: "분체",
   };
-  
+
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
   // 초기 데이터 로드
@@ -138,7 +147,11 @@ export default function OrderViewPage() {
     companyName: string,
     itemName: string
   ): Promise<void> => {
-    if (window.confirm(`${companyName}의 '${itemName}' 데이터를 삭제하시겠습니까?`)) {
+    if (
+      window.confirm(
+        `${companyName}의 '${itemName}' 데이터를 삭제하시겠습니까?`
+      )
+    ) {
       try {
         await deleteOrderItems(id);
         await fetchOrderItems();
@@ -187,6 +200,16 @@ export default function OrderViewPage() {
   const handleItemSave = async (): Promise<void> => {
     await fetchOrderItems(); // ✅ 수정 후 즉시 새로고침
   };
+
+  // 정렬된 데이터 (routing_id 기준)
+  const sortedRows = [...displayedItems].sort((a, b) =>
+    sortAsc
+      ? a.order_item_id - b.order_item_id
+      : b.order_item_id - a.order_item_id
+  );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedRows, 20); // 한 페이지당 20개
 
   return (
     <Box
@@ -256,6 +279,12 @@ export default function OrderViewPage() {
           <Button variant="contained" color="primary" onClick={handleSearch}>
             검색
           </Button>
+          {/* 정렬 토글 버튼 */}
+          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+            <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+              {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+            </IconButton>
+          </Tooltip>
         </Box>
 
         <Box sx={{ display: "flex", gap: 1 }}>
@@ -297,16 +326,16 @@ export default function OrderViewPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedItems.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
-                      조회된 수주 대상 품목이 없습니다.
+                      거래중인 수주 대상 품목이 없습니다.
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedItems.map((row) => (
+                paginatedData.map((row) => (
                   <TableRow key={row.order_item_id}>
                     <TableCell>{row.order_item_id}</TableCell>
                     <TableCell>{row.company_name}</TableCell>
@@ -327,8 +356,12 @@ export default function OrderViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell>{CATEGORY_LABELS[row.category] || row.category}</TableCell>
-                    <TableCell>{PAINT_LABELS[row.paint_type] || row.paint_type}</TableCell>
+                    <TableCell>
+                      {CATEGORY_LABELS[row.category] || row.category}
+                    </TableCell>
+                    <TableCell>
+                      {PAINT_LABELS[row.paint_type] || row.paint_type}
+                    </TableCell>
                     <TableCell>{row.unit_price}</TableCell>
                     <TableCell>{row.note}</TableCell>
                     <TableCell align="center">
@@ -379,6 +412,27 @@ export default function OrderViewPage() {
           </Table>
         </TableContainer>
       )}
+
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
 
       <OrderRegisterModal
         open={openModal}

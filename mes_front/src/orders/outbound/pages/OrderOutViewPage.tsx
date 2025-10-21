@@ -11,11 +11,17 @@ import {
   TableBody,
   TableContainer,
   Paper,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 // import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 import OrderOutRegisterModal from "./OrderOutRegisterModal";
 import type { OrderOutbound } from "../../../type";
 import {
@@ -27,6 +33,7 @@ import {
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import EditOrderOutModal from "./EditOrderOutModal";
+import { usePagination } from "../../../Common/usePagination";
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -46,6 +53,8 @@ export default function OrderOutViewPage() {
 
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
+
+  const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
     loadOrderOutboundData();
@@ -71,9 +80,6 @@ export default function OrderOutViewPage() {
       })
       .catch((err) => console.log(err));
   };
-
-  
-   
 
   // ✅ 출고 등록 처리
   const handleRegister = async (data: OrderOutbound) => {
@@ -134,9 +140,18 @@ export default function OrderOutViewPage() {
     AUTOMOTIVE: "자동차",
     SHIPBUILDING: "조선",
   };
+
   const translateCategory = (category: string) => {
     return categoryMap[category] || category;
   };
+
+  // 정렬된 데이터
+  const sortedRows = [...displayedRows].sort((a, b) =>
+    sortAsc ? (a.id ?? 0) - (b.id ?? 0) : (b.id ?? 0) - (a.id ?? 0)
+  );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedRows, 20); // 한 페이지당 20개
 
   //  작업지시서 모달 상태
   // const [openModal, setOpenModal] = useState(false);
@@ -196,14 +211,21 @@ export default function OrderOutViewPage() {
           {/* height 추가 */}
           검색
         </Button>
+        {/* 정렬 토글 버튼 */}
+        <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+          <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+            {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+          </IconButton>
+        </Tooltip>
         <Box sx={{ flex: 1 }} />
         {/*  오른쪽: 엑셀 다운로드 버튼 */}
-        <Button 
-          variant="outlined" 
-          endIcon={<FileDownloadIcon />} 
-          sx={{ height: 40 }} 
-          onClick={() => exportToExcel(displayedRows, "출고 이력")}> 
-        {/* height 추가 */}
+        <Button
+          variant="outlined"
+          endIcon={<FileDownloadIcon />}
+          sx={{ height: 40 }}
+          onClick={() => exportToExcel(displayedRows, "출고 이력")}
+        >
+          {/* height 추가 */}
           Excel
         </Button>
         <Button
@@ -233,51 +255,84 @@ export default function OrderOutViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayedRows.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.outboundNo}</TableCell>
-                <TableCell>{row.customerName}</TableCell>
-                <TableCell>{row.itemCode}</TableCell>
-                <TableCell>{row.itemName}</TableCell>
-                <TableCell>{row.qty}</TableCell>
-                <TableCell>{row.outboundDate}</TableCell>
-                <TableCell>{translateCategory(row.category)}</TableCell>
-                <TableCell align="center">
-                  <Box
-                    sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                  >
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ color: "#ff8c00ff", borderColor: "#ff8c00ff" }}
-                      onClick={() => handleOpenModal(row, row.orderInboundId)}
-                    >
-                      출하증
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => setEditData(row)}
-                    >
-                      수정
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      startIcon={<DeleteIcon />}
-                      onClick={() => handleDelete(row.id!)}
-                    >
-                      삭제
-                    </Button>
-                  </Box>
+            {paginatedData.length === 0 ? (
+              // 표시할 데이터 없을 때
+              <TableRow>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">
+                    입고된 수주 품목이 없습니다.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedData.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>{row.outboundNo}</TableCell>
+                  <TableCell>{row.customerName}</TableCell>
+                  <TableCell>{row.itemCode}</TableCell>
+                  <TableCell>{row.itemName}</TableCell>
+                  <TableCell>{row.qty}</TableCell>
+                  <TableCell>{row.outboundDate}</TableCell>
+                  <TableCell>{translateCategory(row.category)}</TableCell>
+                  <TableCell align="center">
+                    <Box
+                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                    >
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{ color: "#ff8c00ff", borderColor: "#ff8c00ff" }}
+                        onClick={() => handleOpenModal(row, row.orderInboundId)}
+                      >
+                        출하증
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => setEditData(row)}
+                      >
+                        수정
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => handleDelete(row.id!)}
+                      >
+                        삭제
+                      </Button>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
+
       {/* 수정 모달 */}
       <EditOrderOutModal
         open={!!editData}

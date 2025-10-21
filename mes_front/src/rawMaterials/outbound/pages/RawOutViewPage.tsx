@@ -1,17 +1,37 @@
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, Typography, Box, IconButton, TextField,
-  InputAdornment, Tooltip, Dialog, DialogTitle, DialogContent,
-  DialogActions, Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Box,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
 } from "@mui/material";
 import {
-  Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon,
-  Search as SearchIcon, FileDownload as FileDownloadIcon,
-  Save as SaveIcon, Cancel as CancelIcon,
-  ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  FileDownload as FileDownloadIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
 import * as XLSX from "xlsx";
 import { useState } from "react";
+import { usePagination } from "../../../Common/usePagination";
 
 // ===== 타입 정의 =====
 interface TableData {
@@ -32,8 +52,17 @@ export default function RawOutViewPage() {
     { id: 2, name: "원자재 B", quantity: 22, date: "2025-10-10" },
     { id: 3, name: "원자재 C", quantity: 18, date: "2025-10-09" },
   ]);
-  const [editData, setEditData] = useState<TableData>({ id: 0, name: "", quantity: 0, date: "" });
-  const [newData, setNewData] = useState<Partial<TableData>>({ name: "", quantity: 0, date: "" });
+  const [editData, setEditData] = useState<TableData>({
+    id: 0,
+    name: "",
+    quantity: 0,
+    date: "",
+  });
+  const [newData, setNewData] = useState<Partial<TableData>>({
+    name: "",
+    quantity: 0,
+    date: "",
+  });
 
   // ===== 검색 & 정렬 적용 =====
   const filteredData = searchData(tableData, searchText, ["name"]);
@@ -50,7 +79,7 @@ export default function RawOutViewPage() {
     setNewData({ name: "", quantity: 0, date: "" });
   };
   const handleSubmitAdd = () => {
-    const newId = Math.max(...tableData.map(d => d.id), 0) + 1;
+    const newId = Math.max(...tableData.map((d) => d.id), 0) + 1;
     setTableData([...tableData, { ...(newData as TableData), id: newId }]);
     handleCloseModal();
   };
@@ -61,19 +90,21 @@ export default function RawOutViewPage() {
     setEditData(row);
   };
   const handleSaveRow = () => {
-    setTableData(prev => prev.map(row => (row.id === editingRowId ? editData : row)));
+    setTableData((prev) =>
+      prev.map((row) => (row.id === editingRowId ? editData : row))
+    );
     setEditingRowId(null);
   };
   const handleCancelRow = () => setEditingRowId(null);
   const handleEditChange = (field: keyof TableData, value: string | number) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
+    setEditData((prev) => ({ ...prev, [field]: value }));
   };
 
   // ===== 삭제 =====
   const handleDelete = (id: number, name: string) => {
     const confirmed = window.confirm(`선택한 ${name}을/를 삭제하시겠습니까?`);
     if (confirmed) {
-        setTableData(prev => prev.filter(row => row.id !== id));
+      setTableData((prev) => prev.filter((row) => row.id !== id));
     }
   };
 
@@ -83,14 +114,26 @@ export default function RawOutViewPage() {
   };
 
   // ===== 정렬 토글 =====
-  const toggleSortOrder = () => setSortAsc(prev => !prev);
+  const toggleSortOrder = () => setSortAsc((prev) => !prev);
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedData, 20); // 한 페이지당 20개
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>조회 화면</Typography>
+      <Typography variant="h6" gutterBottom>
+        조회 화면
+      </Typography>
 
       {/* 검색 + 정렬 + 버튼 */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 2,
+        }}
+      >
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <TextField
             size="small"
@@ -99,8 +142,10 @@ export default function RawOutViewPage() {
             onChange={(e) => setSearchText(e.target.value)}
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start"><SearchIcon /></InputAdornment>
-              )
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
             }}
             sx={{ width: 250 }}
           />
@@ -113,10 +158,14 @@ export default function RawOutViewPage() {
 
         <Box>
           <Tooltip title="등록">
-            <IconButton color="primary" onClick={handleAdd}><AddIcon /></IconButton>
+            <IconButton color="primary" onClick={handleAdd}>
+              <AddIcon />
+            </IconButton>
           </Tooltip>
           <Tooltip title="엑셀 다운로드">
-            <IconButton color="success" onClick={handleExcelDownload}><FileDownloadIcon /></IconButton>
+            <IconButton color="success" onClick={handleExcelDownload}>
+              <FileDownloadIcon />
+            </IconButton>
           </Tooltip>
         </Box>
       </Box>
@@ -132,70 +181,137 @@ export default function RawOutViewPage() {
               <TableCell>날짜</TableCell>
               <TableCell align="center">작업</TableCell>
             </TableRow>
-        </TableHead>
+          </TableHead>
           <TableBody>
-            {sortedData.map(row => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      value={editData.name}
-                      onChange={(e) => handleEditChange("name", e.target.value)}
-                      fullWidth
-                    />
-                  ) : row.name}
-                </TableCell>
-                <TableCell>
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      type="number"
-                      value={editData.quantity}
-                      onChange={(e) => handleEditChange("quantity", parseInt(e.target.value))}
-                      fullWidth
-                    />
-                  ) : row.quantity}
-                </TableCell>
-                <TableCell>
-                  {editingRowId === row.id ? (
-                    <TextField
-                      size="small"
-                      type="date"
-                      value={editData.date}
-                      onChange={(e) => handleEditChange("date", e.target.value)}
-                      fullWidth
-                    />
-                  ) : row.date}
-                </TableCell>
-                <TableCell align="center">
-                  {editingRowId === row.id ? (
-                    <>
-                      <Tooltip title="저장">
-                        <IconButton color="primary" size="small" onClick={handleSaveRow}><SaveIcon /></IconButton>
-                      </Tooltip>
-                      <Tooltip title="취소">
-                        <IconButton color="error" size="small" onClick={handleCancelRow}><CancelIcon /></IconButton>
-                      </Tooltip>
-                    </>
-                  ) : (
-                    <>
-                      <Tooltip title="수정">
-                        <IconButton color="primary" size="small" onClick={() => handleEditRow(row)}><EditIcon /></IconButton>
-                      </Tooltip>
-                      <Tooltip title="삭제">
-                        <IconButton color="error" size="small" onClick={() => handleDelete(row.id, row.name)}><DeleteIcon /></IconButton>
-                      </Tooltip>
-                    </>
-                  )}
+            {paginatedData.length === 0 ? (
+              // 표시할 데이터 없을 때
+              <TableRow>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">
+                    입고된 원자재가 없습니다.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              sortedData.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>{row.id}</TableCell>
+                  <TableCell>
+                    {editingRowId === row.id ? (
+                      <TextField
+                        size="small"
+                        value={editData.name}
+                        onChange={(e) =>
+                          handleEditChange("name", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      row.name
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingRowId === row.id ? (
+                      <TextField
+                        size="small"
+                        type="number"
+                        value={editData.quantity}
+                        onChange={(e) =>
+                          handleEditChange("quantity", parseInt(e.target.value))
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      row.quantity
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingRowId === row.id ? (
+                      <TextField
+                        size="small"
+                        type="date"
+                        value={editData.date}
+                        onChange={(e) =>
+                          handleEditChange("date", e.target.value)
+                        }
+                        fullWidth
+                      />
+                    ) : (
+                      row.date
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {editingRowId === row.id ? (
+                      <>
+                        <Tooltip title="저장">
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={handleSaveRow}
+                          >
+                            <SaveIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="취소">
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={handleCancelRow}
+                          >
+                            <CancelIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <>
+                        <Tooltip title="수정">
+                          <IconButton
+                            color="primary"
+                            size="small"
+                            onClick={() => handleEditRow(row)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="삭제">
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleDelete(row.id, row.name)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
       {/* 등록 모달 */}
       <Dialog open={openModal} onClose={handleCloseModal}>
         <DialogTitle>원자재 등록</DialogTitle>
@@ -204,21 +320,30 @@ export default function RawOutViewPage() {
             <TextField
               label="품목명"
               value={newData.name ?? ""}
-              onChange={(e) => setNewData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setNewData((prev) => ({ ...prev, name: e.target.value }))
+              }
               fullWidth
             />
             <TextField
               label="수량"
               type="number"
               value={newData.quantity ?? 0}
-              onChange={(e) => setNewData(prev => ({ ...prev, quantity: parseInt(e.target.value) }))}
+              onChange={(e) =>
+                setNewData((prev) => ({
+                  ...prev,
+                  quantity: parseInt(e.target.value),
+                }))
+              }
               fullWidth
             />
             <TextField
               label="날짜"
               type="date"
               value={newData.date ?? ""}
-              onChange={(e) => setNewData(prev => ({ ...prev, date: e.target.value }))}
+              onChange={(e) =>
+                setNewData((prev) => ({ ...prev, date: e.target.value }))
+              }
               InputLabelProps={{ shrink: true }}
               fullWidth
             />
@@ -226,7 +351,9 @@ export default function RawOutViewPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal}>취소</Button>
-          <Button onClick={handleSubmitAdd} variant="contained">등록</Button>
+          <Button onClick={handleSubmitAdd} variant="contained">
+            등록
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
@@ -237,8 +364,8 @@ export default function RawOutViewPage() {
 function searchData<T>(data: T[], keyword: string, fields: (keyof T)[]): T[] {
   if (!keyword.trim()) return data;
   const lowerKeyword = keyword.toLowerCase();
-  return data.filter(item =>
-    fields.some(field => {
+  return data.filter((item) =>
+    fields.some((field) => {
       const value = item[field];
       if (value === undefined || value === null) return false;
       return String(value).toLowerCase().includes(lowerKeyword);

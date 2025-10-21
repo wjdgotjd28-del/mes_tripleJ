@@ -34,6 +34,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import OrdersProcessTrackings from "../../processStatus/pages/OrdersProcessTrackings";
+import { usePagination } from "../../../Common/usePagination";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -123,6 +124,9 @@ export default function InboundHistoryPage() {
       ? a.order_inbound_id - b.order_inbound_id
       : b.order_inbound_id - a.order_inbound_id
   );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedData, 20); // 한 페이지당 20개
 
   /** -----------------------------
    * 📌 엑셀 다운로드
@@ -314,124 +318,159 @@ export default function InboundHistoryPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData.map((row: OrderInbound) => (
-              <TableRow key={row.order_inbound_id}>
-                <TableCell>{row.order_inbound_id}</TableCell>
-                <TableCell>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      textDecoration: "underline",
-                      cursor: "pointer",
-                      "&:hover": { color: "primary.dark", fontWeight: "bold" },
-                    }}
-                    onClick={() =>
-                      handleLotClick(
-                        row.order_item_id,
-                        row.lot_no,
-                        row.order_inbound_id
-                      )
-                    }
-                  >
-                    {row.lot_no}
+            {paginatedData.length === 0 ? (
+              // 표시할 데이터 없을 때
+              <TableRow>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">
+                    입고된 수주 품목이 없습니다.
                   </Typography>
                 </TableCell>
-                <TableCell>{row.customer_name}</TableCell>
-                <TableCell>{row.item_code}</TableCell>
-                <TableCell>{row.item_name}</TableCell>
-                {/* 수량 */}
-                <TableCell align="center">
-                  {editRowId === row.order_inbound_id ? (
-                    <TextField
-                      size="small"
-                      type="number"
-                      value={values[row.order_inbound_id]?.qty ?? ""}
-                      onChange={(e) =>
-                        handleQtyChange(row.order_inbound_id, e.target.value)
+              </TableRow>
+            ) : (
+              paginatedData.map((row: OrderInbound) => (
+                <TableRow key={row.order_inbound_id}>
+                  <TableCell>{row.order_inbound_id}</TableCell>
+                  <TableCell>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                        "&:hover": {
+                          color: "primary.dark",
+                          fontWeight: "bold",
+                        },
+                      }}
+                      onClick={() =>
+                        handleLotClick(
+                          row.order_item_id,
+                          row.lot_no,
+                          row.order_inbound_id
+                        )
                       }
-                      inputProps={{ min: 1 }}
-                      sx={{ width: 70 }}
-                    />
-                  ) : (
-                    row.qty
-                  )}
-                </TableCell>
-
-                {/* 입고일자 */}
-                <TableCell align="center">
-                  {editRowId === row.order_inbound_id ? (
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        value={
-                          values[row.order_inbound_id]?.date
-                            ? dayjs(values[row.order_inbound_id].date)
-                            : null
-                        }
-                        onChange={(newDate) =>
-                          handleDateChange(row.order_inbound_id, newDate)
-                        }
-                        format="YYYY-MM-DD"
-                        slotProps={{
-                          textField: { size: "small", sx: { width: 147 } },
-                        }}
-                      />
-                    </LocalizationProvider>
-                  ) : (
-                    row.inbound_date
-                  )}
-                </TableCell>
-
-                <TableCell>
-                  {paintLableMap[row.paint_type] || row.paint_type}
-                </TableCell>
-                <TableCell>
-                  {categoryLabelMap[row.category] || row.category}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
-                    onClick={() =>
-                      handleOpenModal(row.order_item_id, row.lot_no, row.qty)
-                    }
-                  >
-                    작업지시서
-                  </Button>
-
-                  {editRowId === row.order_inbound_id ? (
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleSave(row.order_inbound_id)}
                     >
-                      완료
-                    </Button>
-                  ) : (
+                      {row.lot_no}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>{row.customer_name}</TableCell>
+                  <TableCell>{row.item_code}</TableCell>
+                  <TableCell>{row.item_name}</TableCell>
+                  {/* 수량 */}
+                  <TableCell align="center">
+                    {editRowId === row.order_inbound_id ? (
+                      <TextField
+                        size="small"
+                        type="number"
+                        value={values[row.order_inbound_id]?.qty ?? ""}
+                        onChange={(e) =>
+                          handleQtyChange(row.order_inbound_id, e.target.value)
+                        }
+                        inputProps={{ min: 1 }}
+                        sx={{ width: 70 }}
+                      />
+                    ) : (
+                      row.qty
+                    )}
+                  </TableCell>
+
+                  {/* 입고일자 */}
+                  <TableCell align="center">
+                    {editRowId === row.order_inbound_id ? (
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={
+                            values[row.order_inbound_id]?.date
+                              ? dayjs(values[row.order_inbound_id].date)
+                              : null
+                          }
+                          onChange={(newDate) =>
+                            handleDateChange(row.order_inbound_id, newDate)
+                          }
+                          format="YYYY-MM-DD"
+                          slotProps={{
+                            textField: { size: "small", sx: { width: 147 } },
+                          }}
+                        />
+                      </LocalizationProvider>
+                    ) : (
+                      row.inbound_date
+                    )}
+                  </TableCell>
+
+                  <TableCell>
+                    {paintLableMap[row.paint_type] || row.paint_type}
+                  </TableCell>
+                  <TableCell>
+                    {categoryLabelMap[row.category] || row.category}
+                  </TableCell>
+                  <TableCell>
                     <Button
                       variant="outlined"
                       size="small"
-                      onClick={() => handleUpdate(row.order_inbound_id)}
+                      sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
+                      onClick={() =>
+                        handleOpenModal(row.order_item_id, row.lot_no, row.qty)
+                      }
                     >
-                      수정
+                      작업지시서
                     </Button>
-                  )}
 
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    onClick={() => handleDelete(row.order_inbound_id)}
-                    sx={{ ml: 0.3 }}
-                  >
-                    삭제
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+                    {editRowId === row.order_inbound_id ? (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleSave(row.order_inbound_id)}
+                      >
+                        완료
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => handleUpdate(row.order_inbound_id)}
+                      >
+                        수정
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      onClick={() => handleDelete(row.order_inbound_id)}
+                      sx={{ ml: 0.3 }}
+                    >
+                      삭제
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center", mx: 2 }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
 
       {/* 작업지시서 모달 */}
       {selectedItem && (

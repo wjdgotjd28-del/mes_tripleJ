@@ -1,9 +1,31 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import {
-  Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, Button, TextField, MenuItem, FormControl, InputLabel,
-  Select, type SelectChangeEvent, Chip, Alert, CircularProgress
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  type SelectChangeEvent,
+  Chip,
+  Alert,
+  CircularProgress,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
 
 import RawRegisterModal from "./RawRegisterModal";
@@ -17,6 +39,7 @@ import {
   restoreRawItems,
 } from "../api/RawApi";
 import { filterRawItems } from "../components/RawSearchUtils";
+import { usePagination } from "../../../Common/usePagination";
 
 export default function RawViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
@@ -33,18 +56,19 @@ export default function RawViewPage() {
     useYn: "",
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
+  const [sortAsc, setSortAsc] = useState(true);
 
   // ✅ 영어 → 한글 매핑 (표시용)
   const categoryMap: Record<string, string> = {
-    "PAINT": "페인트",
-    "THINNER": "신나",
-    "CLEANER": "세척제",
-    "HARDENER": "경화제",
+    PAINT: "페인트",
+    THINNER: "신나",
+    CLEANER: "세척제",
+    HARDENER: "경화제",
   };
 
   const useYnMap: Record<string, string> = {
-    "Y": "사용중",
-    "N": "사용중지",
+    Y: "사용중",
+    N: "사용중지",
   };
 
   useEffect(() => {
@@ -77,7 +101,9 @@ export default function RawViewPage() {
     }
   };
 
-  const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleTextChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setSearchValues((prev) => ({ ...prev, [name]: value }));
   };
@@ -105,8 +131,16 @@ export default function RawViewPage() {
     setDisplayedItems(filtered);
   };
 
-  const handleDelete = async (id: number, company_name: string, item_name: string) => {
-    if (window.confirm(`${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`)) {
+  const handleDelete = async (
+    id: number,
+    company_name: string,
+    item_name: string
+  ) => {
+    if (
+      window.confirm(
+        `${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`
+      )
+    ) {
       try {
         await deleteRawItems(id);
         await fetchRawItems();
@@ -143,9 +177,24 @@ export default function RawViewPage() {
   const handleItemSave = async () => {
     await fetchRawItems();
   };
+  const sortedRows = [...displayedItems].sort((a, b) =>
+    sortAsc
+      ? a.material_item_id - b.material_item_id
+      : b.material_item_id - a.material_item_id
+  );
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedRows, 20); // 한 페이지당 20개
 
   return (
-    <Box sx={{ padding: 4, width: "100%", display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box
+      sx={{
+        padding: 4,
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+      }}
+    >
       <Typography variant="h5">원자재 품목 관리</Typography>
 
       {/* 에러 메시지 */}
@@ -155,7 +204,14 @@ export default function RawViewPage() {
         </Alert>
       )}
 
-      <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
@@ -197,7 +253,14 @@ export default function RawViewPage() {
           <Button variant="contained" color="primary" onClick={handleSearch}>
             검색
           </Button>
+          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+            <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+              {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+            </IconButton>
+          </Tooltip>
         </Box>
+        {/* 정렬 토글 버튼 */}
+
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
             + 등록
@@ -215,7 +278,7 @@ export default function RawViewPage() {
 
       {/* 로딩 상태 */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />
         </Box>
       ) : (
@@ -236,16 +299,16 @@ export default function RawViewPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedItems.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
-                      조회된 원자재 품목이 없습니다.
+                      거래중인 원자재 품목이 없습니다.
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedItems.map((row) => (
+                paginatedData.map((row) => (
                   <TableRow key={row.material_item_id}>
                     <TableCell>{row.material_item_id}</TableCell>
                     <TableCell>{row.company_name}</TableCell>
@@ -254,9 +317,12 @@ export default function RawViewPage() {
                       <Typography
                         variant="body2"
                         sx={{
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                          '&:hover': { color: 'primary.dark', fontWeight: 'bold' }
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: "primary.dark",
+                            fontWeight: "bold",
+                          },
                         }}
                         onClick={() => handleItemClick(row)}
                       >
@@ -264,7 +330,9 @@ export default function RawViewPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
-                    <TableCell>{categoryMap[row.category] || row.category}</TableCell>
+                    <TableCell>
+                      {categoryMap[row.category] || row.category}
+                    </TableCell>
                     <TableCell>{row.note}</TableCell>
                     <TableCell align="center">
                       <Chip
@@ -275,7 +343,10 @@ export default function RawViewPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button onClick={() => handleToggleUseYn(row.material_item_id!)} size="small">
+                      <Button
+                        onClick={() => handleToggleUseYn(row.material_item_id!)}
+                        size="small"
+                      >
                         {row.use_yn === "Y" ? "사용 중지" : "복원"}
                       </Button>
                     </TableCell>
@@ -285,7 +356,11 @@ export default function RawViewPage() {
                         size="small"
                         color="error"
                         onClick={() =>
-                          handleDelete(row.material_item_id!, row.company_name, row.item_name)
+                          handleDelete(
+                            row.material_item_id!,
+                            row.company_name,
+                            row.item_name
+                          )
                         }
                       >
                         삭제
@@ -298,6 +373,27 @@ export default function RawViewPage() {
           </Table>
         </TableContainer>
       )}
+
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
 
       <RawRegisterModal
         open={openModal}

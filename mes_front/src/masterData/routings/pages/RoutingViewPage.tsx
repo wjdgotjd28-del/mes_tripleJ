@@ -20,6 +20,7 @@ import {
   ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
 import type { RoutingFormData } from "../../../type";
+import { usePagination } from "../../../Common/usePagination";
 
 export default function RoutingViewPage() {
   // 라우팅 데이터 상태
@@ -27,9 +28,7 @@ export default function RoutingViewPage() {
   // 등록 모달 열림 여부
   const [openModal, setOpenModal] = useState(false);
   // 현재 페이지 번호
-  const [currentPage, setCurrentPage] = useState(1);
-  // 페이지당 항목 수
-  const itemsPerPage = 20;
+
   // 정렬 방향 (true: 오름차순, false: 내림차순)
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -76,11 +75,8 @@ export default function RoutingViewPage() {
     sortAsc ? a.routing_id - b.routing_id : b.routing_id - a.routing_id
   );
 
-  // 현재 페이지에 해당하는 데이터만 추출
-  const paginatedData = sortedData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedData, 20); // 한 페이지당 20개
 
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
@@ -122,42 +118,55 @@ export default function RoutingViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow key={row.routing_id}>
-                <TableCell>{row.routing_id}</TableCell>
-                <TableCell>{row.process_code}</TableCell>
-                <TableCell>{row.process_name}</TableCell>
-                <TableCell>{row.process_time}</TableCell>
-                <TableCell>{row.note}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={() => handleDelete(row.routing_id)}
-                  >
-                    삭제
-                  </Button>
+            {paginatedData.length === 0 ? (
+              // 표시할 데이터 없을 때
+              <TableRow>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
+                  <Typography color="text.secondary">
+                    라우팅이 없습니다.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedData.map((row) => (
+                <TableRow key={row.routing_id}>
+                  <TableCell>{row.routing_id}</TableCell>
+                  <TableCell>{row.process_code}</TableCell>
+                  <TableCell>{row.process_name}</TableCell>
+                  <TableCell>{row.process_time}</TableCell>
+                  <TableCell>{row.note}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => handleDelete(row.routing_id)}
+                    >
+                      삭제
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* 페이지네이션 */}
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 2, gap: 1 }}>
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
         <Button
           disabled={currentPage === 1}
-          onClick={() => setCurrentPage((prev) => prev - 1)}
+          onClick={() => setCurrentPage(currentPage - 1)}
         >
           〈
         </Button>
-        <Box sx={{ px: 2, display: "flex", alignItems: "center" }}>
-          <Typography variant="body2">페이지 {currentPage}</Typography>
-        </Box>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
         <Button
-          disabled={currentPage * itemsPerPage >= routingData.length}
-          onClick={() => setCurrentPage((prev) => prev + 1)}
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
         >
           〉
         </Button>

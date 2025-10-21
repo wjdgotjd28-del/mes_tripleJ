@@ -40,6 +40,7 @@ import { registerInbound } from "../api/OrderInViewApi";
 
 // 타입
 import type { OrderInbound, OrderItems } from "../../../type";
+import { usePagination } from "../../../Common/usePagination";
 
 export default function OrderInViewPage() {
   /** -----------------------------
@@ -189,6 +190,9 @@ export default function OrderInViewPage() {
     SHIPBUILDING: "조선",
   };
 
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedItems, 20); // 한 페이지당 20개
+
   /** -----------------------------
    * 📌 UI 렌더링
    * ----------------------------- */
@@ -297,12 +301,12 @@ export default function OrderInViewPage() {
 
             {/* 테이블 본문 */}
             <TableBody>
-              {sortedItems.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 // 표시할 데이터 없을 때
                 <TableRow>
                   <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
-                      거래중인 품목이 없습니다.
+                      수주대상 품목이 없습니다.
                     </Typography>
                   </TableCell>
                 </TableRow>
@@ -435,7 +439,26 @@ export default function OrderInViewPage() {
           </Table>
         </TableContainer>
       )}
-
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center", mx: 2 }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
       {/* 상세보기 모달 */}
       <OrderDetailModal
         open={openDetailModal}
