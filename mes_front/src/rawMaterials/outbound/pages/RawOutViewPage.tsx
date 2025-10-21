@@ -119,6 +119,7 @@ export default function RawMaterialOutViewPage() {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>ID</TableCell>
               <TableCell>출고번호</TableCell>
               <TableCell>매입처명</TableCell>
               <TableCell>품목번호</TableCell>
@@ -138,8 +139,9 @@ export default function RawMaterialOutViewPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              displayedItems.map((r) => (
+              displayedItems.map((r, idx) => (
                 <TableRow key={r.id}>
+                  <TableCell>{idx+1}</TableCell>
                   <TableCell>{r.outbound_no}</TableCell>
                   <TableCell>{r.company_name}</TableCell>
                   <TableCell>{r.item_code}</TableCell>
