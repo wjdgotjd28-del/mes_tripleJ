@@ -14,10 +14,12 @@ import {
   deleteRawMaterialOutbound,
   updateRawMaterialOutbound
 } from "../api/RawMaterialOutApi";
+import { RawoutboundSearchUtils } from "./RawoutboundSearchUtils";
 
 export default function RawMaterialOutViewPage() {
   const [rows, setRows] = useState<RawMaterialOutItems[]>([]);
-  const [search, setSearch] = useState({
+  const [displayedItems, setDisplayedItems] = useState<RawMaterialOutItems[]>([]);
+  const [searchValues, setSearchValues] = useState({
     outbound_no: "",
     company_name: "",
     item_code: "",
@@ -28,23 +30,31 @@ export default function RawMaterialOutViewPage() {
   const [editForm, setEditForm] = useState<Partial<RawMaterialOutItems>>({});
   const [registerOpen, setRegisterOpen] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const loadData = async () => {
     const res = await getRawMaterialOutbound();
     setRows(res);
+    setDisplayedItems(res); // 초기 화면 표시
     setEditingId(null);
   };
 
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSearchValues(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSearch = () => {
-    const filtered = rows.filter(r =>
-      (!search.outbound_no || r.outbound_no?.includes(search.outbound_no)) &&
-      (!search.company_name || r.company_name.includes(search.company_name)) &&
-      (!search.item_code || r.item_code.includes(search.item_code)) &&
-      (!search.item_name || r.item_name.includes(search.item_name)) &&
-      (!search.outbound_date || r.outbound_date?.includes(search.outbound_date))
-    );
-    setRows(filtered);
+    // 모든 검색값이 비어있으면 전체 조회
+    if (Object.values(searchValues).every(v => !v)) {
+      setDisplayedItems(rows);
+      return;
+    }
+
+    const filtered = RawoutboundSearchUtils(rows, searchValues);
+    setDisplayedItems(filtered);
   };
 
   const handleDelete = async (id: number) => {
@@ -62,27 +72,48 @@ export default function RawMaterialOutViewPage() {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>원자재 출고 이력</Typography>
+      {/* 🔍 검색 영역 */}
+      <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
+        {/* 1️⃣ 검색 필드 + 검색 버튼 */}
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "nowrap", mb: 1 }}>
+          <TextField size="small" label="출고번호" sx={{ width: 150 }} name="outbound_no" value={searchValues.outbound_no} onChange={handleTextChange} />
+          <TextField size="small" label="매입처명" sx={{ width: 150 }} name="company_name" value={searchValues.company_name} onChange={handleTextChange} />
+          <TextField size="small" label="품목번호" sx={{ width: 150 }} name="item_code" value={searchValues.item_code} onChange={handleTextChange} />
+          <TextField size="small" label="품목명" sx={{ width: 150 }} name="item_name" value={searchValues.item_name} onChange={handleTextChange} />
+          <TextField
+            size="small"
+            type="date"
+            label="출고일자"
+            name="outbound_date"
+            value={searchValues.outbound_date}
+            onChange={handleTextChange}
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              input: { color: "#000", backgroundColor: "#fff" },
+              svg: { color: "#1976d2" },
+              width: 180
+            }}
+          />
+          <Button variant="contained" color="primary" onClick={handleSearch}>
+            검색
+          </Button>
+        </Box>
 
-      {/* 🔍 검색 */}
-      <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-        <TextField size="small" label="출고번호" value={search.outbound_no}
-          onChange={(e) => setSearch({ ...search, outbound_no: e.target.value })} />
-        <TextField size="small" label="매입처명" value={search.company_name}
-          onChange={(e) => setSearch({ ...search, company_name: e.target.value })} />
-        <TextField size="small" label="품목번호" value={search.item_code}
-          onChange={(e) => setSearch({ ...search, item_code: e.target.value })} />
-        <TextField size="small" label="품목명" value={search.item_name}
-          onChange={(e) => setSearch({ ...search, item_name: e.target.value })} />
-        <TextField size="small" type="date" value={search.outbound_date}
-          onChange={(e) => setSearch({ ...search, outbound_date: e.target.value })} />
-        <Button variant="contained" onClick={handleSearch}>검색</Button>
-        <Box sx={{ flex: 1 }} />
-        <Button variant="outlined" endIcon={<FileDownloadIcon />}
-          onClick={() => exportToExcel(rows, "원자재출고이력")}>Excel</Button>
-        <Button variant="contained" color="success" endIcon={<AddIcon />}
-          onClick={() => setRegisterOpen(true)}>출고 등록</Button>
+        {/* 2️⃣ 오른쪽 정렬 Excel/출고등록 버튼 */}
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button variant="outlined" onClick={() => setRegisterOpen(true)}>
+            + 등록
+          </Button>
+          <Button
+            color="success"
+            variant="outlined"
+            endIcon={<FileDownloadIcon />}
+            onClick={() => exportToExcel(displayedItems, "원자재출고이력")}
+          >
+            엑셀 다운로드
+          </Button>
+        </Box>
       </Box>
-
       {/* 📋 테이블 */}
       <TableContainer component={Paper}>
         <Table>
@@ -100,23 +131,19 @@ export default function RawMaterialOutViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.length === 0 ? (
+            {displayedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
-                  <Typography color="text.secondary">
-                    원자재 출고한 이력이 없습니다.
-                  </Typography>
+                  <Typography color="text.secondary">원자재 출고한 이력이 없습니다.</Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              rows.map((r) => (
+              displayedItems.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell>{r.outbound_no}</TableCell>
                   <TableCell>{r.company_name}</TableCell>
                   <TableCell>{r.item_code}</TableCell>
                   <TableCell>{r.item_name}</TableCell>
-
-                  {/* 🔧 수정 가능 셀 */}
                   <TableCell>
                     {editingId === r.id ? (
                       <TextField
@@ -125,16 +152,13 @@ export default function RawMaterialOutViewPage() {
                         value={editForm.qty ?? r.qty}
                         onChange={(e) => setEditForm({ ...editForm, qty: Number(e.target.value) })}
                       />
-                    ) : (
-                      r.qty
-                    )}
+                    ) : r.qty}
                   </TableCell>
                   <TableCell>{r.unit}</TableCell>
                   <TableCell>{r.manufacturer ?? "-"}</TableCell>
                   <TableCell>
                     {editingId === r.id ? (
                       <Box sx={{ display: "flex", gap: 1 }}>
-                        {/* 날짜 선택 */}
                         <TextField
                           type="date"
                           size="small"
@@ -144,8 +168,6 @@ export default function RawMaterialOutViewPage() {
                             setEditForm({ ...editForm, outbound_date: `${e.target.value}T${timePart}` });
                           }}
                         />
-
-                        {/* 시간 입력 */}
                         <TextField
                           type="time"
                           size="small"
@@ -154,24 +176,18 @@ export default function RawMaterialOutViewPage() {
                             const datePart = editForm.outbound_date?.split("T")[0] ?? new Date().toISOString().slice(0, 10);
                             setEditForm({ ...editForm, outbound_date: `${datePart}T${e.target.value}` });
                           }}
-                          inputProps={{
-                            step: 60, // 1분 단위
-                          }}
+                          inputProps={{ step: 60 }}
                         />
                       </Box>
-                    ) : r.outbound_date ? (
-                      (() => {
-                        const d = new Date(r.outbound_date);
-                        const year = d.getFullYear();
-                        const month = String(d.getMonth() + 1).padStart(2, "0");
-                        const day = String(d.getDate()).padStart(2, "0");
-                        const hour = String(d.getHours()).padStart(2, "0");
-                        const minute = String(d.getMinutes()).padStart(2, "0");
-                        return `${year}-${month}-${day} ${hour}:${minute}`;
-                      })()
-                    ) : (
-                      "-"
-                    )}
+                    ) : r.outbound_date ? (() => {
+                      const d = new Date(r.outbound_date);
+                      const year = d.getFullYear();
+                      const month = String(d.getMonth() + 1).padStart(2, "0");
+                      const day = String(d.getDate()).padStart(2, "0");
+                      const hour = String(d.getHours()).padStart(2, "0");
+                      const minute = String(d.getMinutes()).padStart(2, "0");
+                      return `${year}-${month}-${day} ${hour}:${minute}`;
+                    })() : "-"}
                   </TableCell>
                   <TableCell align="center">
                     {editingId === r.id ? (
@@ -183,15 +199,10 @@ export default function RawMaterialOutViewPage() {
                       <>
                         <Button size="small" variant="outlined" onClick={() => {
                           setEditingId(r.id!);
-                          // 기존 출고일자를 정확히 반영
                           const dateObj = new Date(r.outbound_date!);
-                          const datePart = dateObj.toISOString().slice(0, 10); // YYYY-MM-DD
+                          const datePart = dateObj.toISOString().slice(0, 10);
                           const timePart = `${String(dateObj.getHours()).padStart(2, "0")}:${String(dateObj.getMinutes()).padStart(2, "0")}`;
-
-                          setEditForm({
-                            qty: r.qty,
-                            outbound_date: `${datePart}T${timePart}`
-                          });
+                          setEditForm({ qty: r.qty, outbound_date: `${datePart}T${timePart}` });
                         }}>수정</Button>
                         <Button size="small" variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={() => handleDelete(r.id!)}>삭제</Button>
                       </>
@@ -205,11 +216,7 @@ export default function RawMaterialOutViewPage() {
       </TableContainer>
 
       {/* ➕ 출고 등록 모달 */}
-      <RawOutRegisterModal
-        open={registerOpen}
-        onClose={() => setRegisterOpen(false)}
-        reload={loadData}
-      />
+      <RawOutRegisterModal open={registerOpen} onClose={() => setRegisterOpen(false)} reload={loadData} />
     </Box>
   );
 }
