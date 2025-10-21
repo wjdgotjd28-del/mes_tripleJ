@@ -103,6 +103,7 @@ export type Inbound = {
   qty: number;
   category: string;
   inboundDate: string;
+  processStatus: number;
 };
 
 // 원자재 재고 현황 테이블 타입
@@ -117,7 +118,6 @@ export type RawMaterialInventoryStatus = {
 
 
 export type OrderProcessTracking = {
-  id?: number;
   order_inbound_id: number;
   order_item_routing_id?: number;
   process_status: number;
