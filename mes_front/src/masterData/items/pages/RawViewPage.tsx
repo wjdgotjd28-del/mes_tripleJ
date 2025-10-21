@@ -263,7 +263,7 @@ export default function RawViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
+                    <TableCell>{`${row.spec_qty}${row.spec_unit}`}</TableCell>
                     <TableCell>{categoryMap[row.category] || row.category}</TableCell>
                     <TableCell>{row.note}</TableCell>
                     <TableCell align="center">

@@ -125,7 +125,6 @@ export default function RawMaterialOutViewPage() {
               <TableCell>품목번호</TableCell>
               <TableCell>품목명</TableCell>
               <TableCell>출고수량</TableCell>
-              <TableCell>단위</TableCell>
               <TableCell>제조사</TableCell>
               <TableCell>출고일자</TableCell>
               <TableCell align="center">기능</TableCell>
@@ -149,14 +148,17 @@ export default function RawMaterialOutViewPage() {
                   <TableCell>
                     {editingId === r.id ? (
                       <TextField
-                        type="number"
                         size="small"
                         value={editForm.qty ?? r.qty}
                         onChange={(e) => setEditForm({ ...editForm, qty: Number(e.target.value) })}
+                        InputProps={{
+                          endAdornment: <span style={{ marginLeft: 4 }}>{r.unit}</span>
+                        }}
                       />
-                    ) : r.qty}
+                    ) : (
+                      `${r.qty}${r.unit}` // 예: 10kg
+                    )}
                   </TableCell>
-                  <TableCell>{r.unit}</TableCell>
                   <TableCell>{r.manufacturer ?? "-"}</TableCell>
                   <TableCell>
                     {editingId === r.id ? (
