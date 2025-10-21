@@ -63,24 +63,23 @@ export default function RawInHistoryPage() {
             <TableHead>
               <TableRow>
                 <TableCell align="center">ID</TableCell>
-                <TableCell align="center">품목ID</TableCell>
-                <TableCell align="center">매입처명</TableCell>
+                <TableCell align="center">입고번호</TableCell>
+                <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
-                <TableCell align="center">품목코드</TableCell>
+                <TableCell align="center">매입처명</TableCell>
                 <TableCell align="center">규격(양)</TableCell>
                 <TableCell align="center">규격(단위)</TableCell>
-                <TableCell align="center">제조사</TableCell>
-                <TableCell align="center">제조일자</TableCell>
                 <TableCell align="center">입고수량</TableCell>
-                <TableCell align="center">입고일자</TableCell>
-                <TableCell align="center">입고번호</TableCell>
                 <TableCell align="center">총량</TableCell>
+                <TableCell align="center">입고일자</TableCell>
+                <TableCell align="center">제조일자</TableCell>
+                <TableCell align="center">제조사</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {displayedHistory.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={13} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={12} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
                       조회된 입고 이력 데이터가 없습니다.
                     </Typography>
@@ -90,18 +89,17 @@ export default function RawInHistoryPage() {
                 displayedHistory.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell align="center">{row.id}</TableCell>
-                    <TableCell align="center">{row.materialItemId}</TableCell>
-                    <TableCell align="center">{row.supplierName}</TableCell>
-                    <TableCell align="center">{row.itemName}</TableCell>
+                    <TableCell align="center">{row.inboundNo}</TableCell>
                     <TableCell align="center">{row.itemCode}</TableCell>
+                    <TableCell align="center">{row.itemName}</TableCell>
+                    <TableCell align="center">{row.supplierName}</TableCell>
                     <TableCell align="center">{row.specQty}</TableCell>
                     <TableCell align="center">{row.specUnit}</TableCell>
-                    <TableCell align="center">{row.manufacturer}</TableCell>
-                    <TableCell align="center">{row.manufacteDate}</TableCell>
                     <TableCell align="center">{row.qty}</TableCell>
-                    <TableCell align="center">{row.inboundDate}</TableCell>
-                    <TableCell align="center">{row.inboundNo}</TableCell>
                     <TableCell align="center">{`${row.totalQty}`}</TableCell>
+                    <TableCell align="center">{row.inboundDate}</TableCell>
+                    <TableCell align="center">{row.manufacteDate}</TableCell>
+                    <TableCell align="center">{row.manufacturer}</TableCell>
                   </TableRow>
                 ))
               )}
