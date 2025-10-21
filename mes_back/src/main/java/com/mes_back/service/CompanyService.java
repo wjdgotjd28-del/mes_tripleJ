@@ -1,6 +1,6 @@
 package com.mes_back.service;
 
-import com.mes_back.dto.CompanyDto;
+import com.mes_back.dto.CompanyDTO;
 import com.mes_back.entity.Company;
 import com.mes_back.repository.CompanyRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,7 +18,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
 
     // 회사 등록
-    public CompanyDto addCompany(CompanyDto companyDto) {
+    public CompanyDTO addCompany(CompanyDTO companyDto) {
         Company company = Company.builder()
                 .type(companyDto.getType())
                 .companyName(companyDto.getCompanyName())
@@ -40,7 +40,7 @@ public class CompanyService {
 
     // 업체 조회 페이지용 (삭제 안된 모든 업체)
     @Transactional(readOnly = true)
-    public List<CompanyDto> findAll() {
+    public List<CompanyDTO> findAll() {
         List<Company> companies = companyRepository.findByDeletedAtIsNull();
         return companies.stream()
                 .map(this::convertToDto)
@@ -49,7 +49,7 @@ public class CompanyService {
 
     // 일반 페이지용 (거래중 & 삭제 안된 업체)
     @Transactional(readOnly = true)
-    public List<CompanyDto> findAllActive() {
+    public List<CompanyDTO> findAllActive() {
         List<Company> companies = companyRepository.findByStatusAndDeletedAtIsNull("Y");
         return companies.stream()
                 .map(this::convertToDto)
@@ -58,7 +58,7 @@ public class CompanyService {
 
     // 삭제된 업체 조회
     @Transactional(readOnly = true)
-    public List<CompanyDto> findAllDeleted() {
+    public List<CompanyDTO> findAllDeleted() {
         List<Company> companies = companyRepository.findByDeletedAtIsNotNull();
         return companies.stream()
                 .map(this::convertToDto)
@@ -67,7 +67,7 @@ public class CompanyService {
 
 
     // 회사 수정
-    public CompanyDto updateCompany(CompanyDto companyDto) {
+    public CompanyDTO updateCompany(CompanyDTO companyDto) {
         Company company = companyRepository.findById(companyDto.getCompanyId())
                 .orElseThrow(EntityNotFoundException::new);
         company.updateCompany(companyDto);
@@ -75,13 +75,13 @@ public class CompanyService {
     }
 
 
-    public CompanyDto updateTradeStatus(Long companyId, String status) {
+    public CompanyDTO updateTradeStatus(Long companyId, String status) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(EntityNotFoundException::new);
 
         company.updateStatus(status);
 
-        return CompanyDto.builder()
+        return CompanyDTO.builder()
                 .companyId(company.getCompanyId())
                 .status(company.getStatus())
                 .build();
@@ -104,8 +104,8 @@ public class CompanyService {
     }
 
     // Entity -> DTO 변환 헬퍼
-    private CompanyDto convertToDto(Company company) {
-        return CompanyDto.builder()
+    private CompanyDTO convertToDto(Company company) {
+        return CompanyDTO.builder()
                 .companyId(company.getCompanyId())
                 .type(company.getType())
                 .companyName(company.getCompanyName())

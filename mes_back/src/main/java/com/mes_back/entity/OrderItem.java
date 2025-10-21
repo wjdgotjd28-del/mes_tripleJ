@@ -58,6 +58,10 @@ public class OrderItem {
     @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItemRouting> routings = new ArrayList<>();
 
+    // ⭐ 추가: OrderInbound와의 양방향 관계
+    @OneToMany(mappedBy = "orderItem", fetch = FetchType.LAZY)
+    private List<OrderInbound> inbounds;
+
     public void addRouting(OrderItemRouting routing) {
         routings.add(routing);
         routing.setOrderItem(this);

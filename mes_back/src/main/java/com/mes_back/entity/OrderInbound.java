@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -30,8 +31,14 @@ public class OrderInbound {
     @JoinColumn(name = "company_id")
     private Company company;
 
+    @Column(name = "customer_name", nullable = false, length = 255)
+    private String customerName;
+
     @Column(name = "item_name", nullable = false, length = 255)
     private String itemName;
+
+    @Column(name = "customer_name", nullable = false, length = 255)
+    private String customerName;
 
     @Column(name = "item_code", nullable = false, length = 255)
     private String itemCode;
@@ -55,4 +62,8 @@ public class OrderInbound {
     @Enumerated(EnumType.STRING)
     @Column(name = "paint_type", nullable = false)
     private PaintType paintType;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
 }

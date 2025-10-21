@@ -27,7 +27,7 @@ export interface OrderItems {
 
 // 원자재 품목 데이터 타입
 export interface RawItems {
-  material_item_id?: number;
+  material_item_id: number;
   company_name: string;
   item_code: string;
   item_name: string;
@@ -66,18 +66,18 @@ export type RoutingCreateData = {
   process_code: string;
   process_name: string;
   process_time: string;
-  note: string;
+  note: string | null;
   process_no?: number;
 };
 
 // 라우팅 조회 타입
 export type RoutingFormData = RoutingCreateData & {
   routing_id: number;
+  order_item_id?: number;
 };
 
 export type RoutingFormDataWithProcessNo = RoutingFormData & {
   process_no: number;
-  id?: number;
 };
 
 // 수주 출고 
@@ -103,7 +103,6 @@ export type Inbound = {
   qty: number;
   category: string;
   inboundDate: string;
-  processStatus: number;
 };
 
 // 원자재 재고 현황 테이블 타입
@@ -116,30 +115,45 @@ export type RawMaterialInventoryStatus = {
   unit: string;
 };
 
-export type OrderInView = {
-  id: number;
+
+export interface OrderInView {
+  id?: number; // 선택값으로 변경
+  order_item_id: number;
+  category: "DEFENSE" | "GENERAL" | "AUTOMOTIVE" | "SHIPBUILDING";
   customer_name: string;
+  inbound_date: string;
   item_code: string;
   item_name: string;
-  qty: number;
-  category: string;
+  lot_no: string;
   note: string;
+  paint_type: "LIQUID" | "POWDER";
+  qty: number;
 }
 
 export type OrderProcessTracking = {
-  id: number;
   order_inbound_id: number;
-  order_item_routing_id: number;
-  process_start_time: string | null;
+  order_item_routing_id?: number;
   process_status: number;
+  process_start_time: string | null;
+  routing_id?: number;
+  process_no?: number;
+  process_name?: string;
+  process_time?: number;
 };
 
 export type OrderInbound = {
   id: number;
   order_inbound_id: number;
-  order_item_routing_id: number;
-  process_start_time: string | null;
-  process_status: number;
+  order_item_id: number;
+  category: "AUTOMOTIVE" | "DEFENSE" | "GENERAL" | "SHIPBUILDING";
+  customer_name: string;
+  inbound_date: string; // "YYYY-MM-DD" 형식
+  item_code: string;
+  item_name: string;
+  lot_no: string;
+  note: string;
+  paint_type: "LIQUID" | "POWDER";
+  qty: number;
 };
 
 export type MaterialInbound = {
@@ -157,3 +171,4 @@ export type MaterialInbound = {
   inboundNo: string;
   totalQty: number;
 }
+
