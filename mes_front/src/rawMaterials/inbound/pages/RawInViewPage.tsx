@@ -16,11 +16,15 @@ import {
   // MenuItem, FormControl, InputLabel, Select, type SelectChangeEvent, Chip,
 } from "@mui/material";
 import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 
 import RawRegisterModal from "../../../masterData/items/pages/RawRegisterModal";
 import RawDetailModal from "../../../masterData/items/pages/RawDetailModal";
 import { exportToExcel } from "../../../Common/ExcelUtils";
-import type { RawItems } from "../../../type";
+import type { RawItems, MaterialInbound } from "../../../type";
 import { getRawItems } from "../../../masterData/items/api/RawApi";
 import { filterRawItems } from "../../../masterData/items/components/RawSearchUtils";
 
@@ -40,6 +44,7 @@ export default function RawInViewPage() {
     itemName: "",
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
+  const [inboundInput, setInboundInput] = useState<Record<number, { manufacteDate: string; qty: number; inboundDate: string }>>({});
 
   const categoryMap: Record<string, string> = {
     PAINT: "페인트",
@@ -67,10 +72,10 @@ export default function RawInViewPage() {
       }
 
       // use_yn = "Y"인 데이터만 저장
-      const activeItems = res.filter((item) => item.use_yn === "Y");
+      const activeRawItems = res.filter((item) => item.use_yn === "Y");
 
-      setRawItems(activeItems);
-      setDisplayedItems(activeItems);
+      setRawItems(activeRawItems);
+      setDisplayedItems(activeRawItems);
     } catch (err) {
       console.error("❌ API 호출 실패:", err);
       setError("데이터를 불러오는 중 오류가 발생했습니다.");
@@ -111,6 +116,54 @@ export default function RawInViewPage() {
   const handleItemClick = (item: RawItems) => {
     setSelectedItem(item);
     setOpenDetailModal(true);
+  };
+
+  const handleInboundInputChange = (materialItemId: number, field: string, value: string | number) => {
+    setInboundInput((prev) => ({
+      ...prev,
+      [materialItemId]: {
+        ...(prev[materialItemId] || { manufacteDate: "", qty: 0, inboundDate: "" }),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleRegisterInbound = async (rawItem: RawItems) => {
+    const inboundData = inboundInput[rawItem.material_item_id];
+
+    if (!inboundData || !inboundData.manufacteDate || !inboundData.qty || !inboundData.inboundDate) {
+      alert("모든 입고 정보를 입력해주세요.");
+      return;
+    }
+
+    const newMaterialInbound: MaterialInbound = {
+      id: 0, // Will be assigned by backend
+      materialItemId: rawItem.material_item_id,
+      supplierName: rawItem.company_name,
+      itemName: rawItem.item_name,
+      itemCode: rawItem.item_code,
+      specQty: rawItem.spec_qty,
+      specUnit: rawItem.spec_unit,
+      manufacturer: rawItem.manufacturer,
+      manufacteDate: inboundData.manufacteDate,
+      qty: inboundData.qty,
+      inboundDate: inboundData.inboundDate,
+      inboundNo: "", // Will be assigned by backend
+      totalQty: 0, // Will be calculated by backend
+    };
+
+    console.log("등록할 입고 정보:", newMaterialInbound);
+    alert("입고 등록 준비 완료! 콘솔을 확인하세요.");
+
+    // TODO: 여기에 실제 입고 등록 API 호출 로직 추가
+    // 예: await registerMaterialInbound(newMaterialInbound);
+    // 등록 후, 입력 필드 초기화 및 데이터 새로고침
+    // setInboundInput((prev) => {
+    //   const newState = { ...prev };
+    //   delete newState[rawItem.material_item_id];
+    //   return newState;
+    // });
+    // fetchRawItems();
   };
 
   return (
@@ -198,12 +251,16 @@ export default function RawInViewPage() {
                 <TableCell>품목명</TableCell>
                 <TableCell>규격(양/단위)</TableCell>
                 <TableCell>제조사</TableCell>
+                <TableCell>제조일자</TableCell>
+                <TableCell>입고수량</TableCell>
+                <TableCell>입고일자</TableCell>
+                <TableCell>등록</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {displayedItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
                       조회된 원자재 품목이 없습니다.
                     </Typography>
@@ -233,6 +290,53 @@ export default function RawInViewPage() {
                     </TableCell>
                     <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
                     <TableCell>{row.manufacturer}</TableCell>
+                    <TableCell>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={inboundInput[row.material_item_id]?.manufacteDate ? dayjs(inboundInput[row.material_item_id]?.manufacteDate) : null}
+                          onChange={(newDate) =>
+                            handleInboundInputChange(row.material_item_id, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                          }
+                          format="YYYY-MM-DD"
+                          slotProps={{
+                            textField: { size: "small", sx: { width: 130 } },
+                          }}
+                        />
+                      </LocalizationProvider>
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={inboundInput[row.material_item_id]?.qty || ""}
+                        onChange={(e) => handleInboundInputChange(row.material_item_id, "qty", Number(e.target.value))}
+                        sx={{ width: 80 }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={inboundInput[row.material_item_id]?.inboundDate ? dayjs(inboundInput[row.material_item_id]?.inboundDate) : null}
+                          onChange={(newDate) =>
+                            handleInboundInputChange(row.material_item_id, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                          }
+                          format="YYYY-MM-DD"
+                          slotProps={{
+                            textField: { size: "small", sx: { width: 130 } },
+                          }}
+                        />
+                      </LocalizationProvider>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        onClick={() => handleRegisterInbound(row)}
+                      >
+                        등록
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
