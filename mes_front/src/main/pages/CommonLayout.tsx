@@ -226,6 +226,14 @@ export default function CommonLayout() {
     }
   };
 
+  const handleThirdClick = (main: string, sub: string, third: string) => {
+    setActiveMain(main);
+    setActiveSub(sub);
+    setActiveThird(third);
+    const path = routeMap[`${main} > ${sub} > ${third}`];
+    if (path) navigate(path);
+  };
+
   // ================= Drawer 내용 =================
   const drawerContent = (
     <Box>
@@ -254,6 +262,7 @@ export default function CommonLayout() {
                   <React.Fragment key={sub.text}>
                     <ListItem disablePadding>
                       <ListItemButton
+                        // selected={activeSub === sub.text && !sub.subs}
                         selected={activeSub === sub.text && !sub.subs}
                         onClick={() =>
                           handleSubClick(main.text, sub.text, !!sub.subs)
@@ -264,13 +273,14 @@ export default function CommonLayout() {
                     </ListItem>
 
                     {/* 3계층 메뉴 */}
-                    {sub.subs && activeSub === sub.text && (
+                    {/* {sub.subs && activeSub === sub.text && ( */}
+                    {sub.subs && (
                       <List sx={{ pl: 2 }}>
                         {sub.subs.map((third) => (
                           <ListItem disablePadding key={third.text}>
                             <ListItemButton
                               selected={activeThird === third.text}
-                              onClick={() => setActiveThird(third.text)}
+                              onClick={() => handleThirdClick(main.text, sub.text, third.text)}
                             >
                               <ListItemText
                                 primary={`• ${third.text}`}

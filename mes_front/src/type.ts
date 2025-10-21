@@ -128,6 +128,7 @@ export type RawMaterialOutItems = {
   outbound_no?: string; // 출고번호 (백엔드 생성)
   outbound_date?: string; // 출고일자
   manufacturer?: string;
+  material_inbound_id: number;
 }
 
 export interface OrderInView {
