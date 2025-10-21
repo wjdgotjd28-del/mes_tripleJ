@@ -93,10 +93,16 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
       setSelected(null);
       setForm({ outboundQty: "", outboundDate: "" });
     } else {
+      // ✅ 현재 날짜 + 시간 자동 입력
+      const now = new Date();
+      const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16); // yyyy-MM-ddTHH:mm 형식
+
       setSelected(row);
       setForm({
         outboundQty: "",
-        outboundDate: new Date().toISOString().slice(0, 10),
+        outboundDate: localISOTime, // 현재 날짜+시간
       });
     }
   };

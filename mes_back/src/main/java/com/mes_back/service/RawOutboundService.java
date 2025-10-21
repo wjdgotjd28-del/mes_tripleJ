@@ -58,7 +58,11 @@ public class RawOutboundService {
 
         // 4️⃣ 출고번호 자동 생성
         LocalDate today = LocalDate.now();
-        Long count = outboundRepository.countByDate(today);
+        LocalDateTime startOfDay = today.atStartOfDay(); // 00:00
+        LocalDateTime endOfDay = today.plusDays(1).atStartOfDay(); // 다음날 00:00
+
+        Long count = outboundRepository.countByDateRange(startOfDay, endOfDay);
+
         String sequence = String.format("%03d", count + 1);
         String outboundNo = "MOUT-" + today.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + sequence;
 
