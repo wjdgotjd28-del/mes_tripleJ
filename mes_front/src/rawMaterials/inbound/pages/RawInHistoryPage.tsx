@@ -62,19 +62,19 @@ export default function RawInHistoryPage() {
           <Table sx={{ minWidth: 1200 }}>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>품목ID</TableCell>
-                <TableCell>매입처명</TableCell>
-                <TableCell>품목명</TableCell>
-                <TableCell>품목코드</TableCell>
-                <TableCell>규격(양)</TableCell>
-                <TableCell>규격(단위)</TableCell>
-                <TableCell>제조사</TableCell>
-                <TableCell>제조일자</TableCell>
-                <TableCell>입고수량</TableCell>
-                <TableCell>입고일자</TableCell>
-                <TableCell>입고번호</TableCell>
-                <TableCell>총량</TableCell>
+                <TableCell align="center">ID</TableCell>
+                <TableCell align="center">품목ID</TableCell>
+                <TableCell align="center">매입처명</TableCell>
+                <TableCell align="center">품목명</TableCell>
+                <TableCell align="center">품목코드</TableCell>
+                <TableCell align="center">규격(양)</TableCell>
+                <TableCell align="center">규격(단위)</TableCell>
+                <TableCell align="center">제조사</TableCell>
+                <TableCell align="center">제조일자</TableCell>
+                <TableCell align="center">입고수량</TableCell>
+                <TableCell align="center">입고일자</TableCell>
+                <TableCell align="center">입고번호</TableCell>
+                <TableCell align="center">총량</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -89,19 +89,19 @@ export default function RawInHistoryPage() {
               ) : (
                 displayedHistory.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell>{row.id}</TableCell>
-                    <TableCell>{row.materialItemId}</TableCell>
-                    <TableCell>{row.supplierName}</TableCell>
-                    <TableCell>{row.itemName}</TableCell>
-                    <TableCell>{row.itemCode}</TableCell>
-                    <TableCell>{row.specQty}</TableCell>
-                    <TableCell>{row.specUnit}</TableCell>
-                    <TableCell>{row.manufacturer}</TableCell>
-                    <TableCell>{row.manufacteDate}</TableCell>
-                    <TableCell>{row.qty}</TableCell>
-                    <TableCell>{row.inboundDate}</TableCell>
-                    <TableCell>{row.inboundNo}</TableCell>
-                    <TableCell>{`${row.totalQty}`}</TableCell>
+                    <TableCell align="center">{row.id}</TableCell>
+                    <TableCell align="center">{row.materialItemId}</TableCell>
+                    <TableCell align="center">{row.supplierName}</TableCell>
+                    <TableCell align="center">{row.itemName}</TableCell>
+                    <TableCell align="center">{row.itemCode}</TableCell>
+                    <TableCell align="center">{row.specQty}</TableCell>
+                    <TableCell align="center">{row.specUnit}</TableCell>
+                    <TableCell align="center">{row.manufacturer}</TableCell>
+                    <TableCell align="center">{row.manufacteDate}</TableCell>
+                    <TableCell align="center">{row.qty}</TableCell>
+                    <TableCell align="center">{row.inboundDate}</TableCell>
+                    <TableCell align="center">{row.inboundNo}</TableCell>
+                    <TableCell align="center">{`${row.totalQty}`}</TableCell>
                   </TableRow>
                 ))
               )}

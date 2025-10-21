@@ -244,16 +244,16 @@ export default function RawInViewPage() {
           <Table sx={{ minWidth: 900 }}>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>매입처명</TableCell>
-                <TableCell>품목번호</TableCell>
-                <TableCell>품목명</TableCell>
-                <TableCell>원자재 규격(양/단위)</TableCell>
-                <TableCell>제조사</TableCell>
-                <TableCell>입고수량</TableCell>
-                <TableCell>입고일자</TableCell>
-                <TableCell>제조일자</TableCell>
-                <TableCell>등록</TableCell>
+                <TableCell align="center">ID</TableCell>
+                <TableCell align="center">매입처명</TableCell>
+                <TableCell align="center">품목번호</TableCell>
+                <TableCell align="center">품목명</TableCell>
+                <TableCell align="center">원자재 규격(양/단위)</TableCell>
+                <TableCell align="center">제조사</TableCell>
+                <TableCell align="center">입고수량</TableCell>
+                <TableCell align="center">입고일자</TableCell>
+                <TableCell align="center">제조일자</TableCell>
+                <TableCell align="center">등록</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -268,10 +268,10 @@ export default function RawInViewPage() {
               ) : (
                 displayedItems.map((row) => (
                   <TableRow key={row.material_item_id}>
-                    <TableCell>{row.material_item_id}</TableCell>
-                    <TableCell>{row.company_name}</TableCell>
-                    <TableCell>{row.item_code}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">{row.material_item_id}</TableCell>
+                    <TableCell align="center">{row.company_name}</TableCell>
+                    <TableCell align="center">{row.item_code}</TableCell>
+                    <TableCell align="center">
                       <Typography
                         variant="body2"
                         sx={{
@@ -287,9 +287,9 @@ export default function RawInViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
-                    <TableCell>{row.manufacturer}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
+                    <TableCell align="center">{row.manufacturer}</TableCell>
+                    <TableCell align="center">
                       <TextField
                         type="number"
                         size="small"
@@ -298,7 +298,7 @@ export default function RawInViewPage() {
                         sx={{ width: 80 }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                           value={inboundInput[row.material_item_id]?.inboundDate ? dayjs(inboundInput[row.material_item_id]?.inboundDate) : null}
@@ -312,7 +312,7 @@ export default function RawInViewPage() {
                         />
                       </LocalizationProvider>
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                           value={inboundInput[row.material_item_id]?.manufacteDate ? dayjs(inboundInput[row.material_item_id]?.manufacteDate) : null}
@@ -326,7 +326,7 @@ export default function RawInViewPage() {
                         />
                       </LocalizationProvider>
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <Button
                         variant="contained"
                         color="primary"
