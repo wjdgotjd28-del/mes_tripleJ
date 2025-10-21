@@ -229,6 +229,7 @@ export default function RawViewPage() {
                 <TableCell>품목명</TableCell>
                 <TableCell>규격(양/단위)</TableCell>
                 <TableCell>분류</TableCell>
+                <TableCell>제조사</TableCell>
                 <TableCell>비고</TableCell>
                 <TableCell>사용여부</TableCell>
                 <TableCell></TableCell>
@@ -238,7 +239,7 @@ export default function RawViewPage() {
             <TableBody>
               {displayedItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
                       조회된 원자재 품목이 없습니다.
                     </Typography>
@@ -265,6 +266,7 @@ export default function RawViewPage() {
                     </TableCell>
                     <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
                     <TableCell>{categoryMap[row.category] || row.category}</TableCell>
+                    <TableCell>{row.manufacturer}</TableCell>
                     <TableCell>{row.note}</TableCell>
                     <TableCell align="center">
                       <Chip

@@ -20,18 +20,18 @@ import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
 import RawRegisterModal from "../../../masterData/items/pages/RawRegisterModal";
 import RawDetailModal from "../../../masterData/items/pages/RawDetailModal";
 import { exportToExcel } from "../../../Common/ExcelUtils";
-import type { MaterialInbound } from "../../../type";
+import type { RawItems } from "../../../type";
 import { getRawItems } from "../../../masterData/items/api/RawApi";
 import { filterRawItems } from "../../../masterData/items/components/RawSearchUtils";
 
 export default function RawInViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<MaterialInbound | null>(
+  const [selectedItem, setSelectedItem] = useState<RawItems | null>(
     null
   );
   const [openModal, setOpenModal] = useState(false);
-  const [rawItems, setRawItems] = useState<MaterialInbound[]>([]);
-  const [displayedItems, setDisplayedItems] = useState<MaterialInbound[]>([]);
+  const [rawItems, setRawItems] = useState<RawItems[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<RawItems[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchValues, setSearchValues] = useState({
@@ -197,14 +197,13 @@ export default function RawInViewPage() {
                 <TableCell>품목번호</TableCell>
                 <TableCell>품목명</TableCell>
                 <TableCell>규격(양/단위)</TableCell>
-                <TableCell>분류</TableCell>
-                <TableCell>비고</TableCell>
+                <TableCell>제조사</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {displayedItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
                       조회된 원자재 품목이 없습니다.
                     </Typography>
@@ -233,10 +232,7 @@ export default function RawInViewPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
-                    <TableCell>
-                      {categoryMap[row.category] || row.category}
-                    </TableCell>
-                    <TableCell>{row.note}</TableCell>
+                    <TableCell>{row.manufacturer}</TableCell>
                   </TableRow>
                 ))
               )}
