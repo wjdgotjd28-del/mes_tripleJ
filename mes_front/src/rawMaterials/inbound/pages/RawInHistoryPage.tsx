@@ -74,7 +74,7 @@ export default function RawInHistoryPage() {
                 <TableCell>입고수량</TableCell>
                 <TableCell>입고일자</TableCell>
                 <TableCell>입고번호</TableCell>
-                <TableCell>총수량</TableCell>
+                <TableCell>총량</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -101,7 +101,7 @@ export default function RawInHistoryPage() {
                     <TableCell>{row.qty}</TableCell>
                     <TableCell>{row.inboundDate}</TableCell>
                     <TableCell>{row.inboundNo}</TableCell>
-                    <TableCell>{row.totalQty}</TableCell>
+                    <TableCell>{`${row.totalQty}`}</TableCell>
                   </TableRow>
                 ))
               )}

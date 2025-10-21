@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +36,10 @@ public class MaterialInboundService {
         MaterialItem materialItem = materialItemRepository.findById(materialInboundDto.getMaterialItemId())
                 .orElseThrow(() -> new EntityNotFoundException("MaterialItem not found with id: " + materialInboundDto.getMaterialItemId()));
 
-        // 2. MaterialInbound 엔티티 생성
+        // 2. 입고번호 생성
+        String inboundNo = generateInboundNo();
+
+        // 3. MaterialInbound 엔티티 생성
         MaterialInbound materialInbound = MaterialInbound.builder()
                 .materialItem(materialItem) // 조회된 엔티티 객체를 전달
                 .supplierName(materialInboundDto.getSupplierName())
@@ -46,15 +51,14 @@ public class MaterialInboundService {
                 .manufacteDate(materialInboundDto.getManufacteDate())
                 .qty(materialInboundDto.getQty())
                 .inboundDate(materialInboundDto.getInboundDate())
-                .inboundNo(materialInboundDto.getInboundNo())
+                .inboundNo(inboundNo) // 생성된 입고번호 사용
                 .totalQty(materialInboundDto.getTotalQty())
                 .build();
 
-        // 3. 엔티티 저장
+        // 4. 엔티티 저장
         MaterialInbound savedInbound = materialInboundRepository.save(materialInbound);
-        materialInboundDto.setId(savedInbound.getId());
 
-        // 4. 저장된 엔티티를 DTO로 변환하여 반환
+        // 5. 저장된 엔티티를 DTO로 변환하여 반환
         return entityToDto(savedInbound);
     }
 
@@ -75,5 +79,22 @@ public class MaterialInboundService {
                 .inboundNo(materialInbound.getInboundNo())
                 .totalQty(materialInbound.getTotalQty())
                 .build();
+    }
+
+    protected String generateInboundNo() {
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String prefix = "MINC-" + today + "-";
+
+        Optional<String> lastNoOptional = materialInboundRepository.findMaxInboundNoNative(prefix);
+        int nextSeq = 1;
+        if (lastNoOptional.isPresent()) {
+            String lastNo = lastNoOptional.get();
+            String lastSeq = lastNo.substring(lastNo.lastIndexOf("-") + 1);
+            nextSeq = Integer.parseInt(lastSeq) + 1;
+        }
+
+        if (nextSeq > 999) throw new IllegalStateException("입고번호가 999를 초과했습니다.");
+
+        return prefix + String.format("%03d", nextSeq);
     }
 }

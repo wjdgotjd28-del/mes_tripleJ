@@ -8,7 +8,7 @@ export const getMaterialInbound = async (): Promise<MaterialInbound[]> => {
     return response.data;
 }
 
-export const addMaterialInbound = async (materialInbound: MaterialInbound): Promise<MaterialInbound> => {
+export const addMaterialInbound = async (materialInbound: Omit<MaterialInbound, 'id'>): Promise<MaterialInbound> => {
     const response = await axios.post(`${BASE_URL}/materials/inbound/new`, materialInbound);
     return response.data;
 }

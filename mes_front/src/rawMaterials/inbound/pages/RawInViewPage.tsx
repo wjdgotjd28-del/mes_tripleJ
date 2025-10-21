@@ -27,6 +27,7 @@ import { exportToExcel } from "../../../Common/ExcelUtils";
 import type { RawItems, MaterialInbound } from "../../../type";
 import { getRawItems } from "../../../masterData/items/api/RawApi";
 import { filterRawItems } from "../../../masterData/items/components/RawSearchUtils";
+import { addMaterialInbound } from "../api/rawInboundApi";
 
 export default function RawInViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
@@ -46,12 +47,6 @@ export default function RawInViewPage() {
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
   const [inboundInput, setInboundInput] = useState<Record<number, { manufacteDate: string; qty: number; inboundDate: string }>>({});
 
-  const categoryMap: Record<string, string> = {
-    PAINT: "페인트",
-    THINNER: "신나",
-    CLEANER: "세척제",
-    HARDENER: "경화제",
-  };
 
   useEffect(() => {
     fetchRawItems();
@@ -137,8 +132,7 @@ export default function RawInViewPage() {
       return;
     }
 
-    const newMaterialInbound: MaterialInbound = {
-      id: 0, // Will be assigned by backend
+    const newMaterialInbound: Omit<MaterialInbound, 'id'> = {
       materialItemId: rawItem.material_item_id,
       supplierName: rawItem.company_name,
       itemName: rawItem.item_name,
@@ -150,8 +144,10 @@ export default function RawInViewPage() {
       qty: inboundData.qty,
       inboundDate: inboundData.inboundDate,
       inboundNo: "", // Will be assigned by backend
-      totalQty: 0, // Will be calculated by backend
+      totalQty: `${rawItem.spec_qty * inboundData.qty}${rawItem.spec_unit}`, // Calculate totalQty and append specUnit
     };
+
+    console.log("전송될 데이터:", newMaterialInbound);
 
     try {
       await addMaterialInbound(newMaterialInbound);
@@ -252,11 +248,11 @@ export default function RawInViewPage() {
                 <TableCell>매입처명</TableCell>
                 <TableCell>품목번호</TableCell>
                 <TableCell>품목명</TableCell>
-                <TableCell>규격(양/단위)</TableCell>
+                <TableCell>원자재 규격(양/단위)</TableCell>
                 <TableCell>제조사</TableCell>
-                <TableCell>제조일자</TableCell>
                 <TableCell>입고수량</TableCell>
                 <TableCell>입고일자</TableCell>
+                <TableCell>제조일자</TableCell>
                 <TableCell>등록</TableCell>
               </TableRow>
             </TableHead>
@@ -294,20 +290,6 @@ export default function RawInViewPage() {
                     <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
                     <TableCell>{row.manufacturer}</TableCell>
                     <TableCell>
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          value={inboundInput[row.material_item_id]?.manufacteDate ? dayjs(inboundInput[row.material_item_id]?.manufacteDate) : null}
-                          onChange={(newDate) =>
-                            handleInboundInputChange(row.material_item_id, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
-                          }
-                          format="YYYY-MM-DD"
-                          slotProps={{
-                            textField: { size: "small", sx: { width: 130 } },
-                          }}
-                        />
-                      </LocalizationProvider>
-                    </TableCell>
-                    <TableCell>
                       <TextField
                         type="number"
                         size="small"
@@ -322,6 +304,20 @@ export default function RawInViewPage() {
                           value={inboundInput[row.material_item_id]?.inboundDate ? dayjs(inboundInput[row.material_item_id]?.inboundDate) : null}
                           onChange={(newDate) =>
                             handleInboundInputChange(row.material_item_id, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                          }
+                          format="YYYY-MM-DD"
+                          slotProps={{
+                            textField: { size: "small", sx: { width: 130 } },
+                          }}
+                        />
+                      </LocalizationProvider>
+                    </TableCell>
+                    <TableCell>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          value={inboundInput[row.material_item_id]?.manufacteDate ? dayjs(inboundInput[row.material_item_id]?.manufacteDate) : null}
+                          onChange={(newDate) =>
+                            handleInboundInputChange(row.material_item_id, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
                           }
                           format="YYYY-MM-DD"
                           slotProps={{

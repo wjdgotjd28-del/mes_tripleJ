@@ -23,6 +23,6 @@ public class MaterialInboundDTO {
     private Long qty;
     private LocalDate inboundDate;
     private String inboundNo;
-    private Long totalQty;
+    private String totalQty;
 }
 
