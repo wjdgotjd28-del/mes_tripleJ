@@ -39,7 +39,7 @@ import { getOrderItems } from "../../../masterData/items/api/OrderApi";
 import { registerInbound } from "../api/OrderInViewApi";
 
 // 타입
-import type { OrderInView, OrderItems } from "../../../type";
+import type { OrderInbound, OrderItems } from "../../../type";
 
 export default function OrderInViewPage() {
   /** -----------------------------
@@ -390,7 +390,7 @@ export default function OrderInViewPage() {
                           disabled={!values.qty || !values.date} // 수량/일자 없으면 비활성화
                           onClick={async () => {
                             // 등록 payload 구성
-                            const payload: OrderInView = {
+                            const payload: OrderInbound = {
                               id: 0, // 필수값, 서버에서 실제 id 생성
                               order_item_id: row.order_item_id,
                               category: row.category,

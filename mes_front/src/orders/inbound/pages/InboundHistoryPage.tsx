@@ -326,7 +326,13 @@ export default function InboundHistoryPage() {
                       cursor: "pointer",
                       "&:hover": { color: "primary.dark", fontWeight: "bold" },
                     }}
-                    onClick={() => handleLotClick(row.id, row.lot_no, row.id)}
+                    onClick={() =>
+                      handleLotClick(
+                        row.order_item_id,
+                        row.lot_no,
+                        row.order_inbound_id
+                      )
+                    }
                   >
                     {row.lot_no}
                   </Typography>

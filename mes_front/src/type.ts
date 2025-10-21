@@ -116,20 +116,6 @@ export type RawMaterialInventoryStatus = {
 };
 
 
-export interface OrderInView {
-  id?: number; // 선택값으로 변경
-  order_item_id: number;
-  category: "DEFENSE" | "GENERAL" | "AUTOMOTIVE" | "SHIPBUILDING";
-  customer_name: string;
-  inbound_date: string;
-  item_code: string;
-  item_name: string;
-  lot_no: string;
-  note: string;
-  paint_type: "LIQUID" | "POWDER";
-  qty: number;
-}
-
 export type OrderProcessTracking = {
   order_inbound_id: number;
   order_item_routing_id?: number;
@@ -142,7 +128,7 @@ export type OrderProcessTracking = {
 };
 
 export type OrderInbound = {
-  id: number;
+  id?: number;
   order_inbound_id: number;
   order_item_id: number;
   category: "AUTOMOTIVE" | "DEFENSE" | "GENERAL" | "SHIPBUILDING";
