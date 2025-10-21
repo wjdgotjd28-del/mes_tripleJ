@@ -287,7 +287,7 @@ export default function RawInViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell align="center">{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
+                    <TableCell align="center">{`${row.spec_qty}${row.spec_unit}`}</TableCell>
                     <TableCell align="center">{row.manufacturer}</TableCell>
                     <TableCell align="center">
                       <TextField

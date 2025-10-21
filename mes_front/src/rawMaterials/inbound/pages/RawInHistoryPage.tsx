@@ -67,8 +67,7 @@ export default function RawInHistoryPage() {
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
                 <TableCell align="center">매입처명</TableCell>
-                <TableCell align="center">규격(양)</TableCell>
-                <TableCell align="center">규격(단위)</TableCell>
+                <TableCell align="center">규격(양/단위)</TableCell>
                 <TableCell align="center">입고수량</TableCell>
                 <TableCell align="center">총량</TableCell>
                 <TableCell align="center">입고일자</TableCell>
@@ -79,7 +78,7 @@ export default function RawInHistoryPage() {
             <TableBody>
               {displayedHistory.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
                       조회된 입고 이력 데이터가 없습니다.
                     </Typography>
@@ -93,8 +92,7 @@ export default function RawInHistoryPage() {
                     <TableCell align="center">{row.itemCode}</TableCell>
                     <TableCell align="center">{row.itemName}</TableCell>
                     <TableCell align="center">{row.supplierName}</TableCell>
-                    <TableCell align="center">{row.specQty}</TableCell>
-                    <TableCell align="center">{row.specUnit}</TableCell>
+                    <TableCell align="center">{`${row.specQty}${row.specUnit}`}</TableCell>
                     <TableCell align="center">{row.qty}</TableCell>
                     <TableCell align="center">{`${row.totalQty}`}</TableCell>
                     <TableCell align="center">{row.inboundDate}</TableCell>
