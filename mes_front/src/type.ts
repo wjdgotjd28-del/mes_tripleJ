@@ -142,3 +142,19 @@ export type OrderInbound = {
   paint_type: "LIQUID" | "POWDER";
   qty: number;
 };
+
+export type MaterialInbound = {
+  id: number;
+  materialItemId: number;        // materialItem 객체 대신 ID만 전달할 경우
+  supplierName: string;
+  itemName: string;
+  itemCode: string;
+  specQty: number;
+  specUnit: string;
+  manufacturer: string;
+  manufacteDate: string;         // 'YYYY-MM-DD' 형식
+  qty: number;
+  inboundDate: string;           // 'YYYY-MM-DD' 형식
+  inboundNo: string;
+  totalQty: number;
+}

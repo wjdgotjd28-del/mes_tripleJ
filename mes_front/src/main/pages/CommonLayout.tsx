@@ -39,7 +39,10 @@ const mainMenus: MainMenu[] = [
     subs: [
       {
         text: "수주 입고",
-        subs: [{ text: "수주 대상 품목 입고" }, { text: "수주 이력 조회" }],
+        subs: [
+          { text: "수주 대상 품목 입고" },
+          { text: "수주 입고 이력 조회" },
+        ],
       },
       { text: "수주 출고" },
     ],
@@ -48,7 +51,10 @@ const mainMenus: MainMenu[] = [
     text: "원자재 관리",
     icon: <Layers />,
     subs: [
-      { text: "원자재 입고" },
+      {
+        text: "원자재 입고",
+        subs: [{ text: "원자재 품목 입고" }, { text: "원자재 입고 이력 조회" }],
+      },
       { text: "원자재 출고" },
       { text: "재고현황" },
     ],
@@ -106,11 +112,15 @@ export default function CommonLayout() {
   const routeMap: Record<string, string> = {
     // 3계층
     "수주 대상 관리 > 수주 입고 > 수주 대상 품목 입고": "/orders/inbound/items",
-    "수주 대상 관리 > 수주 입고 > 수주 이력 조회": "/orders/inbound/history",
+    "수주 대상 관리 > 수주 입고 > 수주 입고 이력 조회":
+      "/orders/inbound/history",
+    "원자재 관리 > 원자재 입고 > 원자재 품목 입고":
+      "/raw-materials/inbound/items",
+    "원자재 관리 > 원자재 입고 > 원자재 입고 이력 조회":
+      "/raw-materials/inbound/history",
 
     // 2계층
     "수주 대상 관리 > 수주 출고": "/orders/outbound",
-    "원자재 관리 > 원자재 입고": "/raw-materials/inbound",
     "원자재 관리 > 원자재 출고": "/raw-materials/outbound",
     "원자재 관리 > 재고현황": "/raw-materials/inventory",
     "기준 정보 관리 > 수주 대상 품목 관리": "/items/order/view",
@@ -132,17 +142,22 @@ export default function CommonLayout() {
     "/orders/inbound/history": {
       main: "수주 대상 관리",
       sub: "수주 입고",
-      third: "수주 이력 조회",
+      third: "수주 입고 이력 조회",
     },
     "/orders/outbound": {
       main: "수주 대상 관리",
       sub: "수주 출고",
       third: null,
     },
-    "/raw-materials/inbound": {
+    "/raw-materials/inbound/items": {
       main: "원자재 관리",
       sub: "원자재 입고",
-      third: null,
+      third: "원자재 품목 입고",
+    },
+    "/raw-materials/history/history": {
+      main: "원자재 관리",
+      sub: "원자재 입고",
+      third: "원자재 입고 이력 조회",
     },
     "/raw-materials/outbound": {
       main: "원자재 관리",
@@ -202,7 +217,6 @@ export default function CommonLayout() {
       navigate(targetRoute, { replace: true });
     }
   }, [currentPath, navigate, location.pathname, isInitialSync]);
-
 
   // 2계층 메뉴 클릭 핸들러
   const handleSubClick = (

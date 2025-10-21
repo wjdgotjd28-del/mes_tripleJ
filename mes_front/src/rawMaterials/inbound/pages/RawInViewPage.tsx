@@ -1,26 +1,37 @@
 import { useState, useEffect, type ChangeEvent } from "react";
 import {
-  Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, Paper, Button, TextField, Alert, CircularProgress,
-  // MenuItem, FormControl, InputLabel, Select, type SelectChangeEvent, Chip, 
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  TextField,
+  Alert,
+  CircularProgress,
+  // MenuItem, FormControl, InputLabel, Select, type SelectChangeEvent, Chip,
 } from "@mui/material";
 import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
 
 import RawRegisterModal from "../../../masterData/items/pages/RawRegisterModal";
 import RawDetailModal from "../../../masterData/items/pages/RawDetailModal";
 import { exportToExcel } from "../../../Common/ExcelUtils";
-import type { RawItems } from "../../../type";
-import {
-  getRawItems,
-} from "../../../masterData/items/api/RawApi";
+import type { MaterialInbound } from "../../../type";
+import { getRawItems } from "../../../masterData/items/api/RawApi";
 import { filterRawItems } from "../../../masterData/items/components/RawSearchUtils";
 
 export default function RawInViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<RawItems | null>(null);
+  const [selectedItem, setSelectedItem] = useState<MaterialInbound | null>(
+    null
+  );
   const [openModal, setOpenModal] = useState(false);
-  const [rawItems, setRawItems] = useState<RawItems[]>([]);
-  const [displayedItems, setDisplayedItems] = useState<RawItems[]>([]);
+  const [rawItems, setRawItems] = useState<MaterialInbound[]>([]);
+  const [displayedItems, setDisplayedItems] = useState<MaterialInbound[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchValues, setSearchValues] = useState({
@@ -31,10 +42,10 @@ export default function RawInViewPage() {
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
   const categoryMap: Record<string, string> = {
-    "PAINT": "페인트",
-    "THINNER": "신나",
-    "CLEANER": "세척제",
-    "HARDENER": "경화제",
+    PAINT: "페인트",
+    THINNER: "신나",
+    CLEANER: "세척제",
+    HARDENER: "경화제",
   };
 
   useEffect(() => {
@@ -56,7 +67,7 @@ export default function RawInViewPage() {
       }
 
       // use_yn = "Y"인 데이터만 저장
-      const activeItems = res.filter(item => item.use_yn === "Y");
+      const activeItems = res.filter((item) => item.use_yn === "Y");
 
       setRawItems(activeItems);
       setDisplayedItems(activeItems);
@@ -70,7 +81,9 @@ export default function RawInViewPage() {
     }
   };
 
-  const handleTextChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleTextChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setSearchValues((prev) => ({ ...prev, [name]: value }));
   };
@@ -78,7 +91,11 @@ export default function RawInViewPage() {
   const handleSearch = () => {
     setAppliedSearchValues(searchValues);
 
-    if (!searchValues.companyName && !searchValues.itemCode && !searchValues.itemName) {
+    if (
+      !searchValues.companyName &&
+      !searchValues.itemCode &&
+      !searchValues.itemName
+    ) {
       setDisplayedItems(rawItems);
       return;
     }
@@ -97,7 +114,15 @@ export default function RawInViewPage() {
   };
 
   return (
-    <Box sx={{ padding: 4, width: "100%", display: "flex", flexDirection: "column", gap: 3 }}>
+    <Box
+      sx={{
+        padding: 4,
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 3,
+      }}
+    >
       <Typography variant="h5">원자재 품목 관리 (활성 데이터만)</Typography>
 
       {error && (
@@ -106,7 +131,14 @@ export default function RawInViewPage() {
         </Alert>
       )}
 
-      <Box sx={{ display: "flex", gap: 1, justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
@@ -152,7 +184,7 @@ export default function RawInViewPage() {
       </Box>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />
         </Box>
       ) : (
@@ -188,9 +220,12 @@ export default function RawInViewPage() {
                       <Typography
                         variant="body2"
                         sx={{
-                          textDecoration: 'underline',
-                          cursor: 'pointer',
-                          '&:hover': { color: 'primary.dark', fontWeight: 'bold' }
+                          textDecoration: "underline",
+                          cursor: "pointer",
+                          "&:hover": {
+                            color: "primary.dark",
+                            fontWeight: "bold",
+                          },
                         }}
                         onClick={() => handleItemClick(row)}
                       >
@@ -198,7 +233,9 @@ export default function RawInViewPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
-                    <TableCell>{categoryMap[row.category] || row.category}</TableCell>
+                    <TableCell>
+                      {categoryMap[row.category] || row.category}
+                    </TableCell>
                     <TableCell>{row.note}</TableCell>
                   </TableRow>
                 ))

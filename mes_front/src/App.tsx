@@ -10,6 +10,7 @@ import RawInViewPage from "./rawMaterials/inbound/pages/RawInViewPage";
 import RawOutViewPage from "./rawMaterials/outbound/pages/RawOutViewPage";
 import RawMaterialInventoryStatus from "./rawMaterials/inventory/pages/RawMaterialInventoryStatus";
 import CompanyViewPage from "./masterData/companies/pages/CompanyViewPage";
+import RawInHistoryPage from "./rawMaterials/inbound/pages/RawInHistoryPage";
 
 function App() {
   return (
@@ -23,12 +24,20 @@ function App() {
               path="orders/inbound/history"
               element={<InboundHistoryPage />}
             />
+            {/* 원자재 관리 - 3계층 */}
+            <Route
+              path="raw-materials/inbound/items"
+              element={<RawInViewPage />}
+            />
+            <Route
+              path="raw-materials/inbound/history"
+              element={<RawInHistoryPage />}
+            />
 
             {/* 수주 대상 관리 - 2계층 */}
             <Route path="orders/outbound" element={<OrderOutViewPage />} />
 
             {/* 원자재 관리 */}
-            <Route path="raw-materials/inbound" element={<RawInViewPage />} />
             <Route path="raw-materials/outbound" element={<RawOutViewPage />} />
             <Route
               path="raw-materials/inventory"
