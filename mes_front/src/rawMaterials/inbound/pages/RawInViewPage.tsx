@@ -129,6 +129,7 @@ export default function RawInViewPage() {
   };
 
   const handleRegisterInbound = async (rawItem: RawItems) => {
+    console.log("handleRegisterInbound called!");
     const inboundData = inboundInput[rawItem.material_item_id];
 
     if (!inboundData || !inboundData.manufacteDate || !inboundData.qty || !inboundData.inboundDate) {
@@ -152,18 +153,20 @@ export default function RawInViewPage() {
       totalQty: 0, // Will be calculated by backend
     };
 
-    console.log("등록할 입고 정보:", newMaterialInbound);
-    alert("입고 등록 준비 완료! 콘솔을 확인하세요.");
-
-    // TODO: 여기에 실제 입고 등록 API 호출 로직 추가
-    // 예: await registerMaterialInbound(newMaterialInbound);
-    // 등록 후, 입력 필드 초기화 및 데이터 새로고침
-    // setInboundInput((prev) => {
-    //   const newState = { ...prev };
-    //   delete newState[rawItem.material_item_id];
-    //   return newState;
-    // });
-    // fetchRawItems();
+    try {
+      await addMaterialInbound(newMaterialInbound);
+      alert("입고 등록이 완료되었습니다.");
+      // Clear input fields for the registered item
+      setInboundInput((prev) => {
+        const newState = { ...prev };
+        delete newState[rawItem.material_item_id];
+        return newState;
+      });
+      fetchRawItems(); // Refresh the list
+    } catch (err) {
+      console.error("입고 등록 실패:", err);
+      alert("입고 등록 중 오류가 발생했습니다.");
+    }
   };
 
   return (
