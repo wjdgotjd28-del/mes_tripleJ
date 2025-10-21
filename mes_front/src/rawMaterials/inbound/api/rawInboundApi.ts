@@ -7,3 +7,14 @@ export const getMaterialInbound = async (): Promise<MaterialInbound[]> => {
     const response = await axios.get(`${BASE_URL}/materials/inbound`);
     return response.data;
 }
+
+export const addMaterialInbound = async (materialInbound: MaterialInbound): Promise<MaterialInbound> => {
+    const response = await axios.post(`${BASE_URL}/materials/inbound/new`, materialInbound);
+    return response.data;
+}
+
+// 원자재 입고 등록
+export const addMaterialInbound = async (materialInbound: MaterialInbound): Promise<MaterialInbound> => {
+    const response = await axios.post(`${BASE_URL}/materials/inbound/new`, materialInbound);
+    return response.data;
+}

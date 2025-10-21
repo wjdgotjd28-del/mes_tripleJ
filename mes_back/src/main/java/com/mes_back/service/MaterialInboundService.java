@@ -39,4 +39,20 @@ public class MaterialInboundService {
         }
         return materialInboundDtoList;
     }
+
+    public MaterialInboundDTO addMaterialInbound(MaterialInboundDTO materialInboundDto) {
+        MaterialInbound materialInbound = MaterialInbound.builder()
+                .materialItem(materialInboundDto.getMaterialItemId())
+                .supplierName(materialInboundDto.getSupplierName())
+                .itemName(materialInboundDto.getItemName())
+                .itemCode(materialInboundDto.getItemCode())
+                .specQty(materialInboundDto.getSpecQty())
+                .specUnit(materialInboundDto.getSpecUnit())
+                .manufacturer(materialInboundDto.getManufacturer())
+                .manufacteDate(materialInboundDto.getManufacteDate())
+                .qty(materialInboundDto.getQty())
+                .inboundDate(materialInboundDto.getInboundDate())
+                .inboundNo(materialInboundDto.getInboundNo())
+                .totalQty(materialInboundDto.getTotalQty())
+    }
 }
