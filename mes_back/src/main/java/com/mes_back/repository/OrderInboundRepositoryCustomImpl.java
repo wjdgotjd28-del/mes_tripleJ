@@ -1,6 +1,7 @@
 package com.mes_back.repository;
 
 import com.mes_back.dto.OrderInboundDTO;
+import com.mes_back.entity.QProcessTracking;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,6 +20,9 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
 
     @Override
     public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
+        // 각 수주(inbound)에서 가장 최근에 시작된 공정이 완료(status=2)되었는지 확인하는 로직
+        QProcessTracking ptSub = new QProcessTracking("ptSub");
+
         return queryFactory
                 .select(Projections.constructor(OrderInboundDTO.class,
                         orderInbound.orderInboundId,
@@ -36,10 +40,18 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
                         processTracking.processStatus
                 ))
                 .from(orderInbound)
-                .leftJoin(processTracking)
-                .on(processTracking.orderInbound.eq(orderInbound))
-                // ✅ 추가: processStatus == 2 조건
-                .where(processTracking.processStatus.eq(2))
+                .join(processTracking).on(processTracking.orderInbound.eq(orderInbound))
+                .where(
+                        // 1. 현재 공정이 가장 최근에 시작된 공정인지 확인
+                        processTracking.processStartTime.eq(
+                                JPAExpressions.select(ptSub.processStartTime.max())
+                                        .from(ptSub)
+                                        .where(ptSub.orderInbound.eq(orderInbound))
+                        ),
+                        // 2. 그리고 그 공정의 상태가 '완료'인지 확인
+                        processTracking.processStatus.eq(2)
+                )
+                .groupBy(orderInbound.orderInboundId, orderInbound.lotNo, orderInbound.company.companyName, orderInbound.itemName, orderInbound.itemCode, orderInbound.inboundDate, orderInbound.qty, orderInbound.category, processTracking.processStatus) // 중복 방지
                 .fetch();
     }
 
