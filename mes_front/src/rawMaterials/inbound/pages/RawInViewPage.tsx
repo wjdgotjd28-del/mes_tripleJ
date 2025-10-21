@@ -307,7 +307,7 @@ export default function RawInViewPage() {
                           }
                           format="YYYY-MM-DD"
                           slotProps={{
-                            textField: { size: "small", sx: { width: 130 } },
+                            textField: { size: "small", sx: { width: 170 } },
                           }}
                         />
                       </LocalizationProvider>
@@ -321,7 +321,7 @@ export default function RawInViewPage() {
                           }
                           format="YYYY-MM-DD"
                           slotProps={{
-                            textField: { size: "small", sx: { width: 130 } },
+                            textField: { size: "small", sx: { width: 170 } },
                           }}
                         />
                       </LocalizationProvider>
