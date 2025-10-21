@@ -37,9 +37,6 @@ public class OrderInbound {
     @Column(name = "item_name", nullable = false, length = 255)
     private String itemName;
 
-    @Column(name = "customer_name", nullable = false, length = 255)
-    private String customerName;
-
     @Column(name = "item_code", nullable = false, length = 255)
     private String itemCode;
 

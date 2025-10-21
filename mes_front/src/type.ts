@@ -113,8 +113,22 @@ export type RawMaterialInventoryStatus = {
   item_name: string;
   total_qty: number;
   unit: string;
+  manufacturer?: string;
 };
 
+// 원자재 출고 타입
+export type RawMaterialOutItems = {
+  id?: number;
+  company_name: string;
+  item_code: string;
+  item_name: string;
+  total_qty: number;
+  unit: string;
+  qty:number
+  outbound_no?: string; // 출고번호 (백엔드 생성)
+  outbound_date?: string; // 출고일자
+  manufacturer?: string;
+}
 
 export interface OrderInView {
   id?: number; // 선택값으로 변경

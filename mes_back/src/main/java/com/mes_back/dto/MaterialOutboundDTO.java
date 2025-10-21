@@ -1,12 +1,25 @@
 package com.mes_back.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDate;
 
+@Getter
+@Setter
 public class MaterialOutboundDTO {
     private Long id;
-    private Long materialItemId;
+    @JsonProperty("material_inbound_id")
+    private Long materialInboundId;
+    @JsonProperty("spec_qty")
     private Long specQty;
     private String manufacturer;
     private Long qty;
+    @JsonProperty("inbound_date")
     private LocalDate inboundDate;
+    @JsonProperty("outbound_no")
+    private String outboundNo;
+    @JsonProperty("outbound_date")
+    private LocalDate outboundDate;
 }

@@ -21,7 +21,7 @@ public class MaterialStock {
     private MaterialItem materialItem;
 
     @Column(name = "total_qty", nullable = false)
-    private Integer totalQty;
+    private Long totalQty;
 
     @Column(nullable = false, length = 5)
     private String unit;

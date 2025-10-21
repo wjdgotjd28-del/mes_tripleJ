@@ -22,4 +22,5 @@ public class MaterialStockDTO {
     @JsonProperty("total_qty")
     private Long totalQty;
     private String unit;
+    private String manufacturer;
 }

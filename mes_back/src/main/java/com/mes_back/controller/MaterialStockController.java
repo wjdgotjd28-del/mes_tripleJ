@@ -18,14 +18,12 @@ import java.util.List;
 @Slf4j
 public class MaterialStockController {
 
-    private MaterialStockService materialStockService;
-
+    private final MaterialStockService materialStockService;
 
     @GetMapping("/inventory")
     public ResponseEntity<List<MaterialStockDTO>> findAllInventory() {
         List<MaterialStockDTO> materialStockDTOS = materialStockService.findAll();
         return ResponseEntity.ok(materialStockDTOS);
     }
-
 
 }
