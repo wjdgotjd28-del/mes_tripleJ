@@ -52,6 +52,11 @@ export default function RawInViewPage() {
     fetchRawItems();
   }, []);
 
+  useEffect(() => {
+    const filteredItems = filterRawItems(rawItems, appliedSearchValues);
+    setDisplayedItems(filteredItems);
+  }, [rawItems, appliedSearchValues]);
+
   const fetchRawItems = async () => {
     try {
       setLoading(true);
@@ -62,7 +67,6 @@ export default function RawInViewPage() {
         console.error("❌ API 응답이 배열이 아닙니다:", res);
         setError("서버 응답 형식이 올바르지 않습니다.");
         setRawItems([]);
-        setDisplayedItems([]);
         return;
       }
 
@@ -70,12 +74,10 @@ export default function RawInViewPage() {
       const activeRawItems = res.filter((item) => item.use_yn === "Y");
 
       setRawItems(activeRawItems);
-      setDisplayedItems(activeRawItems);
     } catch (err) {
       console.error("❌ API 호출 실패:", err);
       setError("데이터를 불러오는 중 오류가 발생했습니다.");
       setRawItems([]);
-      setDisplayedItems([]);
     } finally {
       setLoading(false);
     }
@@ -90,18 +92,6 @@ export default function RawInViewPage() {
 
   const handleSearch = () => {
     setAppliedSearchValues(searchValues);
-
-    if (
-      !searchValues.companyName &&
-      !searchValues.itemCode &&
-      !searchValues.itemName
-    ) {
-      setDisplayedItems(rawItems);
-      return;
-    }
-
-    const filtered = filterRawItems(rawItems, searchValues);
-    setDisplayedItems(filtered);
   };
 
   const handleExcelDownload = () => {
