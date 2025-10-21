@@ -223,7 +223,7 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
 
         {/* 🔹 선택된 품목 표시 및 입력 영역 */}
         <Box sx={{ mt: 3, display: "flex", flexWrap: "wrap", gap: 2 }}>
-          <TextField
+          {/* <TextField
             label="매입처명"
             value={selected?.company_name ?? "-"}
             size="small"
@@ -243,20 +243,20 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
             size="small"
             InputProps={ReadOnlyInputProps}
             sx={{ width: 200 }}
-          />
+          /> */}
           <TextField
             label="총재고"
             value={selected?.total_qty ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
-            sx={{ width: 200 }}
+            sx={{ width: 150 }}
           />
           <TextField
             label="단위"
             value={selected?.unit ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
-            sx={{ width: 200 }}
+            sx={{ width: 100 }}
           />
 
           {selected ? (
@@ -269,18 +269,58 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
                 onChange={handleFormChange}
                 size="small"
                 InputLabelProps={{ shrink: true }}
-                sx={{ width: 200 }}
+                sx={{
+                  width: 100,
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor:
+                        Number(form.outboundQty) > (selected?.total_qty ?? 0)
+                          ? "red"
+                          : undefined,
+                    },
+                    "&:hover fieldset": {
+                      borderColor:
+                        Number(form.outboundQty) > (selected?.total_qty ?? 0)
+                          ? "red"
+                          : undefined,
+                    },
+                  },
+                }}
+                error={Number(form.outboundQty) > (selected?.total_qty ?? 0)}
+                helperText={
+                  Number(form.outboundQty) > (selected?.total_qty ?? 0)
+                    ? `출고수량이 재고수량(${selected?.total_qty}${selected?.unit}) 보다 많습니다.`
+                    : ""
+                }
               />
-              <TextField
-                label="출고일자"
-                name="outboundDate"
-                type="date"
-                value={form.outboundDate}
-                onChange={handleFormChange}
-                InputLabelProps={{ shrink: true }}
-                size="small"
-                sx={{ width: 200 }}
-              />
+              {/* 🔹 날짜 + 시간 */}
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                <TextField
+                  label="출고일자"
+                  type="date"
+                  size="small"
+                  value={form.outboundDate.split("T")[0]} // yyyy-MM-dd
+                  onChange={(e) => {
+                    const timePart = form.outboundDate.split("T")[1] ?? "00:00";
+                    setForm({ ...form, outboundDate: `${e.target.value}T${timePart}` });
+                  }}
+                  sx={{ width: 150 }}
+                  InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                  label="출고시간"
+                  type="time"
+                  size="small"
+                  value={form.outboundDate.split("T")[1] ?? "00:00"}
+                  onChange={(e) => {
+                    const datePart = form.outboundDate.split("T")[0] ?? new Date().toISOString().slice(0, 10);
+                    setForm({ ...form, outboundDate: `${datePart}T${e.target.value}` });
+                  }}
+                  sx={{ width: 150 }}
+                  inputProps={{ step: 60 }} // 1분 단위
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Box>
             </>
           ) : (
             <>

@@ -3,6 +3,7 @@ package com.mes_back.dto;
 import com.mes_back.constant.OrderCategory;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,5 +19,5 @@ public class OrderOutboundDto {
     private Long qty;
     private OrderCategory category;
     private String outboundNo;
-    private LocalDate outboundDate;
+    private LocalDateTime outboundDate;
 }

@@ -3,13 +3,11 @@ import {
   Box, Button, Typography, TextField, Table, TableHead, TableRow, TableCell,
   TableBody, TableContainer, Paper
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { exportToExcel } from "../../../Common/ExcelUtils";
-import RawOutRegisterModal from "./RawOutRegisterModal"; // ✅ 이름 통일
-import EditRawOutModal from "./EditRawOutModal"; // ✅ 이름 통일
+import RawOutRegisterModal from "./RawOutRegisterModal";
 import type { RawMaterialOutItems } from "../../../type";
 import {
   getRawMaterialOutbound,
@@ -26,7 +24,8 @@ export default function RawMaterialOutViewPage() {
     item_name: "",
     outbound_date: "",
   });
-  const [editData, setEditData] = useState<RawMaterialOutItems | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<Partial<RawMaterialOutItems>>({});
   const [registerOpen, setRegisterOpen] = useState(false);
 
   useEffect(() => { loadData(); }, []);
@@ -34,6 +33,7 @@ export default function RawMaterialOutViewPage() {
   const loadData = async () => {
     const res = await getRawMaterialOutbound();
     setRows(res);
+    setEditingId(null);
   };
 
   const handleSearch = () => {
@@ -53,10 +53,10 @@ export default function RawMaterialOutViewPage() {
     await loadData();
   };
 
-  const handleEditSave = async (data: RawMaterialOutItems) => {
-    await updateRawMaterialOutbound(data);
+  const handleEditSave = async (id: number) => {
+    const dataToSave = { id, ...editForm } as RawMaterialOutItems;
+    await updateRawMaterialOutbound(dataToSave);
     await loadData();
-    setEditData(null);
   };
 
   return (
@@ -102,7 +102,7 @@ export default function RawMaterialOutViewPage() {
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4, textAlign: "center"}}>
+                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
                   <Typography color="text.secondary">
                     원자재 출고한 이력이 없습니다.
                   </Typography>
@@ -115,15 +115,87 @@ export default function RawMaterialOutViewPage() {
                   <TableCell>{r.company_name}</TableCell>
                   <TableCell>{r.item_code}</TableCell>
                   <TableCell>{r.item_name}</TableCell>
-                  <TableCell>{r.qty}</TableCell>
+
+                  {/* 🔧 수정 가능 셀 */}
+                  <TableCell>
+                    {editingId === r.id ? (
+                      <TextField
+                        type="number"
+                        size="small"
+                        value={editForm.qty ?? r.qty}
+                        onChange={(e) => setEditForm({ ...editForm, qty: Number(e.target.value) })}
+                      />
+                    ) : (
+                      r.qty
+                    )}
+                  </TableCell>
                   <TableCell>{r.unit}</TableCell>
                   <TableCell>{r.manufacturer ?? "-"}</TableCell>
-                  <TableCell>{r.outbound_date ?? "-"}</TableCell>
+                  <TableCell>
+                    {editingId === r.id ? (
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        {/* 날짜 선택 */}
+                        <TextField
+                          type="date"
+                          size="small"
+                          value={editForm.outbound_date?.split("T")[0] ?? ""}
+                          onChange={(e) => {
+                            const timePart = editForm.outbound_date?.split("T")[1] ?? "00:00";
+                            setEditForm({ ...editForm, outbound_date: `${e.target.value}T${timePart}` });
+                          }}
+                        />
+
+                        {/* 시간 입력 */}
+                        <TextField
+                          type="time"
+                          size="small"
+                          value={editForm.outbound_date?.split("T")[1] ?? "00:00"}
+                          onChange={(e) => {
+                            const datePart = editForm.outbound_date?.split("T")[0] ?? new Date().toISOString().slice(0, 10);
+                            setEditForm({ ...editForm, outbound_date: `${datePart}T${e.target.value}` });
+                          }}
+                          inputProps={{
+                            step: 60, // 1분 단위
+                          }}
+                        />
+                      </Box>
+                    ) : r.outbound_date ? (
+                      (() => {
+                        const d = new Date(r.outbound_date);
+                        const year = d.getFullYear();
+                        const month = String(d.getMonth() + 1).padStart(2, "0");
+                        const day = String(d.getDate()).padStart(2, "0");
+                        const hour = String(d.getHours()).padStart(2, "0");
+                        const minute = String(d.getMinutes()).padStart(2, "0");
+                        return `${year}-${month}-${day} ${hour}:${minute}`;
+                      })()
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
                   <TableCell align="center">
-                    <Button size="small" variant="outlined"
-                      startIcon={<EditIcon />} onClick={() => setEditData(r)}>수정</Button>
-                    <Button size="small" variant="outlined" color="error"
-                      startIcon={<DeleteIcon />} onClick={() => handleDelete(r.id!)}>삭제</Button>
+                    {editingId === r.id ? (
+                      <>
+                        <Button size="small" variant="contained" onClick={() => handleEditSave(r.id!)}>저장</Button>
+                        <Button size="small" variant="outlined" onClick={() => setEditingId(null)}>취소</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button size="small" variant="outlined" onClick={() => {
+                          setEditingId(r.id!);
+                          // 기존 출고일자를 정확히 반영
+                          const dateObj = new Date(r.outbound_date!);
+                          const datePart = dateObj.toISOString().slice(0, 10); // YYYY-MM-DD
+                          const timePart = `${String(dateObj.getHours()).padStart(2, "0")}:${String(dateObj.getMinutes()).padStart(2, "0")}`;
+
+                          setEditForm({
+                            qty: r.qty,
+                            outbound_date: `${datePart}T${timePart}`
+                          });
+                        }}>수정</Button>
+                        <Button size="small" variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={() => handleDelete(r.id!)}>삭제</Button>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               ))
@@ -131,14 +203,6 @@ export default function RawMaterialOutViewPage() {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* ✏️ 수정 모달 */}
-      <EditRawOutModal
-        open={!!editData}
-        onClose={() => setEditData(null)}
-        editData={editData}
-        onSave={handleEditSave}
-      />
 
       {/* ➕ 출고 등록 모달 */}
       <RawOutRegisterModal

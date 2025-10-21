@@ -1,6 +1,6 @@
 package com.mes_back.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class MaterialInboundDTO {
     private Long id;
@@ -11,9 +11,9 @@ public class MaterialInboundDTO {
     private Long specQty;
     private String specUnit;
     private String manufacturer;
-    private LocalDate manufacteDate;
+    private LocalDateTime manufacteDate;
     private Long qty;
-    private LocalDate inboundDate;
+    private LocalDateTime inboundDate;
     private String inboundNo;
     private Long totalQty;
 }

@@ -9,7 +9,8 @@ import java.time.LocalDate;
 
 public interface RawOutboundRepository extends JpaRepository<MaterialOutbound, Long> {
 
-    @Query("SELECT COUNT(o) FROM MaterialOutbound o WHERE o.outboundDate = :date")
+    @Query("SELECT COUNT(m) FROM MaterialOutbound m " +
+            "WHERE DATE(m.outboundDate) = :date")
     Long countByDate(@Param("date") LocalDate date);
 
 }

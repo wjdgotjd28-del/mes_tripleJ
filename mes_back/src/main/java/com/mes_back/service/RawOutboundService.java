@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,7 +45,6 @@ public class RawOutboundService {
         // 2️⃣ 해당 MaterialItem 조회 (MaterialInbound -> MaterialItem)
         MaterialItem item = inbound.getMaterialItem();
 
-        long usedQty = dto.getQty() * item.getSpecQty();
         // 3️⃣ 재고 조회 및 차감
         MaterialStock stock = stockRepository.findByMaterialItem(item)
                 .orElseThrow(() -> new RuntimeException("해당 품목의 재고 정보가 없습니다."));
@@ -52,7 +52,8 @@ public class RawOutboundService {
         if (dto.getQty() > stock.getTotalQty()) {
             throw new RuntimeException("출고 수량이 재고 수량보다 많습니다.");
         }
-        stock.setTotalQty(stock.getTotalQty() - usedQty);
+//        long usedQty = dto.getQty() * item.getSpecQty();
+        stock.setTotalQty(stock.getTotalQty() - dto.getQty());
         stockRepository.save(stock);
 
         // 4️⃣ 출고번호 자동 생성
@@ -67,7 +68,7 @@ public class RawOutboundService {
         outbound.setSpecQty(item.getSpecQty());  // ✅ 여기서 MaterialItem의 specQty 사용
         outbound.setManufacturer(dto.getManufacturer());
         outbound.setQty(dto.getQty());
-        outbound.setOutboundDate(dto.getOutboundDate() != null ? dto.getOutboundDate() : LocalDate.now());
+        outbound.setOutboundDate(dto.getOutboundDate() != null ? dto.getOutboundDate() : LocalDateTime.now());
         outbound.setOutboundNo(outboundNo);
 
         outboundRepository.save(outbound);
@@ -84,9 +85,9 @@ public class RawOutboundService {
         // 1️⃣ 출고 수량 변경 시 재고 조정
         if (!outbound.getQty().equals(dto.getQty())) {
             long diff = dto.getQty() - outbound.getQty(); // 변경량
-            long adjustQty = diff * outbound.getSpecQty(); // 실제 재고 조정량
+//            long adjustQty = diff * outbound.getSpecQty(); // 실제 재고 조정량
 
-            long newStock = stock.getTotalQty() - adjustQty;
+            long newStock = stock.getTotalQty() - diff;
             if (newStock < 0) {
                 throw new RuntimeException("재고 수량이 부족합니다.");
             }
@@ -113,8 +114,8 @@ public class RawOutboundService {
         MaterialStock stock = stockRepository.findByMaterialItem(outbound.getMaterialInbound().getMaterialItem())
                 .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
 
-        long restoreQty = outbound.getQty() * outbound.getSpecQty();
-        stock.setTotalQty(stock.getTotalQty() + restoreQty);
+//        long restoreQty = outbound.getQty() * outbound.getSpecQty();
+        stock.setTotalQty(stock.getTotalQty() + outbound.getQty());
         stockRepository.save(stock);
 
         outboundRepository.delete(outbound);
@@ -130,6 +131,10 @@ public class RawOutboundService {
         dto.setOutboundDate(entity.getOutboundDate());
         dto.setOutboundNo(entity.getOutboundNo());
         dto.setInboundDate(entity.getMaterialInbound().getInboundDate());
+        dto.setCompanyName(entity.getMaterialInbound().getSupplierName());
+        dto.setItemName(entity.getMaterialInbound().getItemName());
+        dto.setItemCode(entity.getMaterialInbound().getItemCode());
+        dto.setUnit(entity.getMaterialInbound().getMaterialItem().getSpecUnit());
         return dto;
     }
 }

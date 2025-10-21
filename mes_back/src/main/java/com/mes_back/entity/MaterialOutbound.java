@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "material_outbound")
@@ -31,7 +31,7 @@ public class MaterialOutbound {
     private Long qty;
 
     @Column(name = "outbound_date", nullable = false)
-    private LocalDate outboundDate;
+    private LocalDateTime outboundDate;
 
     @Column(name = "outbound_no", nullable = false, length = 255)
     private String outboundNo;
