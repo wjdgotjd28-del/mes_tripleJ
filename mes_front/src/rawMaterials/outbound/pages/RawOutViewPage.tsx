@@ -151,6 +151,7 @@ export default function RawMaterialOutViewPage() {
                         size="small"
                         value={editForm.qty ?? r.qty}
                         onChange={(e) => setEditForm({ ...editForm, qty: Number(e.target.value) })}
+                        sx={{width:95}}
                         InputProps={{
                           endAdornment: <span style={{ marginLeft: 4 }}>{r.unit}</span>
                         }}
@@ -171,6 +172,7 @@ export default function RawMaterialOutViewPage() {
                             const timePart = editForm.outbound_date?.split("T")[1] ?? "00:00";
                             setEditForm({ ...editForm, outbound_date: `${e.target.value}T${timePart}` });
                           }}
+                          sx={{width:140}}
                         />
                         <TextField
                           type="time"
@@ -180,6 +182,7 @@ export default function RawMaterialOutViewPage() {
                             const datePart = editForm.outbound_date?.split("T")[0] ?? new Date().toISOString().slice(0, 10);
                             setEditForm({ ...editForm, outbound_date: `${datePart}T${e.target.value}` });
                           }}
+                          sx={{width:140}}
                           inputProps={{ step: 60 }}
                         />
                       </Box>
