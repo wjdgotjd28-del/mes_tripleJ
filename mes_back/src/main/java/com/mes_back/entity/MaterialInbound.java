@@ -1,5 +1,6 @@
 package com.mes_back.entity;
 
+import com.mes_back.dto.MaterialInboundDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -54,4 +55,12 @@ public class MaterialInbound {
 
     @Column(name = "total_qty", nullable = false)
     private String totalQty;
+
+    public void updateMaterialInbound(MaterialInboundDTO materialInboundDto) {
+        this.specQty = materialInboundDto.getSpecQty();
+        this.specUnit = materialInboundDto.getSpecUnit();
+        this.qty = materialInboundDto.getQty();
+        this.inboundDate = materialInboundDto.getInboundDate();
+        this.manufacteDate = materialInboundDto.getManufacteDate();
+    }
 }

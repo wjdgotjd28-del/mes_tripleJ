@@ -26,4 +26,9 @@ public class MaterialInboundController {
     public MaterialInboundDTO addMaterialInbound(@RequestBody MaterialInboundDTO materialInboundDto) {
         return materialInboundService.addMaterialInbound(materialInboundDto);
     }
+
+    @PatchMapping("")
+    public MaterialInboundDTO updateMaterialInbound(@RequestBody MaterialInboundDTO materialInboundDto) {
+        return materialInboundService.updateMaterialInbound(materialInboundDto);
+    }
 }

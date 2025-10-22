@@ -97,4 +97,11 @@ public class MaterialInboundService {
 
         return prefix + String.format("%03d", nextSeq);
     }
+
+    public MaterialInboundDTO updateMaterialInbound(MaterialInboundDTO materialInboundDto) {
+        MaterialInbound materialInbound = materialInboundRepository.findById(materialInboundDto.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        materialInbound.updateMaterialInbound(materialInboundDto);
+        return materialInboundDto;
+    }
 }
