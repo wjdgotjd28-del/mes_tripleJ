@@ -50,7 +50,7 @@ export default function RawInViewPage() {
     itemName: "",
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
   const [inboundInput, setInboundInput] = useState<
     Record<number, { manufacteDate: string; qty: number; inboundDate: string }>
   >({});
@@ -266,7 +266,7 @@ export default function RawInViewPage() {
           <Table sx={{ minWidth: 900 }}>
             <TableHead>
               <TableRow>
-                <TableCell align="center">ID</TableCell>
+                <TableCell align="center"></TableCell>
                 <TableCell align="center">매입처명</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -288,13 +288,13 @@ export default function RawInViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((row) => {
+                paginatedData.map((row, idx) => {
                   const materialId = row.material_item_id;
 
                   if (materialId === undefined) {
                     return (
                       <TableRow key={row.item_code}>
-                        <TableCell align="center">{row.material_item_id ?? "-"}</TableCell>
+                        <TableCell align="center">{idx+1}</TableCell>
                         <TableCell align="center">{row.company_name}</TableCell>
                         <TableCell align="center">{row.item_code}</TableCell>
                         <TableCell align="center">

@@ -43,7 +43,7 @@ export default function CompanyViewPage() {
   const [searchCeo, setSearchCeo] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   const [appliedFilters, setAppliedFilters] = useState({
     filterType: "모든 업체",
@@ -244,7 +244,7 @@ export default function CompanyViewPage() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell align="center">ID</TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="center">업체 유형</TableCell>
               <TableCell align="center">업체명</TableCell>
               <TableCell align="center">대표명</TableCell>
@@ -265,14 +265,14 @@ export default function CompanyViewPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((row) => (
+              paginatedData.map((row, idx) => (
                 <TableRow
                   key={row.companyId}
                   hover
                   sx={{ cursor: "pointer" }}
                   onClick={() => handleRowClick(row)}
                 >
-                  <TableCell align="center">{row.companyId}</TableCell>
+                  <TableCell align="center">{idx+1}</TableCell>
                   <TableCell align="center">
                     {translateCompanyType(row.type)}
                   </TableCell>

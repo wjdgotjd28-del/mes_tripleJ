@@ -251,7 +251,7 @@ export default function OrderOutViewPage() {
         <Table sx={{ minWidth: 900 }}>
           <TableHead>
             <TableRow>
-              <TableCell align="center">ID</TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="center">출고번호</TableCell>
               <TableCell align="center">거래처명</TableCell>
               <TableCell align="center">품목번호</TableCell>
@@ -263,9 +263,9 @@ export default function OrderOutViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row) => (
+            {paginatedData.map((row, idx) => (
               <TableRow key={row.id}>
-                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{idx+1}</TableCell>
                 <TableCell align="center">{row.outboundNo}</TableCell>
                 <TableCell align="center">{row.customerName}</TableCell>
                 <TableCell align="center">{row.itemCode}</TableCell>
