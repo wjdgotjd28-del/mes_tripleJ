@@ -280,7 +280,7 @@ export default function RawInHistoryPage() {
           <Table sx={{ minWidth: 1200 }}>
             <TableHead>
               <TableRow>
-                <TableCell align="center">ID</TableCell>
+                <TableCell align="center"></TableCell>
                 <TableCell align="center">입고번호</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -304,11 +304,11 @@ export default function RawInHistoryPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedHistory.map((row) => {
+                displayedHistory.map((row, idx) => {
                   const isEditMode = editRowId === row.id;
                   return (
                     <TableRow key={row.id}>
-                      <TableCell align="center">{row.id}</TableCell>
+                      <TableCell align="center">{idx + 1}</TableCell>
                       <TableCell align="center">{row.inboundNo}</TableCell>
                       <TableCell align="center">{row.itemCode}</TableCell>
                       <TableCell align="center">{row.itemName}</TableCell>
