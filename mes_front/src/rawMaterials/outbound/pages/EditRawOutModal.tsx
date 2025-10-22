@@ -1,6 +1,10 @@
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import type { RawMaterialOutItems } from "../../../type";
@@ -12,7 +16,12 @@ interface Props {
   onSave: (data: RawMaterialOutItems) => void;
 }
 
-export default function EditRawOutModal({ open, onClose, editData, onSave }: Props) {
+export default function EditRawOutModal({
+  open,
+  onClose,
+  editData,
+  onSave,
+}: Props) {
   const [form, setForm] = useState<RawMaterialOutItems | null>(null);
 
   useEffect(() => {
@@ -24,7 +33,9 @@ export default function EditRawOutModal({ open, onClose, editData, onSave }: Pro
   return (
     <Dialog open={open}>
       <DialogTitle>출고 정보 수정</DialogTitle>
-      <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+      <DialogContent
+        sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+      >
         <TextField
           label="출고수량"
           type="number"
@@ -40,7 +51,9 @@ export default function EditRawOutModal({ open, onClose, editData, onSave }: Pro
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>취소</Button>
-        <Button variant="contained" onClick={() => onSave(form)}>저장</Button>
+        <Button variant="contained" onClick={() => onSave(form)}>
+          저장
+        </Button>
       </DialogActions>
     </Dialog>
   );
