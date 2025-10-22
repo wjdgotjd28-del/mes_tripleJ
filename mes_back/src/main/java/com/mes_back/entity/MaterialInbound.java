@@ -1,9 +1,11 @@
 package com.mes_back.entity;
 
+import com.mes_back.dto.MaterialInboundDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "material_inbound")
@@ -54,4 +56,16 @@ public class MaterialInbound {
 
     @Column(name = "total_qty", nullable = false)
     private Long totalQty;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public void updateMaterialInbound(MaterialInboundDTO materialInboundDto) {
+        this.specQty = materialInboundDto.getSpecQty();
+        this.specUnit = materialInboundDto.getSpecUnit();
+        this.qty = materialInboundDto.getQty();
+        this.inboundDate = materialInboundDto.getInboundDate();
+        this.manufacteDate = materialInboundDto.getManufacteDate();
+    }
 }
+

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +30,7 @@ public class MaterialInboundService {
 
     @Transactional(readOnly = true)
     public List<MaterialInboundDTO> getMaterialInbound() {
-        return materialInboundRepository.findAll().stream()
+        return materialInboundRepository.findAllByDeletedAtIsNull().stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }
@@ -98,7 +99,7 @@ public class MaterialInboundService {
                 .qty(materialInbound.getQty()) // 입고수량(Long)
                 .inboundDate(materialInbound.getInboundDate())
                 .inboundNo(materialInbound.getInboundNo())
-                .totalQty(materialInbound.getTotalQty()) // 단위 포함 String
+                .totalQty(materialInbound.getTotalQty())
                 .build();
     }
 
@@ -118,5 +119,20 @@ public class MaterialInboundService {
         if (nextSeq > 999) throw new IllegalStateException("입고번호가 999를 초과했습니다.");
 
         return prefix + String.format("%03d", nextSeq);
+    }
+
+    public MaterialInboundDTO updateMaterialInbound(MaterialInboundDTO materialInboundDto) {
+        MaterialInbound materialInbound = materialInboundRepository.findById(materialInboundDto.getId())
+                .orElseThrow(EntityNotFoundException::new);
+        materialInbound.updateMaterialInbound(materialInboundDto);
+        return materialInboundDto;
+    }
+
+    public Long deleteMaterialInbound(Long id) {
+        MaterialInbound materialInbound = materialInboundRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("MaterialInbound not found with id: " + id));
+        materialInbound.setDeletedAt(LocalDateTime.now());
+        materialInboundRepository.save(materialInbound);
+        return id;
     }
 }

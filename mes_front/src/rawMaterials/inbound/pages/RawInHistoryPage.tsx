@@ -20,7 +20,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
 
 import type { MaterialInbound } from "../../../type";
-import { getMaterialInbound } from "../api/rawInboundApi";
+import { getMaterialInbound, updateMaterialInbound, deleteMaterailInbound } from "../api/rawInboundApi";
 
 // Helper function to filter history
 const filterInboundHistory = (
@@ -59,6 +59,10 @@ export default function RawInHistoryPage() {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editRowId, setEditRowId] = useState<number | null>(null);
+  const [editableRowData, setEditableRowData] = useState<MaterialInbound | null>(
+    null
+  );
 
   const [searchValues, setSearchValues] = useState({
     supplierName: "",
@@ -120,6 +124,79 @@ export default function RawInHistoryPage() {
 
   const handleSearch = () => {
     setAppliedSearchValues(searchValues);
+  };
+
+  const handleUpdate = (row: MaterialInbound) => {
+    setEditRowId(row.id);
+    setEditableRowData(row);
+  };
+
+  const handleSave = async () => {
+    if (!editableRowData) return;
+    try {
+      console.log("Saving data:", editableRowData);
+      await updateMaterialInbound(editableRowData);
+      setEditRowId(null);
+      setEditableRowData(null);
+      fetchMaterialInboundHistory(); // To get fresh data from server
+    } catch (error) {
+      console.error("Error saving material inbound data:", error);
+      setError("데이터 저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("정말로 이 항목을 삭제하시겠습니까?")) return;
+    try {
+      await deleteMaterailInbound(id);
+      fetchMaterialInboundHistory();
+    } catch (error) {
+      console.error("Error deleting material inbound data:", error);
+      setError("데이터 삭제 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleCancel = () => {
+    setEditRowId(null);
+    setEditableRowData(null);
+  };
+
+  const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!editableRowData) return;
+    const { name, value } = e.target;
+
+    let updatedEditableRowData = { ...editableRowData, [name]: value };
+
+    // Update specQty or qty as numbers
+    if (name === "specQty" || name === "qty") {
+      const numericValue = parseFloat(value);
+      if (!isNaN(numericValue)) {
+        updatedEditableRowData = { ...updatedEditableRowData, [name]: numericValue };
+      }
+    }
+
+    // Recalculate totalQty if specQty, qty, or specUnit changes
+    const currentSpecQty = (name === "specQty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.specQty || 0);
+    const currentQty = (name === "qty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.qty || 0);
+
+
+    if (name === "specQty" || name === "qty" || name === "specUnit") {
+      const calculatedTotalQty = currentSpecQty * currentQty;
+      updatedEditableRowData = { ...updatedEditableRowData, totalQty: calculatedTotalQty };
+    }
+
+    setEditableRowData(updatedEditableRowData);
+  };
+
+  const handleDateEditChange = (
+    name: keyof MaterialInbound,
+    newValue: Dayjs | null
+  ) => {
+    if (!editableRowData) return;
+    setEditableRowData({
+      ...editableRowData,
+      [name]: newValue ? newValue.format("YYYY-MM-DD") : "",
+    });
   };
 
   return (
@@ -214,33 +291,167 @@ export default function RawInHistoryPage() {
                 <TableCell align="center">입고일자</TableCell>
                 <TableCell align="center">제조일자</TableCell>
                 <TableCell align="center">제조사</TableCell>
+                <TableCell align="center">기능</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {displayedHistory.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
+                  <TableCell colSpan={12} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
                       조회된 입고 이력 데이터가 없습니다.
                     </Typography>
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedHistory.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell align="center">{row.id}</TableCell>
-                    <TableCell align="center">{row.inboundNo}</TableCell>
-                    <TableCell align="center">{row.itemCode}</TableCell>
-                    <TableCell align="center">{row.itemName}</TableCell>
-                    <TableCell align="center">{row.supplierName}</TableCell>
-                    <TableCell align="center">{`${row.specQty}${row.specUnit}`}</TableCell>
-                    <TableCell align="center">{row.qty}</TableCell>
-                    <TableCell align="center">{`${row.totalQty}`}</TableCell>
-                    <TableCell align="center">{row.inboundDate}</TableCell>
-                    <TableCell align="center">{row.manufacteDate}</TableCell>
-                    <TableCell align="center">{row.manufacturer}</TableCell>
-                  </TableRow>
-                ))
+                displayedHistory.map((row) => {
+                  const isEditMode = editRowId === row.id;
+                  return (
+                    <TableRow key={row.id}>
+                      <TableCell align="center">{row.id}</TableCell>
+                      <TableCell align="center">{row.inboundNo}</TableCell>
+                      <TableCell align="center">{row.itemCode}</TableCell>
+                      <TableCell align="center">{row.itemName}</TableCell>
+                      <TableCell align="center">{row.supplierName}</TableCell>
+                      <TableCell align="center">
+                        {isEditMode ? (
+                          <>
+                            <TextField
+                              size="small"
+                              name="specQty"
+                              type="number"
+                              value={editableRowData?.specQty || ""}
+                              onChange={handleEditChange}
+                              sx={{ width: 80, mr: 1 }}
+                            />
+                            <TextField
+                              size="small"
+                              name="specUnit"
+                              value={editableRowData?.specUnit || ""}
+                              onChange={handleEditChange}
+                              sx={{ width: 60 }}
+                            />
+                          </>
+                        ) : (
+                          `${row.specQty}${row.specUnit}`
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        {isEditMode ? (
+                          <TextField
+                            size="small"
+                            name="qty"
+                            type="number"
+                            value={editableRowData?.qty || ""}
+                            onChange={handleEditChange}
+                            sx={{ width: 80 }}
+                          />
+                        ) : (
+                          row.qty
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        {isEditMode ? (
+                          editableRowData?.totalQty
+                        ) : (
+                          row.totalQty
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        {isEditMode ? (
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={
+                                editableRowData?.inboundDate
+                                  ? dayjs(editableRowData.inboundDate)
+                                  : null
+                              }
+                              onChange={(newValue) =>
+                                handleDateEditChange("inboundDate", newValue)
+                              }
+                              format="YYYY-MM-DD"
+                              slotProps={{
+                                textField: {
+                                  size: "small",
+                                  sx: { width: 170 },
+                                },
+                              }}
+                            />
+                          </LocalizationProvider>
+                        ) : (
+                          row.inboundDate
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        {isEditMode ? (
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={
+                                editableRowData?.manufacteDate
+                                  ? dayjs(editableRowData.manufacteDate)
+                                  : null
+                              }
+                              onChange={(newValue) =>
+                                handleDateEditChange("manufacteDate", newValue)
+                              }
+                              format="YYYY-MM-DD"
+                              slotProps={{
+                                textField: {
+                                  size: "small",
+                                  sx: { width: 170 },
+                                },
+                              }}
+                            />
+                          </LocalizationProvider>
+                        ) : (
+                          row.manufacteDate
+                        )}
+                      </TableCell>
+                      <TableCell align="center">{row.manufacturer}</TableCell>
+                      <TableCell align="center">
+                        {isEditMode ? (
+                          <>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => handleSave()}
+                              sx={{ mr: 0.5 }}
+                            >
+                              저장
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              color="error"
+                              onClick={handleCancel}
+                            >
+                              취소
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => handleUpdate(row)}
+                            >
+                              수정
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="small"
+                              onClick={() => handleDelete(row.id)}
+                              sx={{ ml: 0.3 }}
+                            >
+                              삭제
+                            </Button>
+                          </>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

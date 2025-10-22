@@ -147,7 +147,7 @@ export type OrderProcessTracking = {
 
 export type OrderInbound = {
   id?: number;
-  order_inbound_id: number;
+  order_inbound_id?: number;
   order_item_id: number;
   category: "AUTOMOTIVE" | "DEFENSE" | "GENERAL" | "SHIPBUILDING";
   customer_name: string;
@@ -173,5 +173,5 @@ export type MaterialInbound = {
   qty: number;
   inboundDate: string;           // 'YYYY-MM-DD' 형식
   inboundNo: string;
-  totalQty: string;
+  totalQty: number;
 }

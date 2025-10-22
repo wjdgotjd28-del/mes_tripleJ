@@ -49,7 +49,9 @@ public class OrderInboundRepositoryCustomImpl implements OrderInboundRepositoryC
                                         .where(ptSub.orderInbound.eq(orderInbound))
                         ),
                         // 2. 그리고 그 공정의 상태가 '완료'인지 확인
-                        processTracking.processStatus.eq(2)
+                        processTracking.processStatus.eq(2),
+                        // 3. 삭제되지 않은 수주 정보만 조회
+                        orderInbound.deletedAt.isNull()
                 )
                 .groupBy(orderInbound.orderInboundId, orderInbound.lotNo, orderInbound.company.companyName, orderInbound.itemName, orderInbound.itemCode, orderInbound.inboundDate, orderInbound.qty, orderInbound.category, processTracking.processStatus) // 중복 방지
                 .fetch();

@@ -26,4 +26,14 @@ public class MaterialInboundController {
     public MaterialInboundDTO addMaterialInbound(@RequestBody MaterialInboundDTO materialInboundDto) {
         return materialInboundService.addMaterialInbound(materialInboundDto);
     }
+
+    @PatchMapping("")
+    public MaterialInboundDTO updateMaterialInbound(@RequestBody MaterialInboundDTO materialInboundDto) {
+        return materialInboundService.updateMaterialInbound(materialInboundDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public Long deleteMaterialInbound(@PathVariable("id") Long id) {
+        return materialInboundService.deleteMaterialInbound(id);
+    }
 }
