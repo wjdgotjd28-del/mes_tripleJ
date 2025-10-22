@@ -340,7 +340,7 @@ export default function RawInHistoryPage() {
                           row.qty
                         )}
                       </TableCell>
-                      <TableCell align="center">{`${row.totalQty}`}</TableCell>
+                      <TableCell align="center">{`${row.totalQty}${row.specUnit}`}</TableCell>
                       <TableCell align="center">
                         {isEditMode ? (
                           <LocalizationProvider dateAdapter={AdapterDayjs}>
