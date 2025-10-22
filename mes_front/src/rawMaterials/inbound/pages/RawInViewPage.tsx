@@ -126,8 +126,8 @@ export default function RawInViewPage() {
   ) => {
     if (field === 'qty') {
       const numericValue = Number(value);
-      if (numericValue < 0) {
-        return; // Do not update state for negative numbers
+      if (isNaN(numericValue) || numericValue < 0 || numericValue % 1 !== 0) {
+        return;
       }
     }
     setInboundInput((prev) => ({
