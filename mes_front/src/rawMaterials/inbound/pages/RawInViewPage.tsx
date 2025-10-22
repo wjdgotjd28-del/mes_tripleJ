@@ -277,78 +277,115 @@ export default function RawInViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((row) => (
-                  <TableRow key={row.material_item_id}>
-                    <TableCell align="center">{row.material_item_id}</TableCell>
-                    <TableCell align="center">{row.company_name}</TableCell>
-                    <TableCell align="center">{row.item_code}</TableCell>
-                    <TableCell align="center">
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          textDecoration: "underline",
-                          cursor: "pointer",
-                          "&:hover": {
-                            color: "primary.dark",
-                            fontWeight: "bold",
-                          },
-                        }}
-                        onClick={() => handleItemClick(row)}
-                      >
-                        {row.item_name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">{`${row.spec_qty}${row.spec_unit}`}</TableCell>
-                    <TableCell align="center">{row.manufacturer}</TableCell>
-                    <TableCell align="center">
-                      <TextField
-                        type="number"
-                        size="small"
-                        value={inboundInput[row.material_item_id]?.qty || ""}
-                        onChange={(e) => handleInboundInputChange(row.material_item_id, "qty", Number(e.target.value))}
-                        sx={{ width: 80 }}
-                      />
-                    </TableCell>
-                    <TableCell align="center">
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          value={inboundInput[row.material_item_id]?.inboundDate ? dayjs(inboundInput[row.material_item_id]?.inboundDate) : null}
-                          onChange={(newDate) =>
-                            handleInboundInputChange(row.material_item_id, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
-                          }
-                          format="YYYY-MM-DD"
-                          slotProps={{
-                            textField: { size: "small", sx: { width: 170 } },
+                paginatedData.map((row) => {
+                  const materialId = row.material_item_id;
+
+                  if (materialId === undefined) {
+                    return (
+                      <TableRow key={row.item_code}>
+                        <TableCell align="center">{row.material_item_id ?? "-"}</TableCell>
+                        <TableCell align="center">{row.company_name}</TableCell>
+                        <TableCell align="center">{row.item_code}</TableCell>
+                        <TableCell align="center">
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              textDecoration: "underline",
+                              cursor: "pointer",
+                              "&:hover": {
+                                color: "primary.dark",
+                                fontWeight: "bold",
+                              },
+                            }}
+                            onClick={() => handleItemClick(row)}
+                          >
+                            {row.item_name}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">{`${row.spec_qty}${row.spec_unit}`}</TableCell>
+                        <TableCell align="center">{row.manufacturer}</TableCell>
+                        <TableCell align="center" colSpan={4}>
+                          <Typography variant="body2" color="text.secondary">
+                            ID가 없어 입고 등록 불가
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+
+                  return (
+                    <TableRow key={materialId}>
+                      <TableCell align="center">{materialId}</TableCell>
+                      <TableCell align="center">{row.company_name}</TableCell>
+                      <TableCell align="center">{row.item_code}</TableCell>
+                      <TableCell align="center">
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            textDecoration: "underline",
+                            cursor: "pointer",
+                            "&:hover": {
+                              color: "primary.dark",
+                              fontWeight: "bold",
+                            },
                           }}
+                          onClick={() => handleItemClick(row)}
+                        >
+                          {row.item_name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">{`${row.spec_qty}${row.spec_unit}`}</TableCell>
+                      <TableCell align="center">{row.manufacturer}</TableCell>
+                      <TableCell align="center">
+                        <TextField
+                          type="number"
+                          size="small"
+                          value={inboundInput[materialId]?.qty || ""}
+                          onChange={(e) => handleInboundInputChange(materialId, "qty", Number(e.target.value))}
+                          sx={{ width: 80 }}
                         />
-                      </LocalizationProvider>
-                    </TableCell>
-                    <TableCell align="center">
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          value={inboundInput[row.material_item_id]?.manufacteDate ? dayjs(inboundInput[row.material_item_id]?.manufacteDate) : null}
-                          onChange={(newDate) =>
-                            handleInboundInputChange(row.material_item_id, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
-                          }
-                          format="YYYY-MM-DD"
-                          slotProps={{
-                            textField: { size: "small", sx: { width: 170 } },
-                          }}
-                        />
-                      </LocalizationProvider>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="small"
-                        onClick={() => handleRegisterInbound(row)}
-                      >
-                        등록
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
+                      </TableCell>
+                      <TableCell align="center">
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            value={inboundInput[materialId]?.inboundDate ? dayjs(inboundInput[materialId]?.inboundDate) : null}
+                            onChange={(newDate) =>
+                              handleInboundInputChange(materialId, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                            }
+                            format="YYYY-MM-DD"
+                            slotProps={{
+                              textField: { size: "small", sx: { width: 170 } },
+                            }}
+                          />
+                        </LocalizationProvider>
+                      </TableCell>
+                      <TableCell align="center">
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            value={inboundInput[materialId]?.manufacteDate ? dayjs(inboundInput[materialId]?.manufacteDate) : null}
+                            onChange={(newDate) =>
+                              handleInboundInputChange(materialId, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                            }
+                            format="YYYY-MM-DD"
+                            slotProps={{
+                              textField: { size: "small", sx: { width: 170 } },
+                            }}
+                          />
+                        </LocalizationProvider>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => handleRegisterInbound(row)}
+                        >
+                          등록
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
