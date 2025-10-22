@@ -20,7 +20,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
 
 import type { MaterialInbound } from "../../../type";
-import { getMaterialInbound } from "../api/rawInboundApi";
+import { getMaterialInbound, updateMaterialInbound } from "../api/rawInboundApi";
 
 // Helper function to filter history
 const filterInboundHistory = (
@@ -134,14 +134,16 @@ export default function RawInHistoryPage() {
 
   const handleSave = async (id: number) => {
     if (!editableRowData) return;
-    console.log("Saving data:", editableRowData);
-    // Here you would call an API to update the data
-    // e.g., await updateMaterialInbound(editableRowData);
-
-    // Then exit edit mode and refresh data
-    setEditRowId(null);
-    setEditableRowData(null);
-    // fetchMaterialInboundHistory(); // To get fresh data from server
+    try {
+      console.log("Saving data:", editableRowData);
+      await updateMaterialInbound(editableRowData);
+      setEditRowId(null);
+      setEditableRowData(null);
+      fetchMaterialInboundHistory(); // To get fresh data from server
+    } catch (error) {
+      console.error("Error saving material inbound data:", error);
+      setError("데이터 저장 중 오류가 발생했습니다.");
+    }
   };
 
   const handleCancel = () => {
