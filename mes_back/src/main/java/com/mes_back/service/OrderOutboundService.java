@@ -118,7 +118,7 @@ public class OrderOutboundService {
         }
 
         // 🔹 번호 자리수
-        if (nextSeq > 999) throw new IllegalStateException("출고번호가 9999를 초과했습니다.");
+        if (nextSeq > 999) throw new IllegalStateException("출고번호가 999를 초과했습니다.");
 
         return prefix + String.format("%03d", nextSeq);
     }

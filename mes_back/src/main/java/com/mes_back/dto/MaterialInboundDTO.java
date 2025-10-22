@@ -1,7 +1,13 @@
 package com.mes_back.dto;
 
 import java.time.LocalDateTime;
+import lombok.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MaterialInboundDTO {
     private Long id;
     private Long materialItemId;
@@ -15,6 +21,6 @@ public class MaterialInboundDTO {
     private Long qty;
     private LocalDateTime inboundDate;
     private String inboundNo;
-    private Long totalQty;
+    private String totalQty;
 }
 
