@@ -5,7 +5,6 @@ import com.mes_back.entity.MaterialInbound;
 import com.mes_back.entity.MaterialItem;
 import com.mes_back.entity.MaterialOutbound;
 import com.mes_back.entity.MaterialStock;
-import com.mes_back.repository.MaterialItemRepository;
 import com.mes_back.repository.MaterialStockRepository;
 import com.mes_back.repository.RawInboundRepository;
 import com.mes_back.repository.RawOutboundRepository;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;

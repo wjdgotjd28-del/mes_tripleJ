@@ -225,25 +225,25 @@ export default function OrderOutViewPage() {
           </IconButton>
         </Tooltip>
         <Box sx={{ flex: 1 }} />
-
+        <Button
+          startIcon={<AddIcon />}
+          onClick={() => setRegisterOpen(true)}
+          sx={{ height: 40 }}
+          variant="outlined"
+          size="small"
+          // {/* height 추가 */}
+        >
+          출고 등록
+        </Button>
         {/*  오른쪽: 엑셀 다운로드 버튼 */}
         <Button
           color="success"
           variant="outlined"
+          sx={{ height: 40 }}
           endIcon={<FileDownloadIcon />}
           onClick={handleExcelDownload}
         >
           엑셀 다운로드
-        </Button>
-        <Button
-          variant="contained"
-          color="success"
-          endIcon={<AddIcon />}
-          onClick={() => setRegisterOpen(true)}
-          sx={{ height: 40 }}
-          // {/* height 추가 */}
-        >
-          출고 등록
         </Button>
       </Box>
       {/* 테이블 */}
