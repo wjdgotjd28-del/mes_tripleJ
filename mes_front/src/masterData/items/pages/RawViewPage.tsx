@@ -304,7 +304,6 @@ export default function RawViewPage() {
                 <TableCell align="center">비고</TableCell>
                 <TableCell align="center">사용여부</TableCell>
                 <TableCell align="center"></TableCell>
-                <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -352,13 +351,14 @@ export default function RawViewPage() {
                     </TableCell>
                     <TableCell align="center">
                       <Button
-                        onClick={() => handleToggleUseYn(row.material_item_id!)}
+                        variant="outlined"
                         size="small"
+                        color={row.use_yn === "Y" ? "error" : "success"}
+                        onClick={() => handleToggleUseYn(row.material_item_id!)}
+                        sx={{ mr: 1 }}
                       >
                         {row.use_yn === "Y" ? "사용 중지" : "복원"}
                       </Button>
-                    </TableCell>
-                    <TableCell align="center">
                       <Button
                         variant="outlined"
                         size="small"
