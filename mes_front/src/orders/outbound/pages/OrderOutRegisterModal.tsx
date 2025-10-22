@@ -174,6 +174,8 @@ export default function OrderOutRegisterModal({
       qty: qty,
       outboundDate: form.outboundDate,
       category: selected.category,
+      inboundDate: selected.inboundDate,
+      color: "",
     });
     onClose();
   };
