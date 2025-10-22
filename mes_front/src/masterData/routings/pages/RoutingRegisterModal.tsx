@@ -40,6 +40,8 @@ export default function RoutingRegisterModal({
   // 에러 메시지 상태 (중복 코드 등)
   const [error, setError] = useState("");
 
+  const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
+
   // 입력값 변경 핸들러
   const handleChange = (field: keyof typeof form, value: string) => {
     setForm({ ...form, [field]: value });
@@ -97,7 +99,12 @@ export default function RoutingRegisterModal({
         <IconButton
           onClick={() => {
             onClose();
-            setForm({ process_code: "", process_name: "", process_time: "", note: "" });
+            setForm({
+              process_code: "",
+              process_name: "",
+              process_time: "",
+              note: "",
+            });
             setError("");
           }}
           size="small"
@@ -144,10 +151,45 @@ export default function RoutingRegisterModal({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={handleSubmit}>
+        <Button
+          color="error"
+          variant="outlined"
+          onClick={() => setConfirmCloseOpen(true)}
+        >
+          취소
+        </Button>
+        <Button variant="outlined" onClick={handleSubmit}>
           등록
         </Button>
       </DialogActions>
+      <Dialog
+        open={confirmCloseOpen}
+        onClose={() => setConfirmCloseOpen(false)}
+      >
+        <DialogTitle>확인</DialogTitle>
+        <DialogContent>
+          <Typography>변경된 내용은 저장되지 않습니다.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="error"
+            onClick={() => {
+              setConfirmCloseOpen(false);
+              onClose();
+              setForm({
+                process_code: "",
+                process_name: "",
+                process_time: "",
+                note: "",
+              });
+              setError("");
+            }}
+          >
+            예
+          </Button>
+          <Button onClick={() => setConfirmCloseOpen(false)}>아니요</Button>
+        </DialogActions>
+      </Dialog>
     </Dialog>
   );
 }

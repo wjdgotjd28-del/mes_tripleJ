@@ -138,7 +138,6 @@ export default function RawInViewPage() {
   };
 
   const handleRegisterInbound = async (rawItem: RawItems) => {
-    console.log("handleRegisterInbound called!");
     const inboundData = inboundInput[rawItem.material_item_id!];
 
     if (
@@ -147,7 +146,6 @@ export default function RawInViewPage() {
       !inboundData.qty ||
       !inboundData.inboundDate
     ) {
-      alert("모든 입고 정보를 입력해주세요.");
       return;
     }
 
@@ -163,10 +161,8 @@ export default function RawInViewPage() {
       qty: inboundData.qty,
       inboundDate: inboundData.inboundDate,
       inboundNo: "", // Will be assigned by backend
-      totalQty: rawItem.spec_qty * inboundData.qty, 
+      totalQty: rawItem.spec_qty * inboundData.qty,
     };
-
-    console.log("전송될 데이터:", newMaterialInbound);
 
     try {
       await addMaterialInbound(newMaterialInbound);
@@ -294,7 +290,9 @@ export default function RawInViewPage() {
                   if (materialId === undefined) {
                     return (
                       <TableRow key={row.item_code}>
-                        <TableCell align="center">{row.material_item_id ?? "-"}</TableCell>
+                        <TableCell align="center">
+                          {row.material_item_id ?? "-"}
+                        </TableCell>
                         <TableCell align="center">{row.company_name}</TableCell>
                         <TableCell align="center">{row.item_code}</TableCell>
                         <TableCell align="center">
@@ -352,16 +350,30 @@ export default function RawInViewPage() {
                           type="number"
                           size="small"
                           value={inboundInput[materialId]?.qty || ""}
-                          onChange={(e) => handleInboundInputChange(materialId, "qty", Number(e.target.value))}
+                          onChange={(e) =>
+                            handleInboundInputChange(
+                              materialId,
+                              "qty",
+                              Number(e.target.value)
+                            )
+                          }
                           sx={{ width: 80 }}
                         />
                       </TableCell>
                       <TableCell align="center">
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
-                            value={inboundInput[materialId]?.inboundDate ? dayjs(inboundInput[materialId]?.inboundDate) : null}
+                            value={
+                              inboundInput[materialId]?.inboundDate
+                                ? dayjs(inboundInput[materialId]?.inboundDate)
+                                : null
+                            }
                             onChange={(newDate) =>
-                              handleInboundInputChange(materialId, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                              handleInboundInputChange(
+                                materialId,
+                                "inboundDate",
+                                newDate ? newDate.format("YYYY-MM-DD") : ""
+                              )
                             }
                             format="YYYY-MM-DD"
                             slotProps={{
@@ -373,9 +385,17 @@ export default function RawInViewPage() {
                       <TableCell align="center">
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
-                            value={inboundInput[materialId]?.manufacteDate ? dayjs(inboundInput[materialId]?.manufacteDate) : null}
+                            value={
+                              inboundInput[materialId]?.manufacteDate
+                                ? dayjs(inboundInput[materialId]?.manufacteDate)
+                                : null
+                            }
                             onChange={(newDate) =>
-                              handleInboundInputChange(materialId, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                              handleInboundInputChange(
+                                materialId,
+                                "manufacteDate",
+                                newDate ? newDate.format("YYYY-MM-DD") : ""
+                              )
                             }
                             format="YYYY-MM-DD"
                             slotProps={{
@@ -386,12 +406,16 @@ export default function RawInViewPage() {
                       </TableCell>
                       <TableCell align="center">
                         <Button
-                          variant="contained"
-                          color="primary"
+                          variant="outlined"
                           size="small"
+                          disabled={
+                            !inboundInput[materialId]?.qty ||
+                            !inboundInput[materialId]?.inboundDate ||
+                            !inboundInput[materialId]?.manufacteDate
+                          }
                           onClick={() => handleRegisterInbound(row)}
                         >
-                          등록
+                          입고 등록
                         </Button>
                       </TableCell>
                     </TableRow>

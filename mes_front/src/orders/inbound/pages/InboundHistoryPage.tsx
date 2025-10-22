@@ -154,7 +154,7 @@ export default function InboundHistoryPage() {
   };
 
   const handleDelete = async (order_inbound_id: number) => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    if (!window.confirm("해당 입고 이력을 삭제하시겠습니까?")) return;
 
     try {
       await deleteInboundHistory(order_inbound_id);
@@ -328,7 +328,7 @@ export default function InboundHistoryPage() {
             ) : (
               paginatedData.map((row: OrderInbound, idx) => (
                 <TableRow key={row.order_inbound_id}>
-                  <TableCell align="center">{idx+1}</TableCell>
+                  <TableCell align="center">{idx + 1}</TableCell>
                   <TableCell align="center">
                     <Typography
                       variant="body2"
@@ -405,11 +405,16 @@ export default function InboundHistoryPage() {
                   <TableCell align="center">
                     {editRowId === row.order_inbound_id ? (
                       <Box
-                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          justifyContent: "center",
+                        }}
                       >
                         <Button
                           variant="outlined"
                           size="small"
+                          color="success"
                           onClick={() => handleSave(row.order_inbound_id!)}
                           sx={{ mr: 0.5 }}
                         >
@@ -426,7 +431,11 @@ export default function InboundHistoryPage() {
                       </Box>
                     ) : (
                       <Box
-                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          justifyContent: "center",
+                        }}
                       >
                         <Button
                           variant="outlined"

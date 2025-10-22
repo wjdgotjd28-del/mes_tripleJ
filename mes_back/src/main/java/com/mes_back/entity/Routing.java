@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "routing")
@@ -11,7 +13,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = "orderItemRoutings")
 public class Routing {
 
     @Id
@@ -32,3 +34,5 @@ public class Routing {
     private String note;
 
 }
+
+

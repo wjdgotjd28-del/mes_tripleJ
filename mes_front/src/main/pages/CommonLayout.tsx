@@ -294,7 +294,13 @@ export default function CommonLayout() {
                           <ListItem disablePadding key={third.text}>
                             <ListItemButton
                               selected={activeThird === third.text}
-                              onClick={() => handleThirdClick(main.text, sub.text, third.text)}
+                              onClick={() =>
+                                handleThirdClick(
+                                  main.text,
+                                  sub.text,
+                                  third.text
+                                )
+                              }
                             >
                               <ListItemText
                                 primary={`• ${third.text}`}

@@ -58,7 +58,7 @@ export default function RoutingViewPage() {
 
   // 삭제 버튼 클릭 시 호출
   const handleDelete = async (routing_id: number) => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    if (!window.confirm("해당 라우팅을 삭제하시겠습니까?")) return;
 
     try {
       await deleteRouting(routing_id); // API 호출
@@ -99,7 +99,7 @@ export default function RoutingViewPage() {
           </Tooltip>
           {/* 등록 버튼 */}
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
-            + 등록
+            + 라우팅 등록
           </Button>
         </Box>
       </Box>
@@ -130,7 +130,7 @@ export default function RoutingViewPage() {
             ) : (
               paginatedData.map((row, idx) => (
                 <TableRow key={row.routing_id}>
-                  <TableCell align="center">{idx+1}</TableCell>
+                  <TableCell align="center">{idx + 1}</TableCell>
                   <TableCell align="center">{row.process_code}</TableCell>
                   <TableCell align="center">{row.process_name}</TableCell>
                   <TableCell align="center">{row.process_time}</TableCell>

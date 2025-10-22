@@ -315,7 +315,7 @@ export default function OrderInViewPage() {
 
                   return (
                     <TableRow key={id}>
-                      <TableCell align="center">{idx+1}</TableCell>
+                      <TableCell align="center">{idx + 1}</TableCell>
                       <TableCell align="center">{row.company_name}</TableCell>
                       <TableCell align="center">{row.item_code}</TableCell>
 
@@ -364,6 +364,15 @@ export default function OrderInViewPage() {
                           inputProps={{ min: 1 }}
                           sx={{ width: 70 }}
                         />
+                        {values.qty !== "" && Number(values.qty) <= 0 && (
+                          <Typography
+                            variant="caption"
+                            color="error"
+                            sx={{ display: "block" }}
+                          >
+                            0보다 큰 값을 입력하세요
+                          </Typography>
+                        )}
                       </TableCell>
 
                       {/* 입고 일자 선택 */}
@@ -387,8 +396,11 @@ export default function OrderInViewPage() {
                         <Button
                           variant="outlined"
                           size="small"
-                          sx={{ color: "#452f8eff", borderColor: "#452f8eff" }}
-                          disabled={!values.qty || !values.date} // 수량/일자 없으면 비활성화
+                          disabled={
+                            !values.qty || // 값 없거나
+                            Number(values.qty) < 1 || // 1보다 작은 수량이면 비활성화
+                            !values.date // 입고일자 없으면 비활성화
+                          }
                           onClick={async () => {
                             // 등록 payload 구성
                             const payload: OrderInbound = {
@@ -425,7 +437,7 @@ export default function OrderInViewPage() {
                             }
                           }}
                         >
-                          입고등록
+                          입고 등록
                         </Button>
                       </TableCell>
                     </TableRow>
