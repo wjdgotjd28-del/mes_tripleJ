@@ -277,7 +277,7 @@ export default function RawInViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedItems.map((row) => (
+                paginatedData.map((row) => (
                   <TableRow key={row.material_item_id}>
                     <TableCell align="center">{row.material_item_id}</TableCell>
                     <TableCell align="center">{row.company_name}</TableCell>
