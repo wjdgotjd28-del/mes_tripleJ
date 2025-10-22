@@ -61,7 +61,7 @@ export default function OrderOutViewPage() {
     loadOrderOutboundData();
   }, []);
 
-  // allRows 또는 search 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
+  // allRows 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
   useEffect(() => {
     const filtered = allRows.filter(
       (row) =>
@@ -71,7 +71,7 @@ export default function OrderOutViewPage() {
         (row.outboundNo ?? "").includes(search.outboundNo)
     );
     setDisplayedRows(filtered);
-  }, [allRows, search]);
+  }, [allRows]);
 
   const loadOrderOutboundData = () => {
     getOrderOutbound()
@@ -125,6 +125,7 @@ export default function OrderOutViewPage() {
       alert("출고 정보 수정에 실패했습니다.");
     }
   };
+  const handleExcelDownload = () => exportToExcel(sortedRows, "출고목록");
 
   // ✅ 삭제
   const handleDelete = (id: number) => {
@@ -158,16 +159,21 @@ export default function OrderOutViewPage() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
   const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
-  const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
-      try {
-        setSelectedOrder(row); // row: OrderOutbound
-        const inbound = allRows.find(item => item.orderInboundId === orderInboundId);
-        setSelectedInboundDate(inbound?.inboundDate);
-        setOpenModal(true);
-      } catch (err) {
-        console.error("출하증 조회 실패", err);
-      }
-    };
+  const handleOpenModal = async (
+    row: OrderOutbound,
+    orderInboundId: number
+  ) => {
+    try {
+      setSelectedOrder(row); // row: OrderOutbound
+      const inbound = allRows.find(
+        (item) => item.orderInboundId === orderInboundId
+      );
+      setSelectedInboundDate(inbound?.inboundDate);
+      setOpenModal(true);
+    } catch (err) {
+      console.error("출하증 조회 실패", err);
+    }
+  };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -219,25 +225,25 @@ export default function OrderOutViewPage() {
           </IconButton>
         </Tooltip>
         <Box sx={{ flex: 1 }} />
-        {/*  오른쪽: 엑셀 다운로드 버튼 */}
         <Button
-          variant="outlined"
-          endIcon={<FileDownloadIcon />}
-          sx={{ height: 40 }}
-          onClick={() => exportToExcel(displayedRows, "출고 이력")}
-        >
-          {/* height 추가 */}
-          Excel
-        </Button>
-        <Button
-          variant="contained"
-          color="success"
-          endIcon={<AddIcon />}
+          startIcon={<AddIcon />}
           onClick={() => setRegisterOpen(true)}
           sx={{ height: 40 }}
+          variant="outlined"
+          size="small"
           // {/* height 추가 */}
         >
           출고 등록
+        </Button>
+        {/*  오른쪽: 엑셀 다운로드 버튼 */}
+        <Button
+          color="success"
+          variant="outlined"
+          sx={{ height: 40 }}
+          endIcon={<FileDownloadIcon />}
+          onClick={handleExcelDownload}
+        >
+          엑셀 다운로드
         </Button>
       </Box>
       {/* 테이블 */}
@@ -266,7 +272,9 @@ export default function OrderOutViewPage() {
                 <TableCell align="center">{row.itemName}</TableCell>
                 <TableCell align="center">{row.qty}</TableCell>
                 <TableCell align="center">{row.outboundDate}</TableCell>
-                <TableCell align="center">{translateCategory(row.category)}</TableCell>
+                <TableCell align="center">
+                  {translateCategory(row.category)}
+                </TableCell>
                 <TableCell align="center">
                   <Box
                     sx={{ display: "flex", gap: 1, justifyContent: "center" }}
@@ -340,13 +348,15 @@ export default function OrderOutViewPage() {
         onSubmit={handleRegister}
       />
 
-      {/* 작업지시서 모달  */}
-      <OrdersOutDocModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        outItem={selectedOrder!}
-        inboundDate={selectedInboundDate ?? ""}
-      />
+      {/* 출하증  */}
+      {selectedOrder && selectedInboundDate && (
+        <OrdersOutDocModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          outItem={selectedOrder}
+          inboundDate={selectedInboundDate}
+        />
+      )}
      
     </Box>
   );

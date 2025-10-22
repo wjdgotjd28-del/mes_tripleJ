@@ -21,9 +21,10 @@ public class MaterialStockController {
     private final MaterialStockService materialStockService;
 
     @GetMapping("/inventory")
-    public ResponseEntity<List<MaterialStockDTO>> findAllInventory() {
-        List<MaterialStockDTO> materialStockDTOS = materialStockService.findAll();
-        return ResponseEntity.ok(materialStockDTOS);
+    public ResponseEntity<List<MaterialStockDTO>> findTotalInventory() {
+        List<MaterialStockDTO> totalStockDTOS = materialStockService.findTotalQtyByItem();
+        return ResponseEntity.ok(totalStockDTOS);
     }
-
 }
+
+

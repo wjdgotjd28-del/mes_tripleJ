@@ -17,8 +17,8 @@ public class MaterialStock {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "material_item_id", nullable = false)
-    private MaterialItem materialItem;
+    @JoinColumn(name = "material_inbound_id", nullable = false)
+    private MaterialInbound materialInbound;
 
     @Column(name = "total_qty", nullable = false)
     private Long totalQty;

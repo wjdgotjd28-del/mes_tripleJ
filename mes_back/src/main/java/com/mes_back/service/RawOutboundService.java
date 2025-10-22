@@ -5,7 +5,6 @@ import com.mes_back.entity.MaterialInbound;
 import com.mes_back.entity.MaterialItem;
 import com.mes_back.entity.MaterialOutbound;
 import com.mes_back.entity.MaterialStock;
-import com.mes_back.repository.MaterialItemRepository;
 import com.mes_back.repository.MaterialStockRepository;
 import com.mes_back.repository.RawInboundRepository;
 import com.mes_back.repository.RawOutboundRepository;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +44,7 @@ public class RawOutboundService {
         MaterialItem item = inbound.getMaterialItem();
 
         // 3️⃣ 재고 조회 및 차감
-        MaterialStock stock = stockRepository.findByMaterialItem(item)
+        MaterialStock stock = stockRepository.findByMaterialInbound(inbound)
                 .orElseThrow(() -> new RuntimeException("해당 품목의 재고 정보가 없습니다."));
 
         if (dto.getQty() > stock.getTotalQty()) {
@@ -80,8 +78,9 @@ public class RawOutboundService {
         MaterialOutbound outbound = outboundRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("출고 내역을 찾을 수 없습니다."));
 
-        MaterialStock stock = stockRepository.findByMaterialItem(outbound.getMaterialInbound().getMaterialItem())
+        MaterialStock stock = stockRepository.findByMaterialInbound(outbound.getMaterialInbound())
                 .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+
 
         // 1️⃣ 출고 수량 변경 시 재고 조정
         if (!outbound.getQty().equals(dto.getQty())) {
@@ -112,8 +111,9 @@ public class RawOutboundService {
         MaterialOutbound outbound = outboundRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("출고 내역을 찾을 수 없습니다."));
 
-        MaterialStock stock = stockRepository.findByMaterialItem(outbound.getMaterialInbound().getMaterialItem())
+        MaterialStock stock = stockRepository.findByMaterialInbound(outbound.getMaterialInbound())
                 .orElseThrow(() -> new RuntimeException("재고 정보를 찾을 수 없습니다."));
+
 
 //        long restoreQty = outbound.getQty() * outbound.getSpecQty();
         stock.setTotalQty(stock.getTotalQty() + outbound.getQty());
