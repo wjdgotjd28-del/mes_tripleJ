@@ -311,7 +311,6 @@ export default function CompanyViewPage() {
                         handleDelete(
                           e,
                           row.companyId as number,
-                          row.companyName
                         )
                       }
                     >
