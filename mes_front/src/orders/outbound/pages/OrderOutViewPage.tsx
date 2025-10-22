@@ -61,7 +61,7 @@ export default function OrderOutViewPage() {
     loadOrderOutboundData();
   }, []);
 
-  // allRows 또는 search 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
+  // allRows 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
   useEffect(() => {
     const filtered = allRows.filter(
       (row) =>
@@ -71,7 +71,7 @@ export default function OrderOutViewPage() {
         (row.outboundNo ?? "").includes(search.outboundNo)
     );
     setDisplayedRows(filtered);
-  }, [allRows, search]);
+  }, [allRows]);
 
   const loadOrderOutboundData = () => {
     getOrderOutbound()
@@ -257,7 +257,7 @@ export default function OrderOutViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayedRows.map((row) => (
+            {paginatedData.map((row) => (
               <TableRow key={row.id}>
                 <TableCell align="center">{row.id}</TableCell>
                 <TableCell align="center">{row.outboundNo}</TableCell>
