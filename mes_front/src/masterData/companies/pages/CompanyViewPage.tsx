@@ -272,7 +272,7 @@ export default function CompanyViewPage() {
                   sx={{ cursor: "pointer" }}
                   onClick={() => handleRowClick(row)}
                 >
-                  <TableCell align="center">{idx+1}</TableCell>
+                  <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
                   <TableCell align="center">
                     {translateCompanyType(row.type)}
                   </TableCell>

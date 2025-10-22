@@ -265,7 +265,7 @@ export default function OrderOutViewPage() {
           <TableBody>
             {paginatedData.map((row, idx) => (
               <TableRow key={row.id}>
-                <TableCell align="center">{idx+1}</TableCell>
+                <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
                 <TableCell align="center">{row.outboundNo}</TableCell>
                 <TableCell align="center">{row.customerName}</TableCell>
                 <TableCell align="center">{row.itemCode}</TableCell>

@@ -13,14 +13,21 @@ import {
   Alert,
   TextField,
   Button,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 
 import type { MaterialInbound } from "../../../type";
 import { getMaterialInbound, updateMaterialInbound, deleteMaterailInbound } from "../api/rawInboundApi";
+import { usePagination } from "../../../Common/usePagination";
 
 // Helper function to filter history
 const filterInboundHistory = (
@@ -72,6 +79,7 @@ export default function RawInHistoryPage() {
     inboundDate: null as Dayjs | null,
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
+  const [sortAsc, setSortAsc] = useState(false);
 
   useEffect(() => {
     fetchMaterialInboundHistory();
@@ -199,6 +207,13 @@ export default function RawInHistoryPage() {
     });
   };
 
+  const sortedData = [...displayedHistory].sort((a, b) =>
+    sortAsc ? (a.id ?? 0) - (b.id ?? 0) : (b.id ?? 0) - (a.id ?? 0)
+  );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedData, 20);
+
   return (
     <Box
       sx={{
@@ -269,6 +284,11 @@ export default function RawInHistoryPage() {
         <Button variant="contained" color="primary" onClick={handleSearch}>
           검색
         </Button>
+        <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+          <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+            {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+          </IconButton>
+        </Tooltip>
       </Box>
 
       {loading ? (
@@ -295,7 +315,7 @@ export default function RawInHistoryPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedHistory.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={12} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
@@ -304,11 +324,11 @@ export default function RawInHistoryPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedHistory.map((row, idx) => {
+                paginatedData.map((row, idx) => {
                   const isEditMode = editRowId === row.id;
                   return (
                     <TableRow key={row.id}>
-                      <TableCell align="center">{idx + 1}</TableCell>
+                      <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
                       <TableCell align="center">{row.inboundNo}</TableCell>
                       <TableCell align="center">{row.itemCode}</TableCell>
                       <TableCell align="center">{row.itemName}</TableCell>
@@ -457,6 +477,26 @@ export default function RawInHistoryPage() {
           </Table>
         </TableContainer>
       )}
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            >
+            〈
+            </Button>
+            <Typography
+            variant="body2"
+            sx={{ display: "flex", alignItems: "center" }}
+            >
+            {currentPage} / {totalPages}
+            </Typography>
+            <Button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+            >
+            〉
+            </Button>
+        </Box>
     </Box>
   );
 }
