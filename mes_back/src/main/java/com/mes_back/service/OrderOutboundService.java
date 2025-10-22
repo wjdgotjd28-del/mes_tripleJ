@@ -102,6 +102,7 @@ public class OrderOutboundService {
                 .category(saved.getCategory())
                 .outboundNo(saved.getOutboundNo())
                 .outboundDate(saved.getOutboundDate())
+                .inboundDate(orderInbound.getInboundDate())
                 .build();
     }
 
@@ -136,6 +137,7 @@ public class OrderOutboundService {
                         .category(o.getCategory())
                         .outboundNo(o.getOutboundNo())
                         .outboundDate(o.getOutboundDate())
+                        .inboundDate(o.getOrderInbound().getInboundDate())
                         .build())
                 .collect(Collectors.toList());
     }

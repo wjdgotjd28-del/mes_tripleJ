@@ -19,4 +19,5 @@ public class OrderOutboundDto {
     private OrderCategory category;
     private String outboundNo;
     private LocalDate outboundDate;
+    private LocalDate inboundDate;
 }
