@@ -70,7 +70,6 @@ export default function OrderInViewPage() {
     itemCode: "",
     itemName: "",
   });
-  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
   /** -----------------------------
    * 📌 초기 데이터 로드
@@ -131,8 +130,6 @@ export default function OrderInViewPage() {
 
   // 검색 버튼 클릭 시 필터 적용
   const handleSearch = (): void => {
-    setAppliedSearchValues(searchValues);
-
     // 검색 조건이 비어있으면 전체 표시
     if (
       !searchValues.companyName &&

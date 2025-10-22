@@ -55,7 +55,6 @@ export default function RawViewPage() {
     itemName: "",
     useYn: "",
   });
-  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
   const [sortAsc, setSortAsc] = useState(false);
 
   // ✅ 영어 → 한글 매핑 (표시용)
@@ -114,8 +113,6 @@ export default function RawViewPage() {
   };
 
   const handleSearch = () => {
-    setAppliedSearchValues(searchValues);
-
     // 모든 검색값이 비어있으면 전체 조회
     if (
       !searchValues.companyName &&
@@ -304,7 +301,6 @@ export default function RawViewPage() {
                 <TableCell align="center">비고</TableCell>
                 <TableCell align="center">사용여부</TableCell>
                 <TableCell align="center"></TableCell>
-                <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -352,13 +348,14 @@ export default function RawViewPage() {
                     </TableCell>
                     <TableCell align="center">
                       <Button
-                        onClick={() => handleToggleUseYn(row.material_item_id!)}
+                        variant="outlined"
                         size="small"
+                        color={row.use_yn === "Y" ? "error" : "success"}
+                        onClick={() => handleToggleUseYn(row.material_item_id!)}
+                        sx={{ mr: 1 }}
                       >
                         {row.use_yn === "Y" ? "사용 중지" : "복원"}
                       </Button>
-                    </TableCell>
-                    <TableCell align="center">
                       <Button
                         variant="outlined"
                         size="small"

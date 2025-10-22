@@ -51,7 +51,6 @@ export default function InboundHistoryPage() {
     lot_no: "",
     inbound_date: "",
   });
-  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [values, setValues] = useState<{
@@ -110,7 +109,6 @@ export default function InboundHistoryPage() {
   };
 
   const handleSearch = () => {
-    setAppliedSearchValues(searchValues);
     const filtered = filterInboundHistory(data, searchValues);
     setDisplayedData(filtered);
   };
@@ -121,8 +119,8 @@ export default function InboundHistoryPage() {
   const toggleSortOrder = () => setSortAsc((prev) => !prev);
   const sortedData = [...displayedData].sort((a, b) =>
     sortAsc
-      ? a.order_inbound_id - b.order_inbound_id
-      : b.order_inbound_id - a.order_inbound_id
+      ? a.order_inbound_id! - b.order_inbound_id!
+      : b.order_inbound_id! - a.order_inbound_id!
   );
 
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
@@ -346,7 +344,7 @@ export default function InboundHistoryPage() {
                         handleLotClick(
                           row.order_item_id,
                           row.lot_no,
-                          row.order_inbound_id
+                          row.order_inbound_id!
                         )
                       }
                     >
@@ -364,7 +362,7 @@ export default function InboundHistoryPage() {
                         type="number"
                         value={values[row.order_inbound_id]?.qty ?? ""}
                         onChange={(e) =>
-                          handleQtyChange(row.order_inbound_id, e.target.value)
+                          handleQtyChange(row.order_inbound_id!, e.target.value)
                         }
                         inputProps={{ min: 1 }}
                         sx={{ width: 70 }}
@@ -385,7 +383,7 @@ export default function InboundHistoryPage() {
                               : null
                           }
                           onChange={(newDate) =>
-                            handleDateChange(row.order_inbound_id, newDate)
+                            handleDateChange(row.order_inbound_id!, newDate)
                           }
                           format="YYYY-MM-DD"
                           slotProps={{
@@ -412,7 +410,7 @@ export default function InboundHistoryPage() {
                         <Button
                           variant="outlined"
                           size="small"
-                          onClick={() => handleSave(row.order_inbound_id)}
+                          onClick={() => handleSave(row.order_inbound_id!)}
                           sx={{ mr: 0.5 }}
                         >
                           저장
@@ -452,7 +450,7 @@ export default function InboundHistoryPage() {
                         <Button
                           variant="outlined"
                           size="small"
-                          onClick={() => handleUpdate(row.order_inbound_id)}
+                          onClick={() => handleUpdate(row.order_inbound_id!)}
                         >
                           수정
                         </Button>
@@ -461,7 +459,7 @@ export default function InboundHistoryPage() {
                           variant="outlined"
                           color="error"
                           size="small"
-                          onClick={() => handleDelete(row.order_inbound_id)}
+                          onClick={() => handleDelete(row.order_inbound_id!)}
                           sx={{ ml: 0.3 }}
                         >
                           삭제

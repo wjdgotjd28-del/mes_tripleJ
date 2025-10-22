@@ -81,8 +81,6 @@ export default function OrderViewPage() {
     POWDER: "분체",
   };
 
-  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
-
   // 초기 데이터 로드
   useEffect(() => {
     void fetchOrderItems();
@@ -125,8 +123,6 @@ export default function OrderViewPage() {
   };
 
   const handleSearch = (): void => {
-    setAppliedSearchValues(searchValues);
-
     if (
       !searchValues.companyName &&
       !searchValues.itemCode &&
@@ -451,7 +447,7 @@ export default function OrderViewPage() {
         open={openDetailModal}
         onClose={() => setOpenDetailModal(false)}
         data={selectedItem}
-        onSave={handleItemSave} // ✅ 수정 저장 시 리스트 즉시 반영
+        onSave={handleItemSave}
         routingList={[]}
       />
     </Box>
