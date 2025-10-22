@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import {
   Box,
   Button,
@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-// import ReceiptIcon from "@mui/icons-material/Receipt";
 import AddIcon from "@mui/icons-material/Add";
 import {
   ArrowUpward as ArrowUpwardIcon,
@@ -32,7 +31,7 @@ import {
 } from "../api/orderOutbound";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import EditOrderOutModal from "./EditOrderOutModal";
+// import EditOrderOutModal from "./EditOrderOutModal"; // Removed
 import { usePagination } from "../../../Common/usePagination";
 import OrdersOutDocModal from "./OrdersOutDocModal";
 
@@ -49,8 +48,9 @@ export default function OrderOutViewPage() {
     outboundNo: "",
   });
 
-  // ✅ 수정 모달 상태
-  const [editData, setEditData] = useState<OrderOutbound | null>(null);
+  // ✅ 인라인 수정 상태
+  const [editRowId, setEditRowId] = useState<number | null>(null);
+  const [editableRowData, setEditableRowData] = useState<OrderOutbound | null>(null);
 
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -110,21 +110,54 @@ export default function OrderOutViewPage() {
     setDisplayedRows(filtered);
   };
 
-  // ✅ 수정 저장
-  const handleEditSave = async (apiPayload: OrderOutbound) => {
-    try {
-      // Call the API to update the order
-      const response = await updateOrderOutbound(apiPayload);
+  // ✅ 인라인 수정 시작
+  const handleUpdate = (row: OrderOutbound) => {
+    setEditRowId(row.id ?? null);
+    setEditableRowData(row);
+  };
 
+  // ✅ 인라인 수정 저장
+  const handleSave = async () => {
+    if (!editableRowData || !editableRowData.id) return;
+    try {
+      await updateOrderOutbound(editableRowData);
       setAllRows((prev) =>
-        prev.map((r) => (r.id === response.id ? response : r))
+        prev.map((r) => (r.id === editableRowData.id ? editableRowData : r))
       );
-      setEditData(null); // Close the modal
+      setEditRowId(null);
+      setEditableRowData(null);
     } catch (error) {
       console.error("출고 정보 수정 실패:", error);
       alert("출고 정보 수정에 실패했습니다.");
     }
   };
+
+  // ✅ 인라인 수정 취소
+  const handleCancel = () => {
+    setEditRowId(null);
+    setEditableRowData(null);
+  };
+
+  // ✅ 인라인 수정 필드 변경
+  const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!editableRowData) return;
+    const { name, value } = e.target;
+
+    let updatedValue: string | number = value;
+    if (name === "qty") {
+      const numericValue = Number(value);
+      if (isNaN(numericValue) || numericValue < 0 || numericValue % 1 !== 0) {
+        return; // Prevent invalid input
+      }
+      updatedValue = numericValue;
+    }
+
+    setEditableRowData((prev) => ({
+      ...prev!,
+      [name]: updatedValue,
+    }));
+  };
+
   const handleExcelDownload = () => exportToExcel(sortedRows, "출고목록");
 
   // ✅ 삭제
@@ -263,51 +296,105 @@ export default function OrderOutViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row, idx) => (
-              <TableRow key={row.id}>
-                <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
-                <TableCell align="center">{row.outboundNo}</TableCell>
-                <TableCell align="center">{row.customerName}</TableCell>
-                <TableCell align="center">{row.itemCode}</TableCell>
-                <TableCell align="center">{row.itemName}</TableCell>
-                <TableCell align="center">{row.qty}</TableCell>
-                <TableCell align="center">{row.outboundDate}</TableCell>
-                <TableCell align="center">
-                  {translateCategory(row.category)}
-                </TableCell>
-                <TableCell align="center">
-                  <Box
-                    sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                  >
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ color: "#ff8c00ff", borderColor: "#ff8c00ff" }}
-                      onClick={() => handleOpenModal(row, row.orderInboundId)}
+            {paginatedData.map((row, idx) => {
+              const isEditMode = editRowId === row.id;
+              return (
+                <TableRow key={row.id}>
+                  <TableCell align="center">
+                    {(currentPage - 1) * 20 + idx + 1}
+                  </TableCell>
+                  <TableCell align="center">{row.outboundNo}</TableCell>
+                  <TableCell align="center">{row.customerName}</TableCell>
+                  <TableCell align="center">{row.itemCode}</TableCell>
+                  <TableCell align="center">{row.itemName}</TableCell>
+                  <TableCell align="center">
+                    {isEditMode ? (
+                      <TextField
+                        name="qty"
+                        type="number"
+                        size="small"
+                        value={editableRowData?.qty ?? ""}
+                        onChange={handleEditChange}
+                        sx={{ width: 80 }}
+                      />
+                    ) : (
+                      row.qty
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {isEditMode ? (
+                      <TextField
+                        name="outboundDate"
+                        type="date"
+                        size="small"
+                        value={editableRowData?.outboundDate ?? ""}
+                        onChange={handleEditChange}
+                        InputLabelProps={{ shrink: true }}
+                        sx={{ width: 130 }}
+                      />
+                    ) : (
+                      row.outboundDate
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {translateCategory(row.category)}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box
+                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
                     >
-                      출하증
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => setEditData(row)}
-                    >
-                      수정
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      startIcon={<DeleteIcon />}
-                      onClick={() => handleDelete(row.id!)}
-                    >
-                      삭제
-                    </Button>
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
+                      {isEditMode ? (
+                        <> 
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            onClick={handleSave}
+                          >
+                            저장
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="error"
+                            onClick={handleCancel}
+                          >
+                            취소
+                          </Button>
+                        </>
+                      ) : (
+                        <> 
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            sx={{ color: "#ff8c00ff", borderColor: "#ff8c00ff" }}
+                            onClick={() => handleOpenModal(row, row.orderInboundId)}
+                          >
+                            출하증
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<EditIcon />}
+                            onClick={() => handleUpdate(row)}
+                          >
+                            수정
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            startIcon={<DeleteIcon />}
+                            onClick={() => handleDelete(row.id!)}
+                          >
+                            삭제
+                          </Button>
+                        </>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -334,12 +421,12 @@ export default function OrderOutViewPage() {
       </Box>
 
       {/* 수정 모달 */}
-      <EditOrderOutModal
+      {/* <EditOrderOutModal // Removed
         open={!!editData}
         onClose={() => setEditData(null)}
         editData={editData}
         onSave={handleEditSave}
-      />
+      /> */}
 
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
