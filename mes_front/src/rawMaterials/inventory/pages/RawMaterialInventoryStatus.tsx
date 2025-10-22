@@ -64,7 +64,7 @@ export default function RawMaterialInventoryStatus() {
   };
 
   //  정렬 상태
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
   const toggleSortOrder = () => setSortAsc((prev) => !prev);
 
   //  정렬된 데이터 (ID 기준)
@@ -151,7 +151,7 @@ export default function RawMaterialInventoryStatus() {
         <Table sx={{ minWidth: 800 }}>
           <TableHead>
             <TableRow>
-              <TableCell align="center">ID</TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="center">거래처명</TableCell>
               <TableCell align="center">품목 번호</TableCell>
               <TableCell align="center">품목명</TableCell>
@@ -169,9 +169,9 @@ export default function RawMaterialInventoryStatus() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((row) => (
+              paginatedData.map((row, idx) => (
                 <TableRow key={row.id}>
-                  <TableCell align="center">{row.id}</TableCell>
+                  <TableCell align="center">{idx+1}</TableCell>
                   <TableCell align="center">{row.company_name}</TableCell>
                   <TableCell align="center">{row.item_code}</TableCell>
                   <TableCell align="center">{row.item_name}</TableCell>

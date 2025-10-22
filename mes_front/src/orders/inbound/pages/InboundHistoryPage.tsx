@@ -62,7 +62,7 @@ export default function InboundHistoryPage() {
   const [data, setData] = useState<OrderInbound[]>([]);
   const [displayedData, setDisplayedData] = useState<OrderInbound[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
   //  작업지시서 모달 상태
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
@@ -305,7 +305,7 @@ export default function InboundHistoryPage() {
         <Table sx={{ minWidth: 1000 }}>
           <TableHead>
             <TableRow>
-              <TableCell align="center">ID</TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="center">LOT번호</TableCell>
               <TableCell align="center">거래처명</TableCell>
               <TableCell align="center">품목 번호</TableCell>
@@ -328,9 +328,9 @@ export default function InboundHistoryPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((row: OrderInbound) => (
+              paginatedData.map((row: OrderInbound, idx) => (
                 <TableRow key={row.order_inbound_id}>
-                  <TableCell align="center">{row.order_inbound_id}</TableCell>
+                  <TableCell align="center">{idx+1}</TableCell>
                   <TableCell align="center">
                     <Typography
                       variant="body2"

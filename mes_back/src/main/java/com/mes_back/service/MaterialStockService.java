@@ -26,7 +26,7 @@ public class MaterialStockService {
             dto.setCompanyName(ms.getMaterialItem().getCompany().getCompanyName());
             dto.setItemCode(ms.getMaterialItem().getItemCode());
             dto.setItemName(ms.getMaterialItem().getItemName());
-            dto.setTotalQty(ms.getTotalQty().longValue()); // MaterialStock의 totalQty
+            dto.setTotalQty(ms.getTotalQty()); // MaterialStock의 totalQty
             dto.setUnit(ms.getUnit());
             dto.setManufacturer(ms.getMaterialItem().getManufacturer());
             return dto;

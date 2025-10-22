@@ -55,7 +55,7 @@ export default function OrderInViewPage() {
   const [inputValues, setInputValues] = useState<
     Record<string, { qty: string; date: string }>
   >({});
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
   // 전체 품목 데이터
   const [orderItems, setOrderItems] = useState<OrderItems[]>([]);
   // 화면에 표시되는 품목 데이터 (검색 필터 적용됨)
@@ -286,7 +286,7 @@ export default function OrderInViewPage() {
             {/* 테이블 헤더 */}
             <TableHead>
               <TableRow>
-                <TableCell align="center">ID</TableCell>
+                <TableCell align="center"></TableCell>
                 <TableCell align="center">거래처명</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -312,13 +312,13 @@ export default function OrderInViewPage() {
                 </TableRow>
               ) : (
                 // 품목 데이터 반복 렌더링
-                sortedItems.map((row) => {
+                sortedItems.map((row, idx) => {
                   const id = row.order_item_id.toString();
                   const values = inputValues[id] || { qty: "", date: "" };
 
                   return (
                     <TableRow key={id}>
-                      <TableCell align="center">{row.order_item_id}</TableCell>
+                      <TableCell align="center">{idx+1}</TableCell>
                       <TableCell align="center">{row.company_name}</TableCell>
                       <TableCell align="center">{row.item_code}</TableCell>
 

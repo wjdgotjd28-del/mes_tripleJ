@@ -67,7 +67,7 @@ export default function OrderViewPage() {
     useYn: "",
   });
 
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   // category 매핑 테이블
   const CATEGORY_LABELS: Record<string, string> = {
@@ -302,6 +302,13 @@ export default function OrderViewPage() {
         </Box>
       </Box>
 
+      {/* 안내 메시지 */}
+      <Box>
+        <Typography variant="body2" color="text.secondary">
+          🔹 수주 대상 품목 정보를 수정하려면 '품목명'을 클릭하세요.
+        </Typography>
+      </Box>
+
       {/* 테이블 영역 */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -312,7 +319,7 @@ export default function OrderViewPage() {
           <Table sx={{ minWidth: 900 }}>
             <TableHead>
               <TableRow>
-                <TableCell align="center">ID</TableCell>
+                <TableCell align="center"></TableCell>
                 <TableCell align="center">거래처명</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -335,9 +342,9 @@ export default function OrderViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((row) => (
+                paginatedData.map((row, idx) => (
                   <TableRow key={row.order_item_id}>
-                    <TableCell align="center">{row.order_item_id}</TableCell>
+                    <TableCell align="center">{idx+1}</TableCell>
                     <TableCell align="center">{row.company_name}</TableCell>
                     <TableCell align="center">{row.item_code}</TableCell>
                     <TableCell align="center">

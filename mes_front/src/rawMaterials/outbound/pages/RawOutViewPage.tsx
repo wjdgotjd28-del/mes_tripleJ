@@ -35,7 +35,7 @@ export default function RawMaterialOutViewPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<RawMaterialOutItems>>({});
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   useEffect(() => {
     loadData();

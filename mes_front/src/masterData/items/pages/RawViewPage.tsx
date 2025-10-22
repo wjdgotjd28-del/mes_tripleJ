@@ -56,7 +56,7 @@ export default function RawViewPage() {
     useYn: "",
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   // ✅ 영어 → 한글 매핑 (표시용)
   const categoryMap: Record<string, string> = {
@@ -276,17 +276,25 @@ export default function RawViewPage() {
         </Box>
       </Box>
 
+      {/* 안내 메시지 */}
+      <Box>
+        <Typography variant="body2" color="text.secondary">
+          🔹 원자재 품목 정보를 수정하려면 '품목명'을 클릭하세요.
+        </Typography>
+      </Box>
+
       {/* 로딩 상태 */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />
         </Box>
       ) : (
+        
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 900 }}>
             <TableHead>
               <TableRow>
-                <TableCell align="center">ID</TableCell>
+                <TableCell align="center"></TableCell>
                 <TableCell align="center">매입처명</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -309,9 +317,9 @@ export default function RawViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((row) => (
+                paginatedData.map((row, idx) => (
                   <TableRow key={row.material_item_id}>
-                    <TableCell align="center">{row.material_item_id}</TableCell>
+                    <TableCell align="center">{idx+1}</TableCell>
                     <TableCell align="center">{row.company_name}</TableCell>
                     <TableCell align="center">{row.item_code}</TableCell>
                     <TableCell align="center">
