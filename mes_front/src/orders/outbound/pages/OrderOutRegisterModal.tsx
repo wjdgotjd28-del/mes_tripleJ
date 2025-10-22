@@ -19,6 +19,8 @@ import {
 import { useState, useEffect } from "react";
 import type { Inbound, OrderOutbound } from "../../../type";
 import { getInboundForOut } from "../../inbound/api/OrderInViewApi";
+import { exportToExcel } from "../../../Common/ExcelUtils";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
 type Props = {
   open: boolean;
@@ -147,6 +149,8 @@ export default function OrderOutRegisterModal({
     setFilteredInbounds(filtered);
   };
 
+  const handleExcelDownload = () => exportToExcel(filteredInbounds, "출고대상_수주목록");
+
   const handleSubmit = () => {
     if (!selected) return alert("출고할 항목을 선택하세요.");
 
@@ -188,7 +192,7 @@ export default function OrderOutRegisterModal({
         <Box
           sx={{
             display: "flex",
-            gap: 2,
+            gap: 1,
             mb: 2,
             alignItems: "center",
           }}
@@ -199,7 +203,7 @@ export default function OrderOutRegisterModal({
             value={search.customerName}
             onChange={handleSearchChange}
             size="small"
-            sx={{ width: 200 }}
+            sx={{ width: 150 }}
           />
           <TextField
             placeholder="품목번호"
@@ -207,7 +211,7 @@ export default function OrderOutRegisterModal({
             value={search.itemCode}
             onChange={handleSearchChange}
             size="small"
-            sx={{ width: 200 }}
+            sx={{ width: 150 }}
           />
           <TextField
             placeholder="품목명"
@@ -215,7 +219,7 @@ export default function OrderOutRegisterModal({
             value={search.itemName}
             onChange={handleSearchChange}
             size="small"
-            sx={{ width: 200 }}
+            sx={{ width: 150 }}
           />
           <TextField
             placeholder="LOT번호"
@@ -223,7 +227,7 @@ export default function OrderOutRegisterModal({
             value={search.lotNo}
             onChange={handleSearchChange}
             size="small"
-            sx={{ width: 200 }}
+            sx={{ width: 150 }}
           />
           {/* 입고일자 필드: placeholder 사용, 값이 없을 때 텍스트 색상 조정 */}
           <TextField
@@ -233,7 +237,7 @@ export default function OrderOutRegisterModal({
             value={search.inboundDate}
             onChange={handleSearchChange}
             size="small"
-            sx={{ width: 200 }}
+            sx={{ width: 170 }}
             InputProps={{
               sx: {
                 // 값이 없을 때 '연도-월-일' 텍스트를 연한 회색으로 변경
@@ -245,6 +249,14 @@ export default function OrderOutRegisterModal({
           />
           <Button variant="contained" onClick={handleSearchClick}>
             검색
+          </Button>
+          <Button
+            color="success"
+            variant="outlined"
+            endIcon={<FileDownloadIcon />}
+            onClick={handleExcelDownload}
+          >
+            엑셀 다운로드
           </Button>
         </Box>
 
