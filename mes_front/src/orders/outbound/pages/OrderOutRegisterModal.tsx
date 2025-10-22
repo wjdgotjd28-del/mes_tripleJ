@@ -250,6 +250,7 @@ export default function OrderOutRegisterModal({
           <Button variant="contained" onClick={handleSearchClick}>
             검색
           </Button>
+          <Box sx={{ flexGrow: 1 }} />
           <Button
             color="success"
             variant="outlined"
