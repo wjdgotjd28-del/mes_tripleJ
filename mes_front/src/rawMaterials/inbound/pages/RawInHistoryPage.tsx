@@ -132,7 +132,7 @@ export default function RawInHistoryPage() {
     setEditableRowData(row);
   };
 
-  const handleSave = async (id: number) => {
+  const handleSave = async () => {
     if (!editableRowData) return;
     try {
       console.log("Saving data:", editableRowData);
@@ -415,7 +415,7 @@ export default function RawInHistoryPage() {
                             <Button
                               variant="outlined"
                               size="small"
-                              onClick={() => handleSave(row.id)}
+                              onClick={() => handleSave()}
                               sx={{ mr: 0.5 }}
                             >
                               저장

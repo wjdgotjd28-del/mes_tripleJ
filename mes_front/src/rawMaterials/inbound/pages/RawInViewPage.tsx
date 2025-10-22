@@ -151,7 +151,7 @@ export default function RawInViewPage() {
       qty: inboundData.qty,
       inboundDate: inboundData.inboundDate,
       inboundNo: "", // Will be assigned by backend
-      totalQty: `${rawItem.spec_qty * inboundData.qty}${rawItem.spec_unit}`, // Calculate totalQty and append specUnit
+      totalQty: `${rawItem.spec_qty * inboundData.qty}`, // Calculate totalQty and append specUnit
     };
 
     console.log("전송될 데이터:", newMaterialInbound);
