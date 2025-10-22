@@ -21,6 +21,11 @@ import type { RawMaterialOutItems, RawMaterialInventoryStatus } from "../../../t
 import { addRawMaterialOutbound } from "../api/RawMaterialOutApi";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import { fetchRawMaterialInventory } from "../../inventory/api/RawMaterialApi";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/ko";
 
 // ✅ Props 타입
 interface Props {
@@ -326,20 +331,22 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
                 }}
               />
 
-              {/* 🔹 날짜 + 시간 */}
-              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <TextField
+              {/* 🔹 날짜 */}
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
+                <DatePicker
                   label="출고일자"
-                  type="date"
-                  size="small"
-                  value={form.outboundDate.split("T")[0]} // yyyy-MM-dd
-                  onChange={(e) => {
-                    setForm({ ...form, outboundDate: `${e.target.value}` });
+                  format="YYYY-MM-DD"
+                  value={dayjs(form.outboundDate)}
+                  onChange={(newValue) => {
+                    if (newValue) {
+                      setForm({ ...form, outboundDate: newValue.format("YYYY-MM-DD") });
+                    }
                   }}
-                  sx={{ width: 150 }}
-                  InputLabelProps={{ shrink: true }}
+                  slotProps={{
+                    textField: { size: "small", sx: { width: 180 } },
+                  }}
                 />
-              </Box>
+              </LocalizationProvider>
             </>
           ) : (
             <>

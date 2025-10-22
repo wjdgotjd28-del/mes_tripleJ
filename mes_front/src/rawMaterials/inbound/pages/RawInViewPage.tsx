@@ -304,17 +304,17 @@ export default function RawInViewPage() {
                       <TextField
                         type="number"
                         size="small"
-                        value={inboundInput[row.material_item_id]?.qty || ""}
-                        onChange={(e) => handleInboundInputChange(row.material_item_id, "qty", Number(e.target.value))}
+                        value={inboundInput[row.material_item_id!]?.qty || ""}
+                        onChange={(e) => handleInboundInputChange(row.material_item_id!, "qty", Number(e.target.value))}
                         sx={{ width: 80 }}
                       />
                     </TableCell>
                     <TableCell align="center">
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                         <DatePicker
-                          value={inboundInput[row.material_item_id]?.inboundDate ? dayjs(inboundInput[row.material_item_id]?.inboundDate) : null}
+                          value={inboundInput[row.material_item_id!]?.inboundDate ? dayjs(inboundInput[row.material_item_id!]?.inboundDate) : null}
                           onChange={(newDate) =>
-                            handleInboundInputChange(row.material_item_id, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                            handleInboundInputChange(row.material_item_id!, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
                           }
                           format="YYYY-MM-DD"
                           slotProps={{
@@ -324,11 +324,11 @@ export default function RawInViewPage() {
                       </LocalizationProvider>
                     </TableCell>
                     <TableCell align="center">
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                         <DatePicker
-                          value={inboundInput[row.material_item_id]?.manufacteDate ? dayjs(inboundInput[row.material_item_id]?.manufacteDate) : null}
+                          value={inboundInput[row.material_item_id!]?.manufacteDate ? dayjs(inboundInput[row.material_item_id!]?.manufacteDate) : null}
                           onChange={(newDate) =>
-                            handleInboundInputChange(row.material_item_id, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                            handleInboundInputChange(row.material_item_id!, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
                           }
                           format="YYYY-MM-DD"
                           slotProps={{

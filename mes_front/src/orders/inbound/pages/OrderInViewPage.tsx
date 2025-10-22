@@ -21,6 +21,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
+import "dayjs/locale/ko";
 
 import {
   ArrowDownward,
@@ -368,7 +369,7 @@ export default function OrderInViewPage() {
 
                       {/* 입고 일자 선택 */}
                       <TableCell align="center">
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                           <DatePicker
                             value={values.date ? dayjs(values.date) : null}
                             onChange={(newDate) =>

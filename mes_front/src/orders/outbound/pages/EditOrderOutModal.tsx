@@ -12,6 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { type Dayjs } from 'dayjs';
+import "dayjs/locale/ko";
 
 interface EditOrderOutModalProps {
   open: boolean;
@@ -106,7 +107,7 @@ export default function EditOrderOutModal({
           fullWidth
           InputProps={{ inputProps: { min: 0 } }}
         />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
           <DatePicker
             label="출고 일자"
             value={dateValue}
