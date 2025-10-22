@@ -392,8 +392,8 @@ export default function RawInViewPage() {
                       </TableCell>
                       <TableCell align="center">
                         <Button
-                          variant="contained"
-                          color="primary"
+                          variant="outlined"
+                          color="success"
                           size="small"
                           onClick={() => handleRegisterInbound(row)}
                         >
