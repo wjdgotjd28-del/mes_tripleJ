@@ -71,8 +71,7 @@ export default function RawInHistoryPage() {
     inboundNo: "",
     inboundDate: null as Dayjs | null,
   });
-  const [appliedSearchValues, setAppliedSearchValues] =
-    useState(searchValues);
+  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
   useEffect(() => {
     fetchMaterialInboundHistory();

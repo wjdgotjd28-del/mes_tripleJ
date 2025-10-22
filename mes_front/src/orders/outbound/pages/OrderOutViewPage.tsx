@@ -55,7 +55,7 @@ export default function OrderOutViewPage() {
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
 
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   useEffect(() => {
     loadOrderOutboundData();
@@ -125,6 +125,7 @@ export default function OrderOutViewPage() {
       alert("출고 정보 수정에 실패했습니다.");
     }
   };
+  const handleExcelDownload = () => exportToExcel(sortedRows, "출고목록");
 
   // ✅ 삭제
   const handleDelete = (id: number) => {
@@ -158,16 +159,21 @@ export default function OrderOutViewPage() {
   const [openModal, setOpenModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
   const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
-  const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
-      try {
-        setSelectedOrder(row); // row: OrderOutbound
-        const inbound = allRows.find(item => item.orderInboundId === orderInboundId);
-        setSelectedInboundDate(inbound?.inboundDate);
-        setOpenModal(true);
-      } catch (err) {
-        console.error("출하증 조회 실패", err);
-      }
-    };
+  const handleOpenModal = async (
+    row: OrderOutbound,
+    orderInboundId: number
+  ) => {
+    try {
+      setSelectedOrder(row); // row: OrderOutbound
+      const inbound = allRows.find(
+        (item) => item.orderInboundId === orderInboundId
+      );
+      setSelectedInboundDate(inbound?.inboundDate);
+      setOpenModal(true);
+    } catch (err) {
+      console.error("출하증 조회 실패", err);
+    }
+  };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -219,15 +225,15 @@ export default function OrderOutViewPage() {
           </IconButton>
         </Tooltip>
         <Box sx={{ flex: 1 }} />
+
         {/*  오른쪽: 엑셀 다운로드 버튼 */}
         <Button
+          color="success"
           variant="outlined"
           endIcon={<FileDownloadIcon />}
-          sx={{ height: 40 }}
-          onClick={() => exportToExcel(displayedRows, "출고 이력")}
+          onClick={handleExcelDownload}
         >
-          {/* height 추가 */}
-          Excel
+          엑셀 다운로드
         </Button>
         <Button
           variant="contained"
@@ -266,7 +272,9 @@ export default function OrderOutViewPage() {
                 <TableCell align="center">{row.itemName}</TableCell>
                 <TableCell align="center">{row.qty}</TableCell>
                 <TableCell align="center">{row.outboundDate}</TableCell>
-                <TableCell align="center">{translateCategory(row.category)}</TableCell>
+                <TableCell align="center">
+                  {translateCategory(row.category)}
+                </TableCell>
                 <TableCell align="center">
                   <Box
                     sx={{ display: "flex", gap: 1, justifyContent: "center" }}

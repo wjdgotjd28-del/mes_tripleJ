@@ -31,6 +31,7 @@ public class OrderInboundService {
         orderInboundRepository.save(entity); // ✅ 상태 변경 저장
     }
 
+
     public List<OrderInboundDTO> findInboundHistoriesForOutbound() {
         return orderInboundRepository.findInboundHistoriesForOutbound();
     }
@@ -65,6 +66,9 @@ public class OrderInboundService {
         orderInboundRepository.save(entity);
 
     }
+
+
+
 
     public void save(OrderInboundDTO dto) {
         OrderItem orderItem = orderItemRepository.findById(dto.getOrderItemId())

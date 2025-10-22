@@ -62,7 +62,7 @@ export default function InboundHistoryPage() {
   const [data, setData] = useState<OrderInbound[]>([]);
   const [displayedData, setDisplayedData] = useState<OrderInbound[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
   //  작업지시서 모달 상태
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
@@ -305,16 +305,16 @@ export default function InboundHistoryPage() {
         <Table sx={{ minWidth: 1000 }}>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>LOT번호</TableCell>
-              <TableCell>거래처명</TableCell>
-              <TableCell>품목 번호</TableCell>
-              <TableCell>품목명</TableCell>
-              <TableCell>수량</TableCell>
-              <TableCell>입고일자</TableCell>
-              <TableCell>도장</TableCell>
-              <TableCell>분류</TableCell>
-              <TableCell></TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center">LOT번호</TableCell>
+              <TableCell align="center">거래처명</TableCell>
+              <TableCell align="center">품목 번호</TableCell>
+              <TableCell align="center">품목명</TableCell>
+              <TableCell align="center">수량</TableCell>
+              <TableCell align="center">입고일자</TableCell>
+              <TableCell align="center">도장</TableCell>
+              <TableCell align="center">분류</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -328,10 +328,10 @@ export default function InboundHistoryPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((row: OrderInbound) => (
+              paginatedData.map((row: OrderInbound, idx) => (
                 <TableRow key={row.order_inbound_id}>
-                  <TableCell>{row.order_inbound_id}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">{idx+1}</TableCell>
+                  <TableCell align="center">
                     <Typography
                       variant="body2"
                       sx={{
@@ -353,9 +353,9 @@ export default function InboundHistoryPage() {
                       {row.lot_no}
                     </Typography>
                   </TableCell>
-                  <TableCell>{row.customer_name}</TableCell>
-                  <TableCell>{row.item_code}</TableCell>
-                  <TableCell>{row.item_name}</TableCell>
+                  <TableCell align="center">{row.customer_name}</TableCell>
+                  <TableCell align="center">{row.item_code}</TableCell>
+                  <TableCell align="center">{row.item_name}</TableCell>
                   {/* 수량 */}
                   <TableCell align="center">
                     {editRowId === row.order_inbound_id ? (
@@ -398,15 +398,17 @@ export default function InboundHistoryPage() {
                     )}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell align="center">
                     {paintLableMap[row.paint_type] || row.paint_type}
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     {categoryLabelMap[row.category] || row.category}
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     {editRowId === row.order_inbound_id ? (
-                      <>
+                      <Box
+                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                      >
                         <Button
                           variant="outlined"
                           size="small"
@@ -423,15 +425,25 @@ export default function InboundHistoryPage() {
                         >
                           취소
                         </Button>
-                      </>
+                      </Box>
                     ) : (
-                      <>
+                      <Box
+                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                      >
                         <Button
                           variant="outlined"
                           size="small"
-                          sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
+                          sx={{
+                            color: "#ff8c00",
+                            borderColor: "#ff8c00",
+                            mr: 0.3,
+                          }}
                           onClick={() =>
-                            handleOpenModal(row.order_item_id, row.lot_no, row.qty)
+                            handleOpenModal(
+                              row.order_item_id,
+                              row.lot_no,
+                              row.qty
+                            )
                           }
                         >
                           작업지시서
@@ -454,7 +466,7 @@ export default function InboundHistoryPage() {
                         >
                           삭제
                         </Button>
-                      </>
+                      </Box>
                     )}
                   </TableCell>
                 </TableRow>

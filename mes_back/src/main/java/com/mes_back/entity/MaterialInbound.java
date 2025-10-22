@@ -55,7 +55,7 @@ public class MaterialInbound {
     private String inboundNo;
 
     @Column(name = "total_qty", nullable = false)
-    private String totalQty;
+    private Long totalQty;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -67,4 +67,4 @@ public class MaterialInbound {
         this.inboundDate = materialInboundDto.getInboundDate();
         this.manufacteDate = materialInboundDto.getManufacteDate();
     }
-}
+

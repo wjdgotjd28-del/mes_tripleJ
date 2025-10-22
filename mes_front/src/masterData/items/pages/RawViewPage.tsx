@@ -56,7 +56,7 @@ export default function RawViewPage() {
     useYn: "",
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   // ✅ 영어 → 한글 매핑 (표시용)
   const categoryMap: Record<string, string> = {
@@ -259,8 +259,8 @@ export default function RawViewPage() {
             </IconButton>
           </Tooltip>
         </Box>
-        {/* 정렬 토글 버튼 */}
 
+        {/* 정렬 토글 버튼 */}
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
             + 등록
@@ -276,27 +276,35 @@ export default function RawViewPage() {
         </Box>
       </Box>
 
+      {/* 안내 메시지 */}
+      <Box>
+        <Typography variant="body2" color="text.secondary">
+          🔹 원자재 품목 정보를 수정하려면 '품목명'을 클릭하세요.
+        </Typography>
+      </Box>
+
       {/* 로딩 상태 */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />
         </Box>
       ) : (
+        
         <TableContainer component={Paper}>
           <Table sx={{ minWidth: 900 }}>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>매입처명</TableCell>
-                <TableCell>품목번호</TableCell>
-                <TableCell>품목명</TableCell>
-                <TableCell>규격(양/단위)</TableCell>
-                <TableCell>분류</TableCell>
-                <TableCell>제조사</TableCell>
-                <TableCell>비고</TableCell>
-                <TableCell>사용여부</TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
+                <TableCell align="center"></TableCell>
+                <TableCell align="center">매입처명</TableCell>
+                <TableCell align="center">품목번호</TableCell>
+                <TableCell align="center">품목명</TableCell>
+                <TableCell align="center">규격(양/단위)</TableCell>
+                <TableCell align="center">분류</TableCell>
+                <TableCell align="center">제조사</TableCell>
+                <TableCell align="center">비고</TableCell>
+                <TableCell align="center">사용여부</TableCell>
+                <TableCell align="center"></TableCell>
+                <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -309,12 +317,12 @@ export default function RawViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((row) => (
+                paginatedData.map((row, idx) => (
                   <TableRow key={row.material_item_id}>
-                    <TableCell>{row.material_item_id}</TableCell>
-                    <TableCell>{row.company_name}</TableCell>
-                    <TableCell>{row.item_code}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">{idx+1}</TableCell>
+                    <TableCell align="center">{row.company_name}</TableCell>
+                    <TableCell align="center">{row.item_code}</TableCell>
+                    <TableCell align="center">
                       <Typography
                         variant="body2"
                         sx={{
@@ -330,10 +338,10 @@ export default function RawViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell>{`${row.spec_qty}${row.spec_unit}`}</TableCell>
-                    <TableCell>{categoryMap[row.category] || row.category}</TableCell>
-                    <TableCell>{row.manufacturer}</TableCell>
-                    <TableCell>{row.note}</TableCell>
+                    <TableCell align="center">{`${row.spec_qty}${row.spec_unit}`}</TableCell>
+                    <TableCell align="center">{categoryMap[row.category] || row.category}</TableCell>
+                    <TableCell align="center">{row.manufacturer}</TableCell>
+                    <TableCell align="center">{row.note}</TableCell>
                     <TableCell align="center">
                       <Chip
                         label={useYnMap[row.use_yn] || row.use_yn}
@@ -342,7 +350,7 @@ export default function RawViewPage() {
                         sx={{ minWidth: 80 }}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <Button
                         onClick={() => handleToggleUseYn(row.material_item_id!)}
                         size="small"
@@ -350,7 +358,7 @@ export default function RawViewPage() {
                         {row.use_yn === "Y" ? "사용 중지" : "복원"}
                       </Button>
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <Button
                         variant="outlined"
                         size="small"

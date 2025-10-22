@@ -3,8 +3,10 @@ package com.mes_back.service;
 import com.mes_back.dto.MaterialInboundDTO;
 import com.mes_back.entity.MaterialInbound;
 import com.mes_back.entity.MaterialItem;
+import com.mes_back.entity.MaterialStock;
 import com.mes_back.repository.MaterialInboundRepository;
 import com.mes_back.repository.MaterialItemRepository;
+import com.mes_back.repository.MaterialStockRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,8 @@ import java.util.stream.Collectors;
 public class MaterialInboundService {
 
     private final MaterialInboundRepository materialInboundRepository;
-    private final MaterialItemRepository materialItemRepository; // Repository 추가
+    private final MaterialItemRepository materialItemRepository;
+    private final MaterialStockRepository materialStockRepository;
 
     @Transactional(readOnly = true)
     public List<MaterialInboundDTO> getMaterialInbound() {
@@ -33,37 +36,55 @@ public class MaterialInboundService {
     }
 
     public MaterialInboundDTO addMaterialInbound(MaterialInboundDTO materialInboundDto) {
-        // 1. DTO에서 ID를 사용하여 MaterialItem 엔티티 조회
+        // 1. MaterialItem 조회
         MaterialItem materialItem = materialItemRepository.findById(materialInboundDto.getMaterialItemId())
-                .orElseThrow(() -> new EntityNotFoundException("MaterialItem not found with id: " + materialInboundDto.getMaterialItemId()));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "MaterialItem not found with id: " + materialInboundDto.getMaterialItemId()
+                ));
 
         // 2. 입고번호 생성
         String inboundNo = generateInboundNo();
 
-        // 3. MaterialInbound 엔티티 생성
+        // 3. 실제 입고량 계산 (입고 수량 * 규격(양))
+        Long calculatedQty = materialInboundDto.getQty() * materialItem.getSpecQty();
+
+        // 4. MaterialInbound 생성 및 저장
         MaterialInbound materialInbound = MaterialInbound.builder()
-                .materialItem(materialItem) // 조회된 엔티티 객체를 전달
+                .materialItem(materialItem)
                 .supplierName(materialInboundDto.getSupplierName())
-                .itemName(materialItem.getItemName()) // 마스터 데이터 이름 사용
-                .itemCode(materialItem.getItemCode()) // 마스터 데이터 코드 사용
+                .itemName(materialItem.getItemName())
+                .itemCode(materialItem.getItemCode())
                 .specQty(materialItem.getSpecQty())
                 .specUnit(materialItem.getSpecUnit())
                 .manufacturer(materialItem.getManufacturer())
                 .manufacteDate(materialInboundDto.getManufacteDate())
                 .qty(materialInboundDto.getQty())
                 .inboundDate(materialInboundDto.getInboundDate())
-                .inboundNo(inboundNo) // 생성된 입고번호 사용
-                .totalQty(String.valueOf(materialInboundDto.getQty() * materialItem.getSpecQty()) + materialItem.getSpecUnit())
+                .inboundNo(inboundNo)
+                .totalQty(calculatedQty)
                 .build();
 
-        // 4. 엔티티 저장
         MaterialInbound savedInbound = materialInboundRepository.save(materialInbound);
 
-        // 5. 저장된 엔티티를 DTO로 변환하여 반환
+        // 5. MaterialStock 업데이트
+        MaterialStock stock = materialStockRepository.findByMaterialInbound(savedInbound)
+                .orElseGet(() -> {
+                    MaterialStock newStock = new MaterialStock();
+                    newStock.setMaterialInbound(savedInbound);
+                    newStock.setUnit(materialItem.getSpecUnit());
+                    newStock.setTotalQty(0L);
+                    return newStock;
+                });
+
+        Long updatedTotal = (stock.getTotalQty() != null ? stock.getTotalQty() : 0L) + calculatedQty;
+        stock.setTotalQty(updatedTotal);
+        materialStockRepository.save(stock);
+
+        // 6. DTO 반환
         return entityToDto(savedInbound);
     }
 
-    // 엔티티를 DTO로 변환하는 헬퍼 메소드
+    // DTO 변환
     private MaterialInboundDTO entityToDto(MaterialInbound materialInbound) {
         return MaterialInboundDTO.builder()
                 .id(materialInbound.getId())
@@ -75,13 +96,14 @@ public class MaterialInboundService {
                 .specUnit(materialInbound.getSpecUnit())
                 .manufacturer(materialInbound.getManufacturer())
                 .manufacteDate(materialInbound.getManufacteDate())
-                .qty(materialInbound.getQty())
+                .qty(materialInbound.getQty()) // 입고수량(Long)
                 .inboundDate(materialInbound.getInboundDate())
                 .inboundNo(materialInbound.getInboundNo())
-                .totalQty(String.valueOf(materialInbound.getQty() * materialInbound.getSpecQty()) + materialInbound.getSpecUnit())
+                .totalQty(materialInbound.getTotalQty()) // 단위 포함 String
                 .build();
     }
 
+    // 입고번호 생성
     protected String generateInboundNo() {
         String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String prefix = "MINC-" + today + "-";
