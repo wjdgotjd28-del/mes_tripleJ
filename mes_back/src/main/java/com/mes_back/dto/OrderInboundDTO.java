@@ -16,7 +16,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class OrderInboundDTO {
 
     @JsonProperty("order_inbound_id")

@@ -34,6 +34,7 @@ import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import EditOrderOutModal from "./EditOrderOutModal";
 import { usePagination } from "../../../Common/usePagination";
+import OrdersOutDocModal from "./OrdersOutDocModal";
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -153,9 +154,7 @@ export default function OrderOutViewPage() {
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
     usePagination(sortedRows, 20); // 한 페이지당 20개
 
-  const handleExcelDownload = () => exportToExcel(sortedRows, "입고이력");
-
-  //  작업지시서 모달 상태
+  // 출하증 모달 상태
   const [openModal, setOpenModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
   const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
@@ -165,7 +164,7 @@ export default function OrderOutViewPage() {
   ) => {
     try {
       setSelectedOrder(row); // row: OrderOutbound
-      const inbound = inbounds.find(
+      const inbound = allRows.find(
         (item) => item.orderInboundId === orderInboundId
       );
       setSelectedInboundDate(inbound?.inboundDate);
@@ -251,70 +250,63 @@ export default function OrderOutViewPage() {
         <Table sx={{ minWidth: 900 }}>
           <TableHead>
             <TableRow>
-              <TableCell>출고번호</TableCell>
-              <TableCell>거래처명</TableCell>
-              <TableCell>품목번호</TableCell>
-              <TableCell>품목명</TableCell>
-              <TableCell>출고 수량</TableCell>
-              <TableCell>출고 일자</TableCell>
-              <TableCell>분류</TableCell>
+              <TableCell align="center">ID</TableCell>
+              <TableCell align="center">출고번호</TableCell>
+              <TableCell align="center">거래처명</TableCell>
+              <TableCell align="center">품목번호</TableCell>
+              <TableCell align="center">품목명</TableCell>
+              <TableCell align="center">출고 수량</TableCell>
+              <TableCell align="center">출고 일자</TableCell>
+              <TableCell align="center">분류</TableCell>
               <TableCell align="center">기능</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.length === 0 ? (
-              // 표시할 데이터 없을 때
-              <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                  <Typography color="text.secondary">
-                    입고된 수주 품목이 없습니다.
-                  </Typography>
+            {displayedRows.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{row.outboundNo}</TableCell>
+                <TableCell align="center">{row.customerName}</TableCell>
+                <TableCell align="center">{row.itemCode}</TableCell>
+                <TableCell align="center">{row.itemName}</TableCell>
+                <TableCell align="center">{row.qty}</TableCell>
+                <TableCell align="center">{row.outboundDate}</TableCell>
+                <TableCell align="center">
+                  {translateCategory(row.category)}
+                </TableCell>
+                <TableCell align="center">
+                  <Box
+                    sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                  >
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ color: "#ff8c00ff", borderColor: "#ff8c00ff" }}
+                      onClick={() => handleOpenModal(row, row.orderInboundId)}
+                    >
+                      출하증
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => setEditData(row)}
+                    >
+                      수정
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDelete(row.id!)}
+                    >
+                      삭제
+                    </Button>
+                  </Box>
                 </TableCell>
               </TableRow>
-            ) : (
-              paginatedData.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.outboundNo}</TableCell>
-                  <TableCell>{row.customerName}</TableCell>
-                  <TableCell>{row.itemCode}</TableCell>
-                  <TableCell>{row.itemName}</TableCell>
-                  <TableCell>{row.qty}</TableCell>
-                  <TableCell>{row.outboundDate}</TableCell>
-                  <TableCell>{translateCategory(row.category)}</TableCell>
-                  <TableCell align="center">
-                    <Box
-                      sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                    >
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        sx={{ color: "#ff8c00ff", borderColor: "#ff8c00ff" }}
-                        onClick={() => handleOpenModal(row, row.orderInboundId)}
-                      >
-                        출하증
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<EditIcon />}
-                        onClick={() => setEditData(row)}
-                      >
-                        수정
-                      </Button>
-                      <Button
-                        variant="outlined"
-                        color="error"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={() => handleDelete(row.id!)}
-                      >
-                        삭제
-                      </Button>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
@@ -355,14 +347,13 @@ export default function OrderOutViewPage() {
         onSubmit={handleRegister}
       />
 
-      {/* 작업지시서 모달 
+      {/* 작업지시서 모달  */}
       <OrdersOutDocModal
         open={openModal}
         onClose={() => setOpenModal(false)}
         outItem={selectedOrder}
         inboundDate={selectedInboundDate}
       />
-      */}
     </Box>
   );
 }

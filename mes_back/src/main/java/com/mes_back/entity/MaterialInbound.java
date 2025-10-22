@@ -1,11 +1,17 @@
 package com.mes_back.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "material_inbound")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MaterialInbound {
 
     @Id
@@ -47,5 +53,5 @@ public class MaterialInbound {
     private String inboundNo;
 
     @Column(name = "total_qty", nullable = false)
-    private Long totalQty;
+    private String totalQty;
 }

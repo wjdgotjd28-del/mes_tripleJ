@@ -405,44 +405,57 @@ export default function InboundHistoryPage() {
                     {categoryLabelMap[row.category] || row.category}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
-                      onClick={() =>
-                        handleOpenModal(row.order_item_id, row.lot_no, row.qty)
-                      }
-                    >
-                      작업지시서
-                    </Button>
-
                     {editRowId === row.order_inbound_id ? (
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() => handleSave(row.order_inbound_id)}
-                      >
-                        완료
-                      </Button>
+                      <>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleSave(row.order_inbound_id)}
+                          sx={{ mr: 0.5 }}
+                        >
+                          저장
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="error"
+                          onClick={() => setEditRowId(null)} // ✅ 수정 취소
+                        >
+                          취소
+                        </Button>
+                      </>
                     ) : (
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => handleUpdate(row.order_inbound_id)}
-                      >
-                        수정
-                      </Button>
-                    )}
+                      <>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
+                          onClick={() =>
+                            handleOpenModal(row.order_item_id, row.lot_no, row.qty)
+                          }
+                        >
+                          작업지시서
+                        </Button>
 
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      onClick={() => handleDelete(row.order_inbound_id)}
-                      sx={{ ml: 0.3 }}
-                    >
-                      삭제
-                    </Button>
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={() => handleUpdate(row.order_inbound_id)}
+                        >
+                          수정
+                        </Button>
+
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          size="small"
+                          onClick={() => handleDelete(row.order_inbound_id)}
+                          sx={{ ml: 0.3 }}
+                        >
+                          삭제
+                        </Button>
+                      </>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

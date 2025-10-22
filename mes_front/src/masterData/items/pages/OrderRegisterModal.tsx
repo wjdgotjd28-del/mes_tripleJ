@@ -6,18 +6,18 @@ import {
   TableCell, TableContainer, TableHead, TableRow, Paper
 } from "@mui/material";
 import { Close as CloseIcon, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
-import type { OrderItems, OrderItemImage, RoutingFormData } from "../../../type";
+import type { OrderItems, OrderItemImage, RoutingFormData, Company, RoutingFormDataWithProcessNo } from "../../../type";
 import { createOrderItems } from "../api/OrderApi";
 import { fetchRoutings } from "../../routings/api/RoutingApi";
+import { getCompany } from "../../companies/api/companyApi";
 
 interface OrderRegisterModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: OrderItems) => void;
-  companyList?: Array<{ id: number; name: string }>;
 }
 
-export default function OrderRegisterModal({ open, onClose, onSubmit, companyList = [] }: OrderRegisterModalProps) {
+export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderRegisterModalProps) {
   const [newData, setNewData] = useState<Partial<OrderItems>>({
     company_name: "",
     item_name: "",
@@ -34,8 +34,10 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
   });
 
   const [routingList, setRoutingList] = useState<RoutingFormData[]>([]);
-  const [selectedRouting, setSelectedRouting] = useState<(RoutingFormData & { process_no: number })[]>([]);
+  const [selectedRouting, setSelectedRouting] = useState<RoutingFormDataWithProcessNo[]>([]);
+  const [companyList, setCompanyList] = useState<Company[]>([]);
 
+  // 모달 열릴 때 라우팅 + 업체 데이터 로드
   useEffect(() => {
     if (!open) {
       setSelectedRouting([]);
@@ -45,9 +47,11 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
         use_yn: "Y", status: "Y", image: [], routing: []
       });
       setRoutingList([]);
+      setCompanyList([]);
       return;
     }
-    const loadRoutings = async (): Promise<void> => {
+
+    const loadRoutings = async () => {
       try {
         const data: RoutingFormData[] = await fetchRoutings();
         setRoutingList(data);
@@ -55,7 +59,19 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
         console.error("라우팅 데이터 불러오기 실패", error);
       }
     };
+
+    const loadCompanyData = async () => {
+      try {
+        const allCompanies: Company[] = await getCompany();
+        const customers = allCompanies.filter(c => c.type === "CUSTOMER");
+        setCompanyList(customers);
+      } catch (err) {
+        console.error("업체 데이터 불러오기 실패", err);
+      }
+    };
+
     loadRoutings();
+    loadCompanyData();
   }, [open]);
 
   const handleChange = (field: keyof OrderItems, value: string | number) => {
@@ -63,7 +79,8 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
   };
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files; if (!files) return;
+    const files = e.target.files;
+    if (!files) return;
     const newImages: OrderItemImage[] = Array.from(files).map(file => {
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 15);
@@ -97,12 +114,6 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
     setSelectedRouting(prev => prev.map(r => r.routing_id === id ? { ...r, process_no: newOrder } : r));
   };
 
-  // const parseDuration = (timeStr: string | undefined) => {
-  //   if (!timeStr) return undefined;
-  //   const match = timeStr.match(/([\d.]+)h/);
-  //   return match ? Math.round(parseFloat(match[1]) * 60) : undefined;
-  // };
-
   const handleSubmit = async () => {
     if (!newData.company_name || !newData.item_code || !newData.item_name || !newData.unit_price) {
       alert("필수값을 입력해주세요.");
@@ -126,14 +137,9 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
     formData.append("orderItem", new Blob([JSON.stringify(orderItemData)], { type: "application/json" }));
 
     if (selectedRouting.length > 0) {
-      const routingData = selectedRouting.sort((a, b) => a.process_no - b.process_no).map((r, i) => ({
-        routing_id: r.routing_id,
-        process_no: i + 1,
-        // process_code: r.processCode,
-        // process_name: r.processName,
-        // process_time: parseDuration(r.processTime),
-        // note: r.note
-      }));
+      const routingData = selectedRouting
+        .sort((a, b) => a.process_no - b.process_no)
+        .map((r, i) => ({ routing_id: r.routing_id, process_no: i + 1 }));
       formData.append("routing", new Blob([JSON.stringify(routingData)], { type: "application/json" }));
     }
 
@@ -165,7 +171,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }} component="div">
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h6">수주 대상 품목 등록</Typography>
         <Box>
           <Button onClick={handleSubmit} variant="contained" color="primary">등록</Button>
@@ -179,8 +185,20 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
             <Typography variant="subtitle2" color="primary" gutterBottom>기본정보</Typography>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 2 }}>
+              {/* 업체명 */}
               <Typography color="text.secondary" alignSelf="center">업체명</Typography>
-              {companyList.length > 0 ? (
+              {companyList.length === 0 ? (
+                // 조회된 CUSTOMER가 없으면 일반 텍스트 입력
+                <TextField
+                  value={newData.company_name ?? ""}
+                  onChange={(e) => handleChange("company_name", e.target.value)}
+                  size="small"
+                  fullWidth
+                  placeholder="등록된 고객사가 없습니다. 업체관리에서 고객사를 등록해주세요"
+                  required
+                />
+              ) : (
+                // 조회된 CUSTOMER가 있으면 드롭다운
                 <TextField
                   select
                   value={newData.company_name ?? ""}
@@ -188,23 +206,19 @@ export default function OrderRegisterModal({ open, onClose, onSubmit, companyLis
                   size="small"
                   fullWidth
                   required
+                  SelectProps={{ displayEmpty: true }} // 이 부분이 핵심
                 >
+                  <MenuItem value="" disabled>
+                    매입처를 선택해주세요
+                  </MenuItem>
                   {companyList.map((company) => (
-                    <MenuItem key={company.id} value={company.name}>
-                      {company.name}
+                    <MenuItem key={company.companyId} value={company.companyName}>
+                      {company.companyName}
                     </MenuItem>
                   ))}
                 </TextField>
-              ) : (
-                <TextField
-                  value={newData.company_name ?? ""}
-                  onChange={(e) => handleChange("company_name", e.target.value)}
-                  size="small"
-                  fullWidth
-                  required
-                  placeholder="업체 목록을 불러오지 못했습니다. 직접 입력하세요."
-                />
               )}
+
               <Typography color="text.secondary" alignSelf="center">품목번호</Typography>
               <TextField
                 value={newData.item_code ?? ""}

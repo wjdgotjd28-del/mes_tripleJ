@@ -70,7 +70,7 @@ public class OrderInboundService {
 
 
 
-    public void getInbound(OrderInboundDTO dto) {
+    public void save(OrderInboundDTO dto) {
         OrderItem orderItem = orderItemRepository.findById(dto.getOrderItemId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수주 품목입니다."));
 

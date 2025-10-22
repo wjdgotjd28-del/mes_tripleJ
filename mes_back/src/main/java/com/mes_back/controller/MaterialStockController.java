@@ -20,7 +20,6 @@ public class MaterialStockController {
 
     private final MaterialStockService materialStockService;
 
-
     @GetMapping("/inventory")
     public ResponseEntity<List<MaterialStockDTO>> findAllInventory() {
         List<MaterialStockDTO> materialStockDTOS = materialStockService.findAll();

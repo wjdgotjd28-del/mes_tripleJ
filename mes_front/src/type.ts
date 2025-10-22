@@ -27,7 +27,7 @@ export interface OrderItems {
 
 // 원자재 품목 데이터 타입
 export interface RawItems {
-  material_item_id: number;
+  material_item_id?: number;
   company_name: string;
   item_code: string;
   item_name: string;
@@ -91,6 +91,7 @@ export type OrderOutbound = {
   qty: number;
   outboundDate: string;
   category: string;
+  inboundDate: string;
 };
 
 // 수주 출고에서 쓰이는 수주 입고 데이터 조회용 타입 
@@ -114,8 +115,23 @@ export type RawMaterialInventoryStatus = {
   item_name: string;
   total_qty: number;
   unit: string;
+  manufacturer?: string;
 };
 
+// 원자재 출고 타입
+export type RawMaterialOutItems = {
+  id?: number;
+  company_name: string;
+  item_code: string;
+  item_name: string;
+  total_qty: number;
+  unit: string;
+  qty:number
+  outbound_no?: string; // 출고번호 (백엔드 생성)
+  outbound_date?: string; // 출고일자
+  manufacturer?: string;
+  material_inbound_id: number;
+}
 
 export type OrderProcessTracking = {
   order_inbound_id: number;
@@ -156,5 +172,5 @@ export type MaterialInbound = {
   qty: number;
   inboundDate: string;           // 'YYYY-MM-DD' 형식
   inboundNo: string;
-  totalQty: number;
+  totalQty: string;
 }

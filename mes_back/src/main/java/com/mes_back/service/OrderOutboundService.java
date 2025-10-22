@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -101,6 +102,7 @@ public class OrderOutboundService {
                 .category(saved.getCategory())
                 .outboundNo(saved.getOutboundNo())
                 .outboundDate(saved.getOutboundDate())
+                .inboundDate(orderInbound.getInboundDate())
                 .build();
     }
 
@@ -117,7 +119,7 @@ public class OrderOutboundService {
         }
 
         // 🔹 번호 자리수
-        if (nextSeq > 999) throw new IllegalStateException("출고번호가 9999를 초과했습니다.");
+        if (nextSeq > 999) throw new IllegalStateException("출고번호가 999를 초과했습니다.");
 
         return prefix + String.format("%03d", nextSeq);
     }
@@ -135,6 +137,7 @@ public class OrderOutboundService {
                         .category(o.getCategory())
                         .outboundNo(o.getOutboundNo())
                         .outboundDate(o.getOutboundDate())
+                        .inboundDate(o.getOrderInbound().getInboundDate())
                         .build())
                 .collect(Collectors.toList());
     }
