@@ -124,6 +124,12 @@ export default function RawInViewPage() {
     field: string,
     value: string | number
   ) => {
+    if (field === 'qty') {
+      const numericValue = Number(value);
+      if (numericValue < 0) {
+        return; // Do not update state for negative numbers
+      }
+    }
     setInboundInput((prev) => ({
       ...prev,
       [materialItemId]: {
