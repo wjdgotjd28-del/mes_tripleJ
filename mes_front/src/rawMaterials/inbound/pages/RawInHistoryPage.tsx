@@ -154,7 +154,7 @@ export default function RawInHistoryPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("정말로 이 항목을 삭제하시겠습니까?")) return;
+    if (!window.confirm("해당 원자재 입고 이력을 삭제하시겠습니까?")) return;
     try {
       await deleteMaterailInbound(id);
       fetchMaterialInboundHistory();

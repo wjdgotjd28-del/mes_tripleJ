@@ -129,7 +129,7 @@ export default function OrderOutViewPage() {
 
   // ✅ 삭제
   const handleDelete = (id: number) => {
-    if (window.confirm("이 출고 정보를 삭제하시겠습니까?")) {
+    if (window.confirm("해당 출고 이력 정보를 삭제하시겠습니까?")) {
       deleteOrderOutbound(id);
       setAllRows((prev) => prev.filter((r) => r.id !== id));
     }

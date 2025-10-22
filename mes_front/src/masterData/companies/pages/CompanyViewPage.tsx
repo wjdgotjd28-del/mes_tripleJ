@@ -69,10 +69,9 @@ export default function CompanyViewPage() {
   const handleDelete = async (
     event: React.MouseEvent,
     companyId: number,
-    companyName: string
   ) => {
     event.stopPropagation();
-    if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
+    if (window.confirm(`해당 업체 정보를 삭제하시겠습니까?`)) {
       await deleteCompany(companyId);
       setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
     }
