@@ -340,13 +340,15 @@ export default function OrderOutViewPage() {
         onSubmit={handleRegister}
       />
 
-      {/* 작업지시서 모달  */}
-      <OrdersOutDocModal
-        open={openModal}
-        onClose={() => setOpenModal(false)}
-        outItem={selectedOrder}
-        inboundDate={selectedInboundDate}
-      />
+      {/* 출하증  */}
+      {selectedOrder && selectedInboundDate && (
+        <OrdersOutDocModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          outItem={selectedOrder}
+          inboundDate={selectedInboundDate}
+        />
+      )}
      
     </Box>
   );
