@@ -12,7 +12,7 @@ public class MaterialItemDTO {
     private String itemCode;
     private String category; // 페인트, 신나, 세척제, 경화제
     private String color;
-    private Integer specQty;
+    private Long specQty;
     private String specUnit;
     private String manufacturer;
     private String note;

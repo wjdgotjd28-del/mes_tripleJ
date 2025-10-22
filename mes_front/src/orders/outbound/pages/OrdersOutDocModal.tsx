@@ -32,7 +32,7 @@ export default function OrdersDocModal({
         newWindow.document.write(`
             <html>
             <head>
-                <title>작업지시서</title>
+                <title>출하증</title>
                 <style>
                 @page {
                     size: A4;

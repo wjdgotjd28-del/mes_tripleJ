@@ -10,13 +10,13 @@ import com.mes_back.constant.PaintType;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class OrderInboundDTO {
 
     @JsonProperty("order_inbound_id")
@@ -32,7 +32,7 @@ public class OrderInboundDTO {
     private String customerName; // 거래처명
 
     @JsonProperty("inbound_date")
-    private LocalDate inboundDate; // 입고일자
+    private LocalDateTime inboundDate; // 입고일자
 
     @JsonProperty("item_code")
     private String itemCode; // 품목코드
@@ -54,7 +54,7 @@ public class OrderInboundDTO {
 
     private Integer processStatus;
 
-    public OrderInboundDTO(Long orderInboundId, String lotNo, String customerName, String itemName, String itemCode, LocalDate inboundDate, Long qty, OrderCategory category, Integer processStatus) {
+    public OrderInboundDTO(Long orderInboundId, String lotNo, String customerName, String itemName, String itemCode, LocalDateTime inboundDate, Long qty, OrderCategory category, Integer processStatus) {
         this.orderInboundId = orderInboundId;
         this.lotNo = lotNo;
         this.customerName = customerName;

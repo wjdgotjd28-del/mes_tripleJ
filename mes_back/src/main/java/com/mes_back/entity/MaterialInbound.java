@@ -1,11 +1,15 @@
 package com.mes_back.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "material_inbound")
+@Getter
+@Setter
 public class MaterialInbound {
 
     @Id
@@ -35,13 +39,13 @@ public class MaterialInbound {
     private String manufacturer;
 
     @Column(name = "manufacte_date", nullable = false)
-    private LocalDate manufacteDate;
+    private LocalDateTime manufacteDate;
 
     @Column(nullable = false)
     private Long qty;
 
     @Column(name = "inbound_date", nullable = false)
-    private LocalDate inboundDate;
+    private LocalDateTime inboundDate;
 
     @Column(name = "inbound_no", nullable = false, length = 255)
     private String inboundNo;

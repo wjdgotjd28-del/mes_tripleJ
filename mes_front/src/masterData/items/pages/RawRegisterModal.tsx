@@ -1,5 +1,5 @@
 // RawRegisterModal.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -13,8 +13,9 @@ import {
   Divider
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-import type { RawItems } from "../../../type";
+import type { RawItems, Company } from "../../../type";
 import { createRawItems } from "../api/RawApi";
+import { getCompany } from "../../companies/api/companyApi";
 
 interface RawRegisterModalProps {
   open: boolean;
@@ -36,6 +37,8 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
     use_yn: "Y",
   });
 
+  const [companyList, setCompanyList] = useState<Company[]>([]);
+
   const categoryMapReverse: Record<string, string> = {
     PAINT: "페인트",
     THINNER: "신나",
@@ -48,6 +51,21 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
     세척제: "CLEANER",
     경화제: "HARDENER",
   };
+
+  // PURCHASER만 불러오기
+  useEffect(() => {
+    if (!open) return;
+    const loadCompanyData = async () => {
+      try {
+        const allCompanies: Company[] = await getCompany();
+        const purchasers = allCompanies.filter(c => c.type === "PURCHASER");
+        setCompanyList(purchasers);
+      } catch (err) {
+        console.error("업체 데이터 불러오기 실패", err);
+      }
+    };
+    loadCompanyData();
+  }, [open]);
 
   const handleChange = (field: keyof RawItems, value: string | number) => {
     setNewData(prev => ({ ...prev, [field]: value }));
@@ -100,15 +118,40 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
           <Typography variant="subtitle2" color="primary" gutterBottom>기본정보</Typography>
           <Divider sx={{ mb: 2 }} />
           <Box sx={{ display: "grid", gridTemplateColumns: "130px 1fr", gap: 2 }}>
+            {/* 업체명 */}
             <Typography color="text.secondary" alignSelf="center">업체명</Typography>
-            <TextField
-              value={newData.company_name}
-              onChange={(e) => handleChange("company_name", e.target.value)}
-              size="small"
-              fullWidth
-              required
-            />
-
+            {companyList.length === 0 ? (
+              // 조회된 PURCHASER가 없으면 일반 텍스트 입력
+              <TextField
+                value={newData.company_name}
+                onChange={(e) => handleChange("company_name", e.target.value)}
+                size="small"
+                fullWidth
+                placeholder="등록된 매입처가 없습니다. 업체관리에서 매입처를 등록해주세요"
+                disabled
+                required
+              />
+            ) : (
+              // 조회된 PURCHASER가 있으면 드롭다운
+              <TextField
+                select
+                value={newData.company_name ?? ""}
+                onChange={(e) => handleChange("company_name", e.target.value)}
+                size="small"
+                fullWidth
+                required
+                SelectProps={{ displayEmpty: true }}
+              >
+                <MenuItem value="" disabled>
+                  매입처를 선택해주세요
+                </MenuItem>
+                {companyList.map(c => (
+                  <MenuItem key={c.companyId} value={c.companyName}>
+                    {c.companyName}
+                  </MenuItem>
+                ))}
+              </TextField>
+            )}
             <Typography color="text.secondary" alignSelf="center">품목번호</Typography>
             <TextField
               value={newData.item_code}
@@ -182,18 +225,6 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
               size="small"
               fullWidth
             />
-
-            {/* <Typography color="text.secondary" alignSelf="center">사용여부</Typography>
-            <FormControl component="fieldset">
-              <RadioGroup
-                row
-                value={newData.use_yn}
-                onChange={(e) => handleChange("use_yn", e.target.value as RawItems["use_yn"])}
-              >
-                <FormControlLabel value="Y" control={<Radio />} label="Y" />
-                <FormControlLabel value="N" control={<Radio />} label="N" />
-              </RadioGroup>
-            </FormControl> */}
 
             <Typography color="text.secondary" alignSelf="center">비고</Typography>
             <TextField

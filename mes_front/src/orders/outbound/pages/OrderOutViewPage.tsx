@@ -34,6 +34,7 @@ import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import EditOrderOutModal from "./EditOrderOutModal";
 import { usePagination } from "../../../Common/usePagination";
+import OrdersOutDocModal from "./OrdersOutDocModal";
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -153,20 +154,20 @@ export default function OrderOutViewPage() {
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
     usePagination(sortedRows, 20); // 한 페이지당 20개
 
-  //  작업지시서 모달 상태
-  // const [openModal, setOpenModal] = useState(false);
-  // const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
-  // const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
-  // const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
-  //     try {
-  //       setSelectedOrder(row); // row: OrderOutbound
-  //       const inbound = inbounds.find(item => item.orderInboundId === orderInboundId);
-  //       setSelectedInboundDate(inbound?.inboundDate);
-  //       setOpenModal(true);
-  //     } catch (err) {
-  //       console.error("출하증 조회 실패", err);
-  //     }
-  //   };
+  // 출하증 모달 상태
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
+  const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
+  const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
+      try {
+        setSelectedOrder(row); // row: OrderOutbound
+        const inbound = allRows.find(item => item.orderInboundId === orderInboundId);
+        setSelectedInboundDate(inbound?.inboundDate);
+        setOpenModal(true);
+      } catch (err) {
+        console.error("출하증 조회 실패", err);
+      }
+    };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -348,14 +349,14 @@ export default function OrderOutViewPage() {
         onSubmit={handleRegister}
       />
 
-      {/* 작업지시서 모달 
+      {/* 작업지시서 모달  */}
       <OrdersOutDocModal
         open={openModal}
         onClose={() => setOpenModal(false)}
         outItem={selectedOrder}
         inboundDate={selectedInboundDate}
       />
-      */}
+     
     </Box>
   );
 }

@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 @AllArgsConstructor
-
 public class MaterialStockService {
 
     private final MaterialStockRepository materialStockRepository;
@@ -29,6 +28,7 @@ public class MaterialStockService {
             dto.setItemName(ms.getMaterialItem().getItemName());
             dto.setTotalQty(ms.getTotalQty().longValue()); // MaterialStock의 totalQty
             dto.setUnit(ms.getUnit());
+            dto.setManufacturer(ms.getMaterialItem().getManufacturer());
             return dto;
         }).collect(Collectors.toList());
     }

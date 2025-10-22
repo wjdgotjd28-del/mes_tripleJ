@@ -1,7 +1,6 @@
 package com.mes_back.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 

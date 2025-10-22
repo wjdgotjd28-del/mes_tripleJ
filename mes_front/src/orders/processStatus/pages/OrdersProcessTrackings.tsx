@@ -204,6 +204,16 @@ export default function OrdersProcessTrackings({
                 ))}
               </TableRow>
               <TableRow>
+                <TableCell>공정시간</TableCell>
+                {processList.map((p) => (
+                  <TableCell key={p.order_item_routing_id} align="center">
+                    {p.process_time != null
+                      ? `${(p.process_time / 60).toFixed(1)}h`
+                      : "-"}
+                  </TableCell>
+                ))}
+              </TableRow>
+              <TableRow>
                 <TableCell>진행현황</TableCell>
                 {processList.map(p => (
                   <TableCell key={p.order_item_routing_id} align="center">

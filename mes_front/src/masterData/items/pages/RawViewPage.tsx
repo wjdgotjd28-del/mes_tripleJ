@@ -179,8 +179,8 @@ export default function RawViewPage() {
   };
   const sortedRows = [...displayedItems].sort((a, b) =>
     sortAsc
-      ? a.material_item_id - b.material_item_id
-      : b.material_item_id - a.material_item_id
+      ? a.material_item_id! - b.material_item_id!
+      : b.material_item_id! - a.material_item_id!
   );
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
     usePagination(sortedRows, 20); // 한 페이지당 20개
@@ -329,7 +329,7 @@ export default function RawViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell>{`${row.spec_qty} ${row.spec_unit}`}</TableCell>
+                    <TableCell>{`${row.spec_qty}${row.spec_unit}`}</TableCell>
                     <TableCell>
                       {categoryMap[row.category] || row.category}
                     </TableCell>
