@@ -276,29 +276,55 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
                 size="small"
                 InputLabelProps={{ shrink: true }}
                 sx={{
-                  width: 100,
+                  width: 200,
                   "& .MuiOutlinedInput-root": {
                     "& fieldset": {
                       borderColor:
-                        Number(form.outboundQty) > (selected?.total_qty ?? 0)
+                        form.outboundQty === ""
+                          ? undefined
+                          : Number(form.outboundQty) <= 0
+                          ? "red"
+                          : Number(form.outboundQty) > (selected?.total_qty ?? 0)
                           ? "red"
                           : undefined,
                     },
                     "&:hover fieldset": {
                       borderColor:
-                        Number(form.outboundQty) > (selected?.total_qty ?? 0)
+                        form.outboundQty === ""
+                          ? undefined
+                          : Number(form.outboundQty) <= 0
+                          ? "red"
+                          : Number(form.outboundQty) > (selected?.total_qty ?? 0)
                           ? "red"
                           : undefined,
                     },
                   },
                 }}
-                error={Number(form.outboundQty) > (selected?.total_qty ?? 0)}
+                error={
+                  form.outboundQty !== "" &&
+                  (Number(form.outboundQty) <= 0 ||
+                    Number(form.outboundQty) > (selected?.total_qty ?? 0))
+                }
                 helperText={
-                  Number(form.outboundQty) > (selected?.total_qty ?? 0)
-                    ? `출고수량이 재고수량(${selected?.total_qty}${selected?.unit}) 보다 많습니다.`
+                  form.outboundQty === ""
+                    ? ""
+                    : Number(form.outboundQty) <= 0
+                    ? "0보다 큰 값을 입력하세요."
+                    : Number(form.outboundQty) > (selected?.total_qty ?? 0)
+                    ? `재고수량(${selected?.total_qty}${selected?.unit}) 보다 많습니다.`
                     : ""
                 }
+                FormHelperTextProps={{
+                  sx: {
+                    width: "100%",          // 전체 폭 사용
+                    whiteSpace: "nowrap",   // 한 줄로 표시
+                    overflow: "hidden",
+                    // textOverflow: "ellipsis", // 길면 ... 처리
+                    // mt: 0.5,                // TextField와 간격 약간
+                  },
+                }}
               />
+
               {/* 🔹 날짜 + 시간 */}
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
                 <TextField
