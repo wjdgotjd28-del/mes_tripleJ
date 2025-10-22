@@ -429,9 +429,17 @@ export default function InboundHistoryPage() {
                         <Button
                           variant="outlined"
                           size="small"
-                          sx={{ color: "#ff8c00", borderColor: "#ff8c00", mr: 0.3 }}
+                          sx={{
+                            color: "#ff8c00",
+                            borderColor: "#ff8c00",
+                            mr: 0.3,
+                          }}
                           onClick={() =>
-                            handleOpenModal(row.order_item_id, row.lot_no, row.qty)
+                            handleOpenModal(
+                              row.order_item_id,
+                              row.lot_no,
+                              row.qty
+                            )
                           }
                         >
                           작업지시서

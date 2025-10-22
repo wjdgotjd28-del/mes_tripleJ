@@ -67,8 +67,7 @@ export default function RawInHistoryPage() {
     inboundNo: "",
     inboundDate: null as Dayjs | null,
   });
-  const [appliedSearchValues, setAppliedSearchValues] =
-    useState(searchValues);
+  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
 
   useEffect(() => {
     fetchMaterialInboundHistory();
@@ -234,9 +233,7 @@ export default function RawInHistoryPage() {
                     <TableCell align="center">{row.itemCode}</TableCell>
                     <TableCell align="center">{row.itemName}</TableCell>
                     <TableCell align="center">{row.supplierName}</TableCell>
-                    <TableCell
-                      align="center"
-                    >{`${row.specQty}${row.specUnit}`}</TableCell>
+                    <TableCell align="center">{`${row.specQty}${row.specUnit}`}</TableCell>
                     <TableCell align="center">{row.qty}</TableCell>
                     <TableCell align="center">{`${row.totalQty}`}</TableCell>
                     <TableCell align="center">{row.inboundDate}</TableCell>

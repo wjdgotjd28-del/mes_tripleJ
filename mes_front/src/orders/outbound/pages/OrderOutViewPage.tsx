@@ -125,6 +125,7 @@ export default function OrderOutViewPage() {
       alert("출고 정보 수정에 실패했습니다.");
     }
   };
+  const handleExcelDownload = () => exportToExcel(sortedRows, "출고목록");
 
   // ✅ 삭제
   const handleDelete = (id: number) => {

@@ -38,9 +38,7 @@ import {
 
 export default function RawInViewPage() {
   const [openDetailModal, setOpenDetailModal] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<RawItems | null>(
-    null
-  );
+  const [selectedItem, setSelectedItem] = useState<RawItems | null>(null);
   const [openModal, setOpenModal] = useState(false);
   const [rawItems, setRawItems] = useState<RawItems[]>([]);
   const [displayedItems, setDisplayedItems] = useState<RawItems[]>([]);
@@ -53,8 +51,9 @@ export default function RawInViewPage() {
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
   const [sortAsc, setSortAsc] = useState(true);
-  const [inboundInput, setInboundInput] = useState<Record<number, { manufacteDate: string; qty: number; inboundDate: string }>>({});
-
+  const [inboundInput, setInboundInput] = useState<
+    Record<number, { manufacteDate: string; qty: number; inboundDate: string }>
+  >({});
 
   useEffect(() => {
     fetchRawItems();
@@ -120,11 +119,19 @@ export default function RawInViewPage() {
 
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
     usePagination(sortedData, 20); // 한 페이지당 20개
-  const handleInboundInputChange = (materialItemId: number, field: string, value: string | number) => {
+  const handleInboundInputChange = (
+    materialItemId: number,
+    field: string,
+    value: string | number
+  ) => {
     setInboundInput((prev) => ({
       ...prev,
       [materialItemId]: {
-        ...(prev[materialItemId] || { manufacteDate: "", qty: 0, inboundDate: "" }),
+        ...(prev[materialItemId] || {
+          manufacteDate: "",
+          qty: 0,
+          inboundDate: "",
+        }),
         [field]: value,
       },
     }));
@@ -134,12 +141,17 @@ export default function RawInViewPage() {
     console.log("handleRegisterInbound called!");
     const inboundData = inboundInput[rawItem.material_item_id!];
 
-    if (!inboundData || !inboundData.manufacteDate || !inboundData.qty || !inboundData.inboundDate) {
+    if (
+      !inboundData ||
+      !inboundData.manufacteDate ||
+      !inboundData.qty ||
+      !inboundData.inboundDate
+    ) {
       alert("모든 입고 정보를 입력해주세요.");
       return;
     }
 
-    const newMaterialInbound: Omit<MaterialInbound, 'id'> = {
+    const newMaterialInbound: Omit<MaterialInbound, "id"> = {
       materialItemId: rawItem.material_item_id!,
       supplierName: rawItem.company_name,
       itemName: rawItem.item_name,
@@ -151,7 +163,7 @@ export default function RawInViewPage() {
       qty: inboundData.qty,
       inboundDate: inboundData.inboundDate,
       inboundNo: "", // Will be assigned by backend
-      totalQty: `${rawItem.spec_qty * inboundData.qty}${rawItem.spec_unit}`, // Calculate totalQty and append specUnit
+      totalQty: `${rawItem.spec_qty * inboundData.qty}`, // Calculate totalQty and append specUnit
     };
 
     console.log("전송될 데이터:", newMaterialInbound);
@@ -234,7 +246,6 @@ export default function RawInViewPage() {
           </Tooltip>
         </Box>
         <Box sx={{ display: "flex", gap: 1 }}>
-         
           <Button
             color="success"
             variant="outlined"
@@ -305,16 +316,33 @@ export default function RawInViewPage() {
                         type="number"
                         size="small"
                         value={inboundInput[row.material_item_id]?.qty || ""}
-                        onChange={(e) => handleInboundInputChange(row.material_item_id, "qty", Number(e.target.value))}
+                        onChange={(e) =>
+                          handleInboundInputChange(
+                            row.material_item_id,
+                            "qty",
+                            Number(e.target.value)
+                          )
+                        }
                         sx={{ width: 80 }}
                       />
                     </TableCell>
                     <TableCell align="center">
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
-                          value={inboundInput[row.material_item_id]?.inboundDate ? dayjs(inboundInput[row.material_item_id]?.inboundDate) : null}
+                          value={
+                            inboundInput[row.material_item_id]?.inboundDate
+                              ? dayjs(
+                                  inboundInput[row.material_item_id]
+                                    ?.inboundDate
+                                )
+                              : null
+                          }
                           onChange={(newDate) =>
-                            handleInboundInputChange(row.material_item_id, "inboundDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                            handleInboundInputChange(
+                              row.material_item_id,
+                              "inboundDate",
+                              newDate ? newDate.format("YYYY-MM-DD") : ""
+                            )
                           }
                           format="YYYY-MM-DD"
                           slotProps={{
@@ -326,9 +354,20 @@ export default function RawInViewPage() {
                     <TableCell align="center">
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
-                          value={inboundInput[row.material_item_id]?.manufacteDate ? dayjs(inboundInput[row.material_item_id]?.manufacteDate) : null}
+                          value={
+                            inboundInput[row.material_item_id]?.manufacteDate
+                              ? dayjs(
+                                  inboundInput[row.material_item_id]
+                                    ?.manufacteDate
+                                )
+                              : null
+                          }
                           onChange={(newDate) =>
-                            handleInboundInputChange(row.material_item_id, "manufacteDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+                            handleInboundInputChange(
+                              row.material_item_id,
+                              "manufacteDate",
+                              newDate ? newDate.format("YYYY-MM-DD") : ""
+                            )
                           }
                           format="YYYY-MM-DD"
                           slotProps={{
