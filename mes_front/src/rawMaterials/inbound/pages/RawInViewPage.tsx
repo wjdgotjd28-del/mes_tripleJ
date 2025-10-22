@@ -393,11 +393,11 @@ export default function RawInViewPage() {
                       <TableCell align="center">
                         <Button
                           variant="outlined"
-                          color="success"
+                          color="primary"
                           size="small"
                           onClick={() => handleRegisterInbound(row)}
                         >
-                          등록
+                          입고 등록
                         </Button>
                       </TableCell>
                     </TableRow>

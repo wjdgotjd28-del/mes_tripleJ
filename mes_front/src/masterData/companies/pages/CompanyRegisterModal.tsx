@@ -75,8 +75,13 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
 
   return (
     <div>
-      <Button variant="contained" size="small" sx={{ height: 40 }} onClick={handleOpen}>
-        업체 등록
+      <Button 
+        variant="outlined" 
+        size="small" 
+        color="primary"
+        sx={{ height: 40 }} 
+        onClick={handleOpen}>
+        + 업체 등록
       </Button>
 
       <Modal open={open} onClose={handleClose}>
