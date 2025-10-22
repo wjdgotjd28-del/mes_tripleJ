@@ -154,7 +154,28 @@ export default function RawInHistoryPage() {
   const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!editableRowData) return;
     const { name, value } = e.target;
-    setEditableRowData({ ...editableRowData, [name]: value });
+
+    let updatedEditableRowData = { ...editableRowData, [name]: value };
+
+    // Update specQty or qty as numbers
+    if (name === "specQty" || name === "qty") {
+      const numericValue = parseFloat(value);
+      if (!isNaN(numericValue)) {
+        updatedEditableRowData = { ...updatedEditableRowData, [name]: numericValue };
+      }
+    }
+
+    // Recalculate totalQty if specQty, qty, or specUnit changes
+    const currentSpecQty = (name === "specQty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.specQty || 0);
+    const currentQty = (name === "qty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.qty || 0);
+    const currentSpecUnit = (name === "specUnit") ? value : (editableRowData.specUnit || "");
+
+    if (name === "specQty" || name === "qty" || name === "specUnit") {
+      const calculatedTotalQty = currentSpecQty * currentQty;
+      updatedEditableRowData = { ...updatedEditableRowData, totalQty: `${calculatedTotalQty}${currentSpecUnit}` };
+    }
+
+    setEditableRowData(updatedEditableRowData);
   };
 
   const handleDateEditChange = (
