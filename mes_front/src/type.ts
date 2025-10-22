@@ -92,6 +92,7 @@ export type OrderOutbound = {
   outboundDate: string;
   category: string;
   inboundDate: string;
+  color: string;
 };
 
 // 수주 출고에서 쓰이는 수주 입고 데이터 조회용 타입 

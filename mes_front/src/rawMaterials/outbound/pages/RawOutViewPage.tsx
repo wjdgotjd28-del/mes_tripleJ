@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import {
   Box, Button, Typography, TextField, Table, TableHead, TableRow, TableCell,
-  TableBody, TableContainer, Paper
+  TableBody, TableContainer, Paper,
+  Tooltip,
+  IconButton
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -13,7 +15,12 @@ import {
   deleteRawMaterialOutbound,
   updateRawMaterialOutbound
 } from "../api/RawMaterialOutApi";
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 import { RawoutboundSearchUtils } from "./RawoutboundSearchUtils";
+import { usePagination } from "../../../Common/usePagination";
 
 export default function RawMaterialOutViewPage() {
   const [rows, setRows] = useState<RawMaterialOutItems[]>([]);
@@ -28,6 +35,7 @@ export default function RawMaterialOutViewPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Partial<RawMaterialOutItems>>({});
   const [registerOpen, setRegisterOpen] = useState(false);
+  const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -55,6 +63,16 @@ export default function RawMaterialOutViewPage() {
     const filtered = RawoutboundSearchUtils(rows, searchValues);
     setDisplayedItems(filtered);
   };
+
+  // 정렬된 데이터
+  const sortedRows = [...displayedItems].sort((a, b) =>
+    sortAsc 
+      ? (a.id ?? 0) - (b.id ?? 0) 
+      : (b.id ?? 0) - (a.id ?? 0)
+  );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedRows, 20); // 한 페이지당 20개
 
   const handleDelete = async (id: number) => {
     if (!window.confirm("이 출고 정보를 삭제하시겠습니까?")) return;
@@ -96,6 +114,12 @@ export default function RawMaterialOutViewPage() {
           <Button variant="contained" color="primary" onClick={handleSearch}>
             검색
           </Button>
+          {/* 정렬 토글 버튼 */}
+          <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+            <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+              {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+            </IconButton>
+          </Tooltip>
         </Box>
 
         {/* 2️⃣ 오른쪽 정렬 Excel/출고등록 버튼 */}
@@ -118,33 +142,33 @@ export default function RawMaterialOutViewPage() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>출고번호</TableCell>
-              <TableCell>매입처명</TableCell>
-              <TableCell>품목번호</TableCell>
-              <TableCell>품목명</TableCell>
-              <TableCell>출고수량</TableCell>
-              <TableCell>제조사</TableCell>
-              <TableCell>출고일자</TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center">출고번호</TableCell>
+              <TableCell align="center">매입처명</TableCell>
+              <TableCell align="center">품목번호</TableCell>
+              <TableCell align="center">품목명</TableCell>
+              <TableCell align="center">출고수량</TableCell>
+              <TableCell align="center">제조사</TableCell>
+              <TableCell align="center">출고일자</TableCell>
               <TableCell align="center">기능</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayedItems.length === 0 ? (
+            {paginatedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
                   <Typography color="text.secondary">원자재 출고한 이력이 없습니다.</Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              displayedItems.map((r, idx) => (
+              paginatedData.map((r, idx) => (
                 <TableRow key={r.id}>
-                  <TableCell>{idx+1}</TableCell>
-                  <TableCell>{r.outbound_no}</TableCell>
-                  <TableCell>{r.company_name}</TableCell>
-                  <TableCell>{r.item_code}</TableCell>
-                  <TableCell>{r.item_name}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">{idx+1}</TableCell>
+                  <TableCell align="center">{r.outbound_no}</TableCell>
+                  <TableCell align="center">{r.company_name}</TableCell>
+                  <TableCell align="center">{r.item_code}</TableCell>
+                  <TableCell align="center">{r.item_name}</TableCell>
+                  <TableCell align="center">
                     {editingId === r.id ? (
                       <TextField
                         size="small"
@@ -159,8 +183,8 @@ export default function RawMaterialOutViewPage() {
                       `${r.qty}${r.unit}` // 예: 10kg
                     )}
                   </TableCell>
-                  <TableCell>{r.manufacturer ?? "-"}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">{r.manufacturer ?? "-"}</TableCell>
+                  <TableCell align="center">
                     {editingId === r.id ? (
                       <Box sx={{ display: "flex", gap: 1 }}>
                         <TextField
@@ -183,12 +207,16 @@ export default function RawMaterialOutViewPage() {
                   </TableCell>
                   <TableCell align="center">
                     {editingId === r.id ? (
-                      <>
+                      <Box
+                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                      >
                         <Button size="small" variant="contained" onClick={() => handleEditSave(r.id!)}>저장</Button>
                         <Button size="small" variant="outlined" onClick={() => setEditingId(null)}>취소</Button>
-                      </>
+                      </Box>
                     ) : (
-                      <>
+                      <Box
+                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
+                      >
                         <Button size="small" variant="outlined" onClick={() => {
                           setEditingId(r.id!);
                           const dateObj = new Date(r.outbound_date!);
@@ -196,7 +224,7 @@ export default function RawMaterialOutViewPage() {
                           setEditForm({ qty: r.qty, outbound_date: `${datePart}` });
                         }}>수정</Button>
                         <Button size="small" variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={() => handleDelete(r.id!)}>삭제</Button>
-                      </>
+                      </Box>
                     )}
                   </TableCell>
                 </TableRow>
@@ -205,6 +233,27 @@ export default function RawMaterialOutViewPage() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        <Button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          〈
+        </Button>
+        <Typography
+          variant="body2"
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          {currentPage} / {totalPages}
+        </Typography>
+        <Button
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          〉
+        </Button>
+      </Box>
 
       {/* ➕ 출고 등록 모달 */}
       <RawOutRegisterModal open={registerOpen} onClose={() => setRegisterOpen(false)} reload={loadData} />
