@@ -13,14 +13,8 @@ export const addMaterialInbound = async (materialInbound: Omit<MaterialInbound, 
   return response.data;
 };
 
-// 수정을 위한 데이터 타입 정의
-export type UpdateMaterialInboundData = Pick<
-  MaterialInbound,
-  "specQty" | "specUnit" | "qty" | "inboundDate" | "manufacteDate"
->;
-
 // 원자재 입고 이력 수정 API
-export const updateMaterialInbound = async (id: number, data: UpdateMaterialInboundData): Promise<MaterialInbound> => {
-  const response = await axios.patch(`${BASE_URL}/materials/inbound/${id}`, data);
+export const updateMaterialInbound = async (materialInbound: MaterialInbound): Promise<MaterialInbound> => {
+  const response = await axios.patch(`${BASE_URL}/materials/inbound`, materialInbound);
   return response.data;
 };
