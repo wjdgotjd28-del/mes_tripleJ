@@ -360,7 +360,7 @@ export default function RawInHistoryPage() {
                       </TableCell>
                       <TableCell align="center">
                         {isEditMode ? (
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                             <DatePicker
                               value={
                                 editableRowData?.inboundDate
@@ -374,7 +374,7 @@ export default function RawInHistoryPage() {
                               slotProps={{
                                 textField: {
                                   size: "small",
-                                  sx: { width: 170 },
+                                  sx: { width: 150 },
                                 },
                               }}
                             />
@@ -385,7 +385,7 @@ export default function RawInHistoryPage() {
                       </TableCell>
                       <TableCell align="center">
                         {isEditMode ? (
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                             <DatePicker
                               value={
                                 editableRowData?.manufacteDate
@@ -399,7 +399,7 @@ export default function RawInHistoryPage() {
                               slotProps={{
                                 textField: {
                                   size: "small",
-                                  sx: { width: 170 },
+                                  sx: { width: 150 },
                                 },
                               }}
                             />

@@ -140,12 +140,10 @@ export default function OrderViewPage() {
   // 삭제
   const handleDelete = async (
     id: number,
-    companyName: string,
-    itemName: string
   ): Promise<void> => {
     if (
       window.confirm(
-        `${companyName}의 '${itemName}' 데이터를 삭제하시겠습니까?`
+        `해당 수주 품목을 삭제하시겠습니까?`
       )
     ) {
       try {
@@ -158,8 +156,17 @@ export default function OrderViewPage() {
     }
   };
 
+  const handleExcelDownload = () => {
+    exportToExcel(displayedItems, "기준정보_수주대상_품목관리조회");
+  };
+
   // 사용 여부 토글
-  const handleToggleUseYn = async (id: number): Promise<void> => {
+  const handleToggleUseYn = async (id: number, currentUseYn: "Y" | "N"): Promise<void> => {
+    const actionText = currentUseYn === "Y" ? "사용 중지" : "사용 재개";
+    if (!window.confirm(`현재 상태가 '${currentUseYn === "Y" ? "사용중" : "사용중지"}'입니다. '${actionText}' 하시겠습니까?`)) {
+      return;
+    }
+
     try {
       await restoreOrderItems(id);
       await fetchOrderItems();
@@ -167,11 +174,6 @@ export default function OrderViewPage() {
       console.error("사용여부 변경 실패:", err);
       alert("사용여부 변경 중 오류가 발생했습니다.");
     }
-  };
-
-  // 엑셀 다운로드
-  const handleExcelDownload = (): void => {
-    exportToExcel(displayedItems, "기준정보_수주대상_품목관리조회");
   };
 
   // 등록 완료 후
@@ -285,7 +287,7 @@ export default function OrderViewPage() {
 
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
-            + 등록
+            + 수주 품목 등록
           </Button>
           <Button
             color="success"
@@ -387,11 +389,11 @@ export default function OrderViewPage() {
                       <Button
                         variant="outlined"
                         size="small"
-                        color={row.use_yn === "Y" ? "error" : "success"}
-                        onClick={() => handleToggleUseYn(row.order_item_id)}
+                        color={row.use_yn === "Y" ? "warning" : "success"}
+                        onClick={() => handleToggleUseYn(row.order_item_id, row.use_yn)}
                         sx={{ mr: 1 }}
                       >
-                        {row.use_yn === "Y" ? "사용 중지" : "사용"}
+                        {row.use_yn === "Y" ? "사용 중지" : "사용 재개"}
                       </Button>
                       <Button
                         variant="outlined"
@@ -400,8 +402,6 @@ export default function OrderViewPage() {
                         onClick={() =>
                           handleDelete(
                             row.order_item_id,
-                            row.company_name,
-                            row.item_name
                           )
                         }
                       >

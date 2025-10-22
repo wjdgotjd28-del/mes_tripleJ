@@ -174,7 +174,7 @@ export default function OrderInViewPage() {
   const handleDateChange = (id: string, value: dayjs.Dayjs | null) => {
     setInputValues((prev) => ({
       ...prev,
-      [id]: { ...prev[id], date: value ? value.format("YYYY-MM-DD") : "" },
+      [id]: { ...prev[id], date: value ? value.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD") },
     }));
   };
 
@@ -371,13 +371,11 @@ export default function OrderInViewPage() {
                       <TableCell align="center">
                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                           <DatePicker
-                            value={values.date ? dayjs(values.date) : null}
-                            onChange={(newDate) =>
-                              handleDateChange(id, newDate)
-                            }
+                            value={values.date ? dayjs(values.date) : dayjs()} // 비어있으면 오늘 날짜
+                            onChange={(newDate) => handleDateChange(id, newDate)}
                             format="YYYY-MM-DD"
                             slotProps={{
-                              textField: { size: "small", sx: { width: 147 } },
+                              textField: { size: "small", sx: { width: 150 } },
                             }}
                           />
                         </LocalizationProvider>

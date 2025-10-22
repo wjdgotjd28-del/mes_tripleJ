@@ -16,7 +16,7 @@ export interface OrderItems {
   item_name: string;
   category: "DEFENSE"|"GENERAL"|"AUTOMOTIVE"|"SHIPBUILDING";
   color?: string;
-  unit_price?: number;
+  unit_price?: number | "";
   paint_type: "LIQUID" | "POWDER";
   note?: string;
   use_yn: "Y" | "N";
@@ -33,7 +33,7 @@ export interface RawItems {
   item_name: string;
   category: "PAINT"|"THINNER"|"CLEANER"|"HARDENER";
   color: string;
-  spec_qty: number;
+  spec_qty: number | "";
   spec_unit: string;
   manufacturer: string;
   note: string;
@@ -117,6 +117,7 @@ export type RawMaterialInventoryStatus = {
   total_qty: number;
   unit: string;
   manufacturer?: string;
+  material_inbound_id: number;
 };
 
 // 원자재 출고 타입

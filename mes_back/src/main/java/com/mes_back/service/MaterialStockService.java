@@ -33,6 +33,7 @@ public class MaterialStockService {
             dto.setTotalQty(ms.getTotalQty());
             dto.setUnit(ms.getUnit());
             dto.setManufacturer(ms.getMaterialInbound().getManufacturer());
+            dto.setMaterialInboundId(ms.getMaterialInbound().getId());
             return dto;
         }).collect(Collectors.toList());
     }
@@ -53,6 +54,8 @@ public class MaterialStockService {
             dto.setItemName(ms.getMaterialInbound().getItemName());
             dto.setUnit(ms.getUnit());
             dto.setTotalQty((dto.getTotalQty() == null ? 0 : dto.getTotalQty()) + ms.getTotalQty());
+            dto.setManufacturer(ms.getMaterialInbound().getManufacturer());
+            dto.setMaterialInboundId(ms.getMaterialInbound().getId());
             totalMap.put(key, dto);
         }
 

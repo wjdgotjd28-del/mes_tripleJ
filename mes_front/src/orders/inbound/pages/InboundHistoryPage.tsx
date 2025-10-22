@@ -23,7 +23,6 @@ import {
 } from "@mui/icons-material";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import type { OrderInbound, OrderItems, RoutingFormData } from "../../../type";
-import { filterInboundHistory } from "./InboundSearchUtils";
 import {
   deleteInboundHistory,
   updateInboundHistory,
@@ -32,47 +31,51 @@ import OrdersInDocModal from "./OrdersInDocModal";
 import { getOrderItemsdtl } from "../../../masterData/items/api/OrderApi";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs, { Dayjs } from "dayjs";
+import "dayjs/locale/ko";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import OrdersProcessTrackings from "../../processStatus/pages/OrdersProcessTrackings";
 import { usePagination } from "../../../Common/usePagination";
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
+type SearchValues = {
+  customer_name: string;
+  item_code: string;
+  item_name: string;
+  lot_no: string;
+  inbound_date: Dayjs | null;
+};
+
 export default function InboundHistoryPage() {
   /** -----------------------------
    * 📌 상태 관리
    * ----------------------------- */
-
-  // 검색 상태
-  const [searchValues, setSearchValues] = useState({
-    customer_name: "",
-    item_code: "",
-    item_name: "",
-    lot_no: "",
-    inbound_date: "",
-  });
-
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [values, setValues] = useState<{
-    [key: number]: { qty: number; date: string };
-  }>({});
+  const [values, setValues] = useState<{ [key: number]: { qty: number; date: string } }>({});
 
-  // 데이터 상태
   const [data, setData] = useState<OrderInbound[]>([]);
   const [displayedData, setDisplayedData] = useState<OrderInbound[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortAsc, setSortAsc] = useState(false);
-  //  작업지시서 모달 상태
+
+  // 모달 상태
   const [openModal, setOpenModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<OrderItems | null>(null);
-  const [selectedLotNo, setSelectedLotNo] = useState<string>(""); // ID 기준으로 선택
-  const [selectedQty, setSelectedQty] = useState<number>(); // ID 기준으로 선택
-  // Lot 번호 클릭
+  const [selectedLotNo, setSelectedLotNo] = useState<string>("");
+  const [selectedQty, setSelectedQty] = useState<number>();
+
   const [openProcessModal, setOpenProcessModal] = useState(false);
-  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<
-    RoutingFormData[]
-  >([]);
-  const [selectedInboundId, setSelectedInboundId] = useState<number>();
+  const [selectedRoutingSteps, setSelectedRoutingSteps] = useState<RoutingFormData[]>([]);
+  const [selectedInboundId, setSelectedInboundId] = useState<number | null>(null);
+
+  // 검색
+  const [searchValues, setSearchValues] = useState<SearchValues>({
+    customer_name: "",
+    item_code: "",
+    item_name: "",
+    lot_no: "",
+    inbound_date: null,
+  });
 
   /** -----------------------------
    * 📌 초기 데이터 로드
@@ -84,9 +87,7 @@ export default function InboundHistoryPage() {
   const fetchInboundHistory = async () => {
     try {
       setLoading(true);
-      const res = await axios.get<OrderInbound[]>(
-        `${BASE_URL}/orders/inbound/history`
-      );
+      const res = await axios.get<OrderInbound[]>(`${BASE_URL}/orders/inbound/history`);
       setData(res.data);
       setDisplayedData(res.data);
       return res.data;
@@ -101,22 +102,36 @@ export default function InboundHistoryPage() {
   };
 
   /** -----------------------------
-   * 📌 검색 관련 핸들러
+   * 📌 검색 핸들러
    * ----------------------------- */
   const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSearchValues((prev) => ({ ...prev, [name]: value }));
+    setSearchValues(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateChangeSearch = (newDate: Dayjs | null) => {
+    setSearchValues(prev => ({ ...prev, inbound_date: newDate }));
   };
 
   const handleSearch = () => {
-    const filtered = filterInboundHistory(data, searchValues);
-    setDisplayedData(filtered);
+    const filteredData = data.filter(item => {
+      const matchesCustomer = item.customer_name.toLowerCase().includes(searchValues.customer_name.toLowerCase());
+      const matchesCode = item.item_code.toLowerCase().includes(searchValues.item_code.toLowerCase());
+      const matchesName = item.item_name.toLowerCase().includes(searchValues.item_name.toLowerCase());
+      const matchesLot = item.lot_no.toLowerCase().includes(searchValues.lot_no.toLowerCase());
+      const matchesDate = searchValues.inbound_date
+        ? dayjs(item.inbound_date).isSame(searchValues.inbound_date, "day")
+        : true;
+      return matchesCustomer && matchesCode && matchesName && matchesLot && matchesDate;
+    });
+    setDisplayedData(filteredData);
   };
 
   /** -----------------------------
    * 📌 정렬
    * ----------------------------- */
-  const toggleSortOrder = () => setSortAsc((prev) => !prev);
+  const toggleSortOrder = () => setSortAsc(prev => !prev);
+
   const sortedData = [...displayedData].sort((a, b) =>
     sortAsc
       ? a.order_inbound_id! - b.order_inbound_id!
@@ -124,7 +139,7 @@ export default function InboundHistoryPage() {
   );
 
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
-    usePagination(sortedData, 20); // 한 페이지당 20개
+    usePagination(sortedData, 20);
 
   /** -----------------------------
    * 📌 엑셀 다운로드
@@ -132,39 +147,14 @@ export default function InboundHistoryPage() {
   const handleExcelDownload = () => exportToExcel(sortedData, "입고이력");
 
   /** -----------------------------
-   * 📌 렌더링
+   * 📌 수정 / 삭제
    * ----------------------------- */
-  if (loading)
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
-        <CircularProgress />
-      </Box>
-    );
-
-  const categoryLabelMap: Record<OrderInbound["category"], string> = {
-    DEFENSE: "방산",
-    GENERAL: "일반",
-    AUTOMOTIVE: "자동차",
-    SHIPBUILDING: "조선",
-  };
-
-  const paintLableMap: Record<OrderInbound["paint_type"], string> = {
-    POWDER: "분체",
-    LIQUID: "액체",
-  };
-
   const handleDelete = async (order_inbound_id: number) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
-
     try {
       await deleteInboundHistory(order_inbound_id);
-
-      setData((prev) =>
-        prev.filter((item) => item.order_inbound_id !== order_inbound_id)
-      );
-      setDisplayedData((prev) =>
-        prev.filter((item) => item.order_inbound_id !== order_inbound_id)
-      );
+      setData(prev => prev.filter(item => item.order_inbound_id !== order_inbound_id));
+      setDisplayedData(prev => prev.filter(item => item.order_inbound_id !== order_inbound_id));
     } catch (err) {
       console.error("삭제 실패:", err);
     }
@@ -172,60 +162,44 @@ export default function InboundHistoryPage() {
 
   const handleUpdate = (id: number) => {
     setEditRowId(id);
-    const row = data.find((item) => item.order_inbound_id === id);
+    const row = data.find(item => item.order_inbound_id === id);
     if (row) {
-      setValues((prev) => ({
-        ...prev,
-        [id]: {
-          qty: row.qty,
-          date: row.inbound_date,
-        },
-      }));
+      setValues(prev => ({ ...prev, [id]: { qty: row.qty, date: row.inbound_date } }));
     }
-  };
-  const fetchData = async () => {
-    const response = await fetchInboundHistory();
-    setData(response);
   };
 
   const handleSave = async (id: number) => {
-    const { qty, date } = values[id];
-
+    const { qty, date } = values[id] ?? { qty: 0, date: "" };
     try {
-      await updateInboundHistory(id, { qty, inbound_date: date }); // ✅ API 호출
-      setEditRowId(null); // ✅ 수정 모드 종료
-      fetchData(); // ✅ 데이터 재조회 또는 상태 갱신
+      await updateInboundHistory(id, { qty, inbound_date: date });
+      setEditRowId(null);
+      await fetchInboundHistory();
     } catch (err) {
       console.error("수정 실패:", err);
     }
   };
 
   const handleQtyChange = (id: number, newQty: string) => {
-    setValues((prev) => ({
+    setValues(prev => ({
       ...prev,
-      [id]: {
-        ...prev[id],
-        qty: Number(newQty),
-      },
+      [id]: { ...prev[id], qty: Number(newQty) },
     }));
   };
 
   const handleDateChange = (id: number, newDate: Dayjs | null) => {
-    setValues((prev) => ({
+    setValues(prev => ({
       ...prev,
-      [id]: {
-        ...prev[id],
-        date: newDate ? newDate.format("YYYY-MM-DD") : "",
-      },
+      [id]: { ...prev[id], date: newDate ? newDate.format("YYYY-MM-DD") : "" },
     }));
   };
 
-  //작업지시서 모달 상태
-
+  /** -----------------------------
+   * 📌 모달 관련
+   * ----------------------------- */
   const handleOpenModal = async (id: number, lotNo: string, qty: number) => {
     try {
-      const data = await getOrderItemsdtl(id); // 상세조회 API 호출
-      setSelectedItem(data);
+      const item = await getOrderItemsdtl(id);
+      setSelectedItem(item);
       setSelectedLotNo(lotNo);
       setSelectedQty(qty);
       setOpenModal(true);
@@ -234,16 +208,11 @@ export default function InboundHistoryPage() {
     }
   };
 
-  // Lot 번호 클릭
-  const handleLotClick = async (
-    itemId: number,
-    lot_no: string,
-    inboundId: number
-  ) => {
+  const handleLotClick = async (itemId: number, lot_no: string, inboundId: number) => {
     try {
-      const data = await getOrderItemsdtl(itemId);
-      setSelectedItem(data);
-      setSelectedRoutingSteps(data.routing || []);
+      const item = await getOrderItemsdtl(itemId);
+      setSelectedItem(item);
+      setSelectedRoutingSteps(item.routing || []);
       setSelectedLotNo(lot_no);
       setSelectedInboundId(inboundId);
       setOpenProcessModal(true);
@@ -252,48 +221,57 @@ export default function InboundHistoryPage() {
     }
   };
 
+  /** -----------------------------
+   * 📌 렌더링
+   * ----------------------------- */
+  if (loading) return <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}><CircularProgress /></Box>;
+
+  const categoryLabelMap: Record<OrderInbound["category"], string> = {
+    DEFENSE: "방산",
+    GENERAL: "일반",
+    AUTOMOTIVE: "자동차",
+    SHIPBUILDING: "조선",
+  };
+  const paintLabelMap: Record<OrderInbound["paint_type"], string> = {
+    POWDER: "분체",
+    LIQUID: "액체",
+  };
+
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        입고된 수주 이력
-      </Typography>
+      <Typography variant="h5" sx={{ mb: 2 }}>입고된 수주 이력</Typography>
 
       {/* 검색 영역 */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-          {[
-            { key: "customer_name", label: "거래처명", width: 150 },
-            { key: "item_code", label: "품목 번호", width: 150 },
-            { key: "item_name", label: "품목명", width: 150 },
-            { key: "lot_no", label: "LOT번호", width: 150 },
-            { key: "inbound_date", label: "입고일자", width: 180 },
-          ].map(({ key, label, width }) => (
+          {["거래처명","품목번호","품목명","LOT 번호"].map(key => (
             <TextField
               key={key}
               name={key}
               size="small"
-              placeholder={label}
-              value={(searchValues as Record<string, string>)[key]}
+              placeholder={key}
+              value={searchValues[key as keyof Omit<SearchValues,"inbound_date">]}
               onChange={handleTextChange}
-              sx={{ width }}
+              sx={{ width: 150 }}
             />
           ))}
-          <Button variant="contained" onClick={handleSearch}>
-            검색
-          </Button>
+          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
+            <DatePicker
+              label="입고일자"
+              value={searchValues.inbound_date}
+              onChange={handleDateChangeSearch}
+              slotProps={{ textField: { size: "small", sx: { width: 180 } } }}
+              format="YYYY-MM-DD"
+            />
+          </LocalizationProvider>
+          <Button variant="contained" onClick={handleSearch}>검색</Button>
           <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
             <IconButton onClick={toggleSortOrder}>
               {sortAsc ? <ArrowUpward /> : <ArrowDownward />}
             </IconButton>
           </Tooltip>
         </Box>
-
-        <Button
-          color="success"
-          variant="outlined"
-          endIcon={<FileDownloadIcon />}
-          onClick={handleExcelDownload}
-        >
+        <Button color="success" variant="outlined" endIcon={<FileDownloadIcon />} onClick={handleExcelDownload}>
           엑셀 다운로드
         </Button>
       </Box>
@@ -317,36 +295,20 @@ export default function InboundHistoryPage() {
           </TableHead>
           <TableBody>
             {paginatedData.length === 0 ? (
-              // 표시할 데이터 없을 때
               <TableRow>
                 <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                  <Typography color="text.secondary">
-                    입고된 수주 품목이 없습니다.
-                  </Typography>
+                  <Typography color="text.secondary">입고된 수주 품목이 없습니다.</Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((row: OrderInbound, idx) => (
+              paginatedData.map((row, idx) => (
                 <TableRow key={row.order_inbound_id}>
-                  <TableCell align="center">{idx+1}</TableCell>
+                  <TableCell align="center">{idx + 1}</TableCell>
                   <TableCell align="center">
                     <Typography
                       variant="body2"
-                      sx={{
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                        "&:hover": {
-                          color: "primary.dark",
-                          fontWeight: "bold",
-                        },
-                      }}
-                      onClick={() =>
-                        handleLotClick(
-                          row.order_item_id,
-                          row.lot_no,
-                          row.order_inbound_id!
-                        )
-                      }
+                      sx={{ textDecoration: "underline", cursor: "pointer", "&:hover": { color: "primary.dark", fontWeight: "bold" } }}
+                      onClick={() => handleLotClick(row.order_item_id, row.lot_no, row.order_inbound_id!)}
                     >
                       {row.lot_no}
                     </Typography>
@@ -354,116 +316,43 @@ export default function InboundHistoryPage() {
                   <TableCell align="center">{row.customer_name}</TableCell>
                   <TableCell align="center">{row.item_code}</TableCell>
                   <TableCell align="center">{row.item_name}</TableCell>
-                  {/* 수량 */}
                   <TableCell align="center">
                     {editRowId === row.order_inbound_id ? (
                       <TextField
                         size="small"
                         type="number"
-                        value={values[row.order_inbound_id]?.qty ?? ""}
-                        onChange={(e) =>
-                          handleQtyChange(row.order_inbound_id!, e.target.value)
-                        }
+                        value={values[row.order_inbound_id]?.qty ?? row.qty}
+                        onChange={(e) => handleQtyChange(row.order_inbound_id!, e.target.value)}
                         inputProps={{ min: 1 }}
                         sx={{ width: 70 }}
                       />
-                    ) : (
-                      row.qty
-                    )}
+                    ) : row.qty}
                   </TableCell>
-
-                  {/* 입고일자 */}
                   <TableCell align="center">
                     {editRowId === row.order_inbound_id ? (
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                         <DatePicker
-                          value={
-                            values[row.order_inbound_id]?.date
-                              ? dayjs(values[row.order_inbound_id].date)
-                              : null
-                          }
-                          onChange={(newDate) =>
-                            handleDateChange(row.order_inbound_id!, newDate)
-                          }
+                          value={values[row.order_inbound_id]?.date ? dayjs(values[row.order_inbound_id].date) : null}
+                          onChange={(newDate) => handleDateChange(row.order_inbound_id!, newDate)}
+                          slotProps={{ textField: { size: "small", sx: { width: 147 } } }}
                           format="YYYY-MM-DD"
-                          slotProps={{
-                            textField: { size: "small", sx: { width: 147 } },
-                          }}
                         />
                       </LocalizationProvider>
-                    ) : (
-                      row.inbound_date
-                    )}
+                    ) : row.inbound_date}
                   </TableCell>
-
-                  <TableCell align="center">
-                    {paintLableMap[row.paint_type] || row.paint_type}
-                  </TableCell>
-                  <TableCell align="center">
-                    {categoryLabelMap[row.category] || row.category}
-                  </TableCell>
+                  <TableCell align="center">{paintLabelMap[row.paint_type] || row.paint_type}</TableCell>
+                  <TableCell align="center">{categoryLabelMap[row.category] || row.category}</TableCell>
                   <TableCell align="center">
                     {editRowId === row.order_inbound_id ? (
-                      <Box
-                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                      >
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => handleSave(row.order_inbound_id!)}
-                          sx={{ mr: 0.5 }}
-                        >
-                          저장
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          color="error"
-                          onClick={() => setEditRowId(null)} // ✅ 수정 취소
-                        >
-                          취소
-                        </Button>
+                      <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                        <Button variant="outlined" size="small" onClick={() => handleSave(row.order_inbound_id!)}>저장</Button>
+                        <Button variant="outlined" size="small" color="error" onClick={() => setEditRowId(null)}>취소</Button>
                       </Box>
                     ) : (
-                      <Box
-                        sx={{ display: "flex", gap: 1, justifyContent: "center" }}
-                      >
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          sx={{
-                            color: "#ff8c00",
-                            borderColor: "#ff8c00",
-                            mr: 0.3,
-                          }}
-                          onClick={() =>
-                            handleOpenModal(
-                              row.order_item_id,
-                              row.lot_no,
-                              row.qty
-                            )
-                          }
-                        >
-                          작업지시서
-                        </Button>
-
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() => handleUpdate(row.order_inbound_id!)}
-                        >
-                          수정
-                        </Button>
-
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          onClick={() => handleDelete(row.order_inbound_id!)}
-                          sx={{ ml: 0.3 }}
-                        >
-                          삭제
-                        </Button>
+                      <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                        <Button variant="outlined" size="small" sx={{ color: "#ff8c00", borderColor: "#ff8c00" }} onClick={() => handleOpenModal(row.order_item_id, row.lot_no, row.qty)}>작업지시서</Button>
+                        <Button variant="outlined" size="small" onClick={() => handleUpdate(row.order_inbound_id!)}>수정</Button>
+                        <Button variant="outlined" size="small" color="error" onClick={() => handleDelete(row.order_inbound_id!)}>삭제</Button>
                       </Box>
                     )}
                   </TableCell>
@@ -474,25 +363,11 @@ export default function InboundHistoryPage() {
         </Table>
       </TableContainer>
 
+      {/* 페이징 */}
       <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-        <Button
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(currentPage - 1)}
-        >
-          〈
-        </Button>
-        <Typography
-          variant="body2"
-          sx={{ display: "flex", alignItems: "center", mx: 2 }}
-        >
-          {currentPage} / {totalPages}
-        </Typography>
-        <Button
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(currentPage + 1)}
-        >
-          〉
-        </Button>
+        <Button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>〈</Button>
+        <Typography variant="body2" sx={{ display: "flex", alignItems: "center", mx: 2 }}>{currentPage} / {totalPages}</Typography>
+        <Button disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>〉</Button>
       </Box>
 
       {/* 작업지시서 모달 */}
@@ -500,20 +375,21 @@ export default function InboundHistoryPage() {
         <OrdersInDocModal
           open={openModal}
           onClose={() => setOpenModal(false)}
-          orderItem={selectedItem!}
+          orderItem={selectedItem}
           lotNo={selectedLotNo}
           qty={selectedQty}
         />
       )}
+
       {/* 공정 진행현황 모달 */}
-      {selectedItem && (
+      {selectedItem && selectedInboundId !== null && (
         <OrdersProcessTrackings
           open={openProcessModal}
           onClose={() => setOpenProcessModal(false)}
           lotNo={selectedLotNo}
           orderItem={selectedItem}
           routingSteps={selectedRoutingSteps}
-          inboundId={selectedInboundId!}
+          inboundId={selectedInboundId}
         />
       )}
     </Box>

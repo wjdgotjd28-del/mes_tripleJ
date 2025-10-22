@@ -16,6 +16,7 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import type { RawMaterialOutItems, RawMaterialInventoryStatus } from "../../../type";
 import { addRawMaterialOutbound } from "../api/RawMaterialOutApi";
@@ -26,6 +27,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
+import { RawoutboundregisterSearchUtils } from "./RawoutboundregisterSearchUtils";
 
 // ✅ Props 타입
 interface Props {
@@ -55,6 +57,8 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
     item_name: "",
   });
 
+  const [filteredInventory, setFilteredInventory] = useState<RawMaterialInventoryStatus[]>([]);
+
   // ✅ 출고 가능 재고 불러오기
   useEffect(() => {
     if (open) {
@@ -69,25 +73,27 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
     try {
       const data = await fetchRawMaterialInventory();
       setInventory(data);
+      // 초기에는 전체 목록 보여주기
+      setFilteredInventory(data);
     } catch (err) {
       console.error("Failed to fetch inventory:", err);
     }
   };
 
   // ✅ 검색 필터
-  const filteredInventory = inventory.filter((item) => {
-    const searchLower = {
-      company_name: search.company_name.toLowerCase(),
-      item_code: search.item_code.toLowerCase(),
-      item_name: search.item_name.toLowerCase(),
-    };
-    return (
-      item.total_qty >= 1 &&
-      item.company_name.toLowerCase().includes(searchLower.company_name) &&
-      item.item_code.toLowerCase().includes(searchLower.item_code) &&
-      item.item_name.toLowerCase().includes(searchLower.item_name)
-    );
-  });
+  // const filteredInventory = inventory.filter((item) => {
+  //   const searchLower = {
+  //     company_name: search.company_name.toLowerCase(),
+  //     item_code: search.item_code.toLowerCase(),
+  //     item_name: search.item_name.toLowerCase(),
+  //   };
+  //   return (
+  //     item.total_qty >= 1 &&
+  //     item.company_name.toLowerCase().includes(searchLower.company_name) &&
+  //     item.item_code.toLowerCase().includes(searchLower.item_code) &&
+  //     item.item_name.toLowerCase().includes(searchLower.item_name)
+  //   );
+  // });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearch({ ...search, [e.target.name]: e.target.value });
@@ -99,16 +105,15 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
       setSelected(null);
       setForm({ outboundQty: "", outboundDate: "" });
     } else {
-      // ✅ 현재 날짜 자동 입력
       const now = new Date();
       const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
         .toISOString()
-        .slice(0, 10); // yyyy-MM-dd 형식
+        .slice(0, 10);
 
       setSelected(row);
       setForm({
         outboundQty: "",
-        outboundDate: localDate, // 현재 날짜
+        outboundDate: localDate,
       });
     }
   };
@@ -132,7 +137,7 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
       item_name: selected.item_name,
       total_qty: selected.total_qty,
       unit: selected.unit,
-      material_inbound_id: selected.id ,
+      material_inbound_id: selected.material_inbound_id, // 서버에서 내려오는 실제 ID 사용
       qty,
       outbound_date: form.outboundDate,
       manufacturer: selected.manufacturer,
@@ -143,59 +148,71 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
     onClose();
   };
 
+  const handleSearchClick = () => {
+    const result = RawoutboundregisterSearchUtils(inventory, {
+      company_name: search.company_name,
+      item_code: search.item_code,
+      item_name: search.item_name,
+    });
+    setFilteredInventory(result);
+  };
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle>원자재 출고 등록</DialogTitle>
       <DialogContent>
-        {/* 🔹 검색 영역 */}
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            mb: 2,
-            alignItems: "center",
-          }}
-        >
-          <TextField
-            placeholder="매입처명"
-            name="company_name"
-            value={search.company_name}
-            onChange={handleSearchChange}
-            size="small"
-            sx={{ width: 200 }}
-          />
-          <TextField
-            placeholder="품목번호"
-            name="item_code"
-            value={search.item_code}
-            onChange={handleSearchChange}
-            size="small"
-            sx={{ width: 200 }}
-          />
-          <TextField
-            placeholder="품목명"
-            name="item_name"
-            value={search.item_name}
-            onChange={handleSearchChange}
-            size="small"
-            sx={{ width: 200 }}
-          />
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2, flexWrap: "wrap", gap: 2 }}>
+          {/* 왼쪽: 검색 필드 + 검색 버튼 */}
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <TextField
+              placeholder="매입처명"
+              name="company_name"
+              value={search.company_name}
+              onChange={handleSearchChange}
+              size="small"
+              sx={{ width: 200 }}
+            />
+            <TextField
+              placeholder="품목번호"
+              name="item_code"
+              value={search.item_code}
+              onChange={handleSearchChange}
+              size="small"
+              sx={{ width: 200 }}
+            />
+            <TextField
+              placeholder="품목명"
+              name="item_name"
+              value={search.item_name}
+              onChange={handleSearchChange}
+              size="small"
+              sx={{ width: 200 }}
+            />
+            <Button 
+              variant="contained" 
+              size="small" 
+              onClick={handleSearchClick}
+            >
+              검색
+            </Button>
+          </Box>
+
+          {/* 오른쪽: 엑셀 다운로드 버튼 */}
           <Button
-            variant="contained"
-            onClick={() => exportToExcel(filteredInventory, "출고가능재고")}
+            color="success"
+            variant="outlined"
+            endIcon={<FileDownloadIcon />}
+            onClick={() => exportToExcel(filteredInventory, "원자재_원자재출고이력")}
           >
-            Excel 다운로드
+            엑셀 다운로드
           </Button>
         </Box>
 
-        {/* 🔹 원자재 입고 리스트 테이블 */}
         <TableContainer component={Paper} sx={{ maxHeight: 470 }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell align="center" sx={{ width: 50 }}>
-                  선택
-                </TableCell>
+                <TableCell align="center" sx={{ width: 50 }}>선택</TableCell>
                 <TableCell align="center">매입처명</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -233,31 +250,9 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
           </Table>
         </TableContainer>
 
-        {/* 🔹 선택된 품목 표시 및 입력 영역 */}
         <Box sx={{ mt: 3, display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {/* <TextField
-            label="매입처명"
-            value={selected?.company_name ?? "-"}
-            size="small"
-            InputProps={ReadOnlyInputProps}
-            sx={{ width: 200 }}
-          />
           <TextField
-            label="품목번호"
-            value={selected?.item_code ?? "-"}
-            size="small"
-            InputProps={ReadOnlyInputProps}
-            sx={{ width: 200 }}
-          />
-          <TextField
-            label="품목명"
-            value={selected?.item_name ?? "-"}
-            size="small"
-            InputProps={ReadOnlyInputProps}
-            sx={{ width: 200 }}
-          /> */}
-          <TextField
-            label="총재고"
+            label="총 재고"
             value={selected?.total_qty ?? "-"}
             size="small"
             InputProps={ReadOnlyInputProps}
@@ -281,57 +276,16 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
                 onChange={handleFormChange}
                 size="small"
                 InputLabelProps={{ shrink: true }}
-                sx={{
-                  width: 200,
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor:
-                        form.outboundQty === ""
-                          ? undefined
-                          : Number(form.outboundQty) <= 0
-                          ? "red"
-                          : Number(form.outboundQty) > (selected?.total_qty ?? 0)
-                          ? "red"
-                          : undefined,
-                    },
-                    "&:hover fieldset": {
-                      borderColor:
-                        form.outboundQty === ""
-                          ? undefined
-                          : Number(form.outboundQty) <= 0
-                          ? "red"
-                          : Number(form.outboundQty) > (selected?.total_qty ?? 0)
-                          ? "red"
-                          : undefined,
-                    },
-                  },
-                }}
-                error={
-                  form.outboundQty !== "" &&
-                  (Number(form.outboundQty) <= 0 ||
-                    Number(form.outboundQty) > (selected?.total_qty ?? 0))
-                }
+                inputProps={{ min: 1 }}
+                sx={{ width: 200 }}
+                minRows={1}
+                error={Number(form.outboundQty) <= 0 && form.outboundQty !== ""}
                 helperText={
-                  form.outboundQty === ""
-                    ? ""
-                    : Number(form.outboundQty) <= 0
-                    ? "0보다 큰 값을 입력하세요."
-                    : Number(form.outboundQty) > (selected?.total_qty ?? 0)
-                    ? `재고수량(${selected?.total_qty}${selected?.unit}) 보다 많습니다.`
+                  Number(form.outboundQty) <= 0 && form.outboundQty !== ""
+                    ? "출고 수량은 0보다 커야 합니다."
                     : ""
                 }
-                FormHelperTextProps={{
-                  sx: {
-                    width: "100%",          // 전체 폭 사용
-                    whiteSpace: "nowrap",   // 한 줄로 표시
-                    overflow: "hidden",
-                    // textOverflow: "ellipsis", // 길면 ... 처리
-                    // mt: 0.5,                // TextField와 간격 약간
-                  },
-                }}
               />
-
-              {/* 🔹 날짜 */}
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                 <DatePicker
                   label="출고일자"
@@ -342,41 +296,30 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
                       setForm({ ...form, outboundDate: newValue.format("YYYY-MM-DD") });
                     }
                   }}
-                  slotProps={{
-                    textField: { size: "small", sx: { width: 180 } },
-                  }}
+                  slotProps={{ textField: { size: "small", sx: { width: 180 } } }}
                 />
               </LocalizationProvider>
             </>
           ) : (
             <>
-              <TextField
-                label="출고수량"
-                value="-"
-                size="small"
-                InputProps={ReadOnlyInputProps}
-                sx={{ width: 200 }}
-              />
-              <TextField
-                label="출고일자"
-                value="-"
-                size="small"
-                InputProps={ReadOnlyInputProps}
-                sx={{ width: 200 }}
-              />
+              <TextField label="출고수량" value="-" size="small" InputProps={ReadOnlyInputProps} sx={{ width: 200 }} />
+              <TextField label="출고일자" value="-" size="small" InputProps={ReadOnlyInputProps} sx={{ width: 200 }} />
             </>
           )}
         </Box>
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>취소</Button>
+        <Button variant="outlined" size="small" color="error" onClick={onClose}>
+          취소
+        </Button>
         <Button
-          variant="contained"
+          variant="outlined"
+          size="small"
           onClick={handleSave}
           disabled={!selected || !form.outboundQty || !form.outboundDate}
         >
-          출고 등록
+          등록
         </Button>
       </DialogActions>
     </Dialog>

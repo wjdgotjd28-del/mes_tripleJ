@@ -3,7 +3,6 @@ import {
   Box, Button, Typography, TextField, Table, TableHead, TableRow, TableCell,
   TableBody, TableContainer, Paper, Tooltip, IconButton
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import RawOutRegisterModal from "./RawOutRegisterModal";
@@ -17,7 +16,7 @@ import {
   ArrowUpward as ArrowUpwardIcon,
   ArrowDownward as ArrowDownwardIcon,
 } from "@mui/icons-material";
-import { RawoutboundSearchUtils } from "./RawoutboundSearchUtils";
+// import { RawoutboundSearchUtils } from "./RawoutboundSearchUtils";
 import { usePagination } from "../../../Common/usePagination";
 
 // ✅ DatePicker 관련 import
@@ -142,7 +141,7 @@ export default function RawMaterialOutViewPage() {
 
           <Box sx={{ display: "flex", gap: 1 }}>
             <Button variant="outlined" onClick={() => setRegisterOpen(true)}>
-              + 등록
+              + 출고 등록
             </Button>
             <Button
               color="success"
@@ -234,14 +233,28 @@ export default function RawMaterialOutViewPage() {
                     <TableCell align="center">
                       {editingId === r.id ? (
                         <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-                          <Button size="small" variant="contained" onClick={() => handleEditSave(r.id!)}>저장</Button>
-                          <Button size="small" variant="outlined" onClick={() => setEditingId(null)}>취소</Button>
+                          <Button 
+                            variant="outlined" 
+                            size="small" 
+                            color="success" 
+                            onClick={() => handleEditSave(r.id!)}
+                          >
+                            저장
+                          </Button>
+                          <Button 
+                            variant="outlined" 
+                            size="small" 
+                            color="error" 
+                            onClick={() => setEditingId(null)}
+                          >
+                            취소
+                          </Button>
                         </Box>
                       ) : (
                         <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
                           <Button
-                            size="small"
                             variant="outlined"
+                            size="small"
                             onClick={() => {
                               setEditingId(r.id!);
                               setEditForm({
@@ -255,10 +268,9 @@ export default function RawMaterialOutViewPage() {
                             수정
                           </Button>
                           <Button
-                            size="small"
                             variant="outlined"
+                            size="small"
                             color="error"
-                            startIcon={<DeleteIcon />}
                             onClick={() => handleDelete(r.id!)}
                           >
                             삭제
