@@ -32,7 +32,7 @@ public class OrderInboundController {
 
     @PostMapping("/items")
     public ResponseEntity<Void> registerInbound(@RequestBody OrderInboundDTO dto) {
-        orderInboundService.save(dto);
+        orderInboundService.getInbound(dto);
         return ResponseEntity.ok().build();
     }
 

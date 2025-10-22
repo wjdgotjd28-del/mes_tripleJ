@@ -70,7 +70,7 @@ public class OrderInboundService {
 
 
 
-    public void save(OrderInboundDTO dto) {
+    public void getInbound(OrderInboundDTO dto) {
         OrderItem orderItem = orderItemRepository.findById(dto.getOrderItemId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 수주 품목입니다."));
 
@@ -85,6 +85,7 @@ public class OrderInboundService {
                 .note(dto.getNote())
                 .paintType(dto.getPaintType())
                 .qty(dto.getQty())
+                .company(orderItem.getCompany())
                 .build();
 
         orderInboundRepository.save(entity);

@@ -153,20 +153,27 @@ export default function OrderOutViewPage() {
   const { currentPage, setCurrentPage, totalPages, paginatedData } =
     usePagination(sortedRows, 20); // 한 페이지당 20개
 
+  const handleExcelDownload = () => exportToExcel(sortedRows, "입고이력");
+
   //  작업지시서 모달 상태
-  // const [openModal, setOpenModal] = useState(false);
-  // const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
-  // const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
-  // const handleOpenModal = async (row: OrderOutbound, orderInboundId: number) => {
-  //     try {
-  //       setSelectedOrder(row); // row: OrderOutbound
-  //       const inbound = inbounds.find(item => item.orderInboundId === orderInboundId);
-  //       setSelectedInboundDate(inbound?.inboundDate);
-  //       setOpenModal(true);
-  //     } catch (err) {
-  //       console.error("출하증 조회 실패", err);
-  //     }
-  //   };
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<OrderOutbound>();
+  const [selectedInboundDate, setSelectedInboundDate] = useState<string>();
+  const handleOpenModal = async (
+    row: OrderOutbound,
+    orderInboundId: number
+  ) => {
+    try {
+      setSelectedOrder(row); // row: OrderOutbound
+      const inbound = inbounds.find(
+        (item) => item.orderInboundId === orderInboundId
+      );
+      setSelectedInboundDate(inbound?.inboundDate);
+      setOpenModal(true);
+    } catch (err) {
+      console.error("출하증 조회 실패", err);
+    }
+  };
 
   return (
     <Box sx={{ p: 4 }}>
@@ -218,15 +225,15 @@ export default function OrderOutViewPage() {
           </IconButton>
         </Tooltip>
         <Box sx={{ flex: 1 }} />
+
         {/*  오른쪽: 엑셀 다운로드 버튼 */}
         <Button
+          color="success"
           variant="outlined"
           endIcon={<FileDownloadIcon />}
-          sx={{ height: 40 }}
-          onClick={() => exportToExcel(displayedRows, "출고 이력")}
+          onClick={handleExcelDownload}
         >
-          {/* height 추가 */}
-          Excel
+          엑셀 다운로드
         </Button>
         <Button
           variant="contained"
