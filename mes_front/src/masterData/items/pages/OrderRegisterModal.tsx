@@ -23,7 +23,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
     item_name: "",
     item_code: "",
     category: "GENERAL",
-    paint_type: "POWDER",
+    paint_type: "LIQUID",
     unit_price: 0,
     color: "",
     note: "",
@@ -43,7 +43,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
       setSelectedRouting([]);
       setNewData({
         company_name: "", item_name: "", item_code: "", category: "GENERAL",
-        paint_type: "POWDER", unit_price: 0, color: "", note: "",
+        paint_type: "LIQUID", unit_price: 0, color: "", note: "",
         use_yn: "Y", status: "Y", image: [], routing: []
       });
       setRoutingList([]);
@@ -160,7 +160,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
     newData.image?.forEach(img => img.img_url?.startsWith("blob:") && URL.revokeObjectURL(img.img_url));
     setNewData({
       company_name: "", item_name: "", item_code: "", category: "GENERAL",
-      paint_type: "POWDER", unit_price: 0, color: "", note: "",
+      paint_type: "LIQUID", unit_price: 0, color: "", note: "",
       use_yn: "Y", status: "Y", image: [], routing: []
     });
     setSelectedRouting([]);

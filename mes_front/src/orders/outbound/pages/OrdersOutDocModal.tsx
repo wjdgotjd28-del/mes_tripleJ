@@ -181,6 +181,9 @@ export default function OrdersDocModal({
                 <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
                     출고 수량</td>
                 <td>{outItem.qty}</td>
+                <td style={{ width: "80px", backgroundColor: "#f0f0f0", fontWeight: "bold" }}>
+                    색상</td>
+                <td>{outItem.color}</td>
               </tr>
             </tbody>
           </table>

@@ -30,7 +30,7 @@ public class MaterialStockService {
             dto.setCompanyName(ms.getMaterialInbound().getMaterialItem().getCompany().getCompanyName());
             dto.setItemCode(ms.getMaterialInbound().getMaterialItem().getItemCode());
             dto.setItemName(ms.getMaterialInbound().getItemName());
-            dto.setTotalQty(ms.getTotalQty().longValue());
+            dto.setTotalQty(ms.getTotalQty());
             dto.setUnit(ms.getUnit());
             dto.setManufacturer(ms.getMaterialInbound().getManufacturer());
             return dto;

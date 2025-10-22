@@ -67,7 +67,7 @@ export default function OrderViewPage() {
     useYn: "",
   });
 
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   // category 매핑 테이블
   const CATEGORY_LABELS: Record<string, string> = {
@@ -302,6 +302,13 @@ export default function OrderViewPage() {
         </Box>
       </Box>
 
+      {/* 안내 메시지 */}
+      <Box>
+        <Typography variant="body2" color="text.secondary">
+          🔹 수주 대상 품목 정보를 수정하려면 '품목명'을 클릭하세요.
+        </Typography>
+      </Box>
+
       {/* 테이블 영역 */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
@@ -312,16 +319,16 @@ export default function OrderViewPage() {
           <Table sx={{ minWidth: 900 }}>
             <TableHead>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>거래처명</TableCell>
-                <TableCell>품목번호</TableCell>
-                <TableCell>품목명</TableCell>
-                <TableCell>분류</TableCell>
-                <TableCell>도장방식</TableCell>
-                <TableCell>단가</TableCell>
-                <TableCell>비고</TableCell>
-                <TableCell>거래상태</TableCell>
-                <TableCell>사용여부</TableCell>
+                <TableCell align="center"></TableCell>
+                <TableCell align="center">거래처명</TableCell>
+                <TableCell align="center">품목번호</TableCell>
+                <TableCell align="center">품목명</TableCell>
+                <TableCell align="center">분류</TableCell>
+                <TableCell align="center">도장방식</TableCell>
+                <TableCell align="center">단가</TableCell>
+                <TableCell align="center">비고</TableCell>
+                <TableCell align="center">거래상태</TableCell>
+                <TableCell align="center">사용여부</TableCell>
                 <TableCell align="center"></TableCell>
               </TableRow>
             </TableHead>
@@ -335,12 +342,12 @@ export default function OrderViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((row) => (
+                paginatedData.map((row, idx) => (
                   <TableRow key={row.order_item_id}>
-                    <TableCell>{row.order_item_id}</TableCell>
-                    <TableCell>{row.company_name}</TableCell>
-                    <TableCell>{row.item_code}</TableCell>
-                    <TableCell>
+                    <TableCell align="center">{idx+1}</TableCell>
+                    <TableCell align="center">{row.company_name}</TableCell>
+                    <TableCell align="center">{row.item_code}</TableCell>
+                    <TableCell align="center">
                       <Typography
                         variant="body2"
                         sx={{
@@ -356,14 +363,14 @@ export default function OrderViewPage() {
                         {row.item_name}
                       </Typography>
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       {CATEGORY_LABELS[row.category] || row.category}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       {PAINT_LABELS[row.paint_type] || row.paint_type}
                     </TableCell>
-                    <TableCell>{row.unit_price}</TableCell>
-                    <TableCell>{row.note}</TableCell>
+                    <TableCell align="center">{row.unit_price}</TableCell>
+                    <TableCell align="center">{row.note}</TableCell>
                     <TableCell align="center">
                       <Chip
                         label={row.status === "Y" ? "거래중" : "거래종료"}

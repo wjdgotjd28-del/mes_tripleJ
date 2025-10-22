@@ -103,6 +103,7 @@ public class OrderOutboundService {
                 .outboundNo(saved.getOutboundNo())
                 .outboundDate(saved.getOutboundDate())
                 .inboundDate(orderInbound.getInboundDate())
+                .color(saved.getOrderInbound().getOrderItem().getColor())
                 .build();
     }
 
@@ -138,6 +139,7 @@ public class OrderOutboundService {
                         .outboundNo(o.getOutboundNo())
                         .outboundDate(o.getOutboundDate())
                         .inboundDate(o.getOrderInbound().getInboundDate())
+                        .color(o.getOrderInbound().getOrderItem().getColor())
                         .build())
                 .collect(Collectors.toList());
     }

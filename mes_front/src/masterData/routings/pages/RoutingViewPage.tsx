@@ -30,7 +30,7 @@ export default function RoutingViewPage() {
   // 현재 페이지 번호
 
   // 정렬 방향 (true: 오름차순, false: 내림차순)
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   // 컴포넌트 마운트 시 라우팅 데이터 불러오기
   useEffect(() => {
@@ -109,11 +109,11 @@ export default function RoutingViewPage() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>공정 코드</TableCell>
-              <TableCell>공정 명</TableCell>
-              <TableCell>공정 시간</TableCell>
-              <TableCell>비고</TableCell>
+              <TableCell align="center"></TableCell>
+              <TableCell align="center">공정 코드</TableCell>
+              <TableCell align="center">공정 명</TableCell>
+              <TableCell align="center">공정 시간</TableCell>
+              <TableCell align="center">비고</TableCell>
               <TableCell align="center">삭제</TableCell>
             </TableRow>
           </TableHead>
@@ -128,13 +128,13 @@ export default function RoutingViewPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((row) => (
+              paginatedData.map((row, idx) => (
                 <TableRow key={row.routing_id}>
-                  <TableCell>{row.routing_id}</TableCell>
-                  <TableCell>{row.process_code}</TableCell>
-                  <TableCell>{row.process_name}</TableCell>
-                  <TableCell>{row.process_time}</TableCell>
-                  <TableCell>{row.note}</TableCell>
+                  <TableCell align="center">{idx+1}</TableCell>
+                  <TableCell align="center">{row.process_code}</TableCell>
+                  <TableCell align="center">{row.process_name}</TableCell>
+                  <TableCell align="center">{row.process_time}</TableCell>
+                  <TableCell align="center">{row.note}</TableCell>
                   <TableCell align="center">
                     <Button
                       variant="outlined"

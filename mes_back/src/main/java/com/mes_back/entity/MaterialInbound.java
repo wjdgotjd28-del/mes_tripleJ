@@ -53,5 +53,5 @@ public class MaterialInbound {
     private String inboundNo;
 
     @Column(name = "total_qty", nullable = false)
-    private Long  totalQty;
+    private Long totalQty;
 }

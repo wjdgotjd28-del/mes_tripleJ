@@ -55,7 +55,7 @@ export default function OrderOutViewPage() {
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
 
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   useEffect(() => {
     loadOrderOutboundData();

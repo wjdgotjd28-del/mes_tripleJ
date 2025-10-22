@@ -20,4 +20,5 @@ public class OrderOutboundDto {
     private String outboundNo;
     private LocalDate outboundDate;
     private LocalDate inboundDate;
+    private String color;
 }

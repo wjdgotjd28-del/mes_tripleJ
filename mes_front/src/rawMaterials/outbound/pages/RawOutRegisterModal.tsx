@@ -77,6 +77,7 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
       item_name: search.item_name.toLowerCase(),
     };
     return (
+      item.total_qty >= 1 &&
       item.company_name.toLowerCase().includes(searchLower.company_name) &&
       item.item_code.toLowerCase().includes(searchLower.item_code) &&
       item.item_name.toLowerCase().includes(searchLower.item_name)
@@ -93,16 +94,16 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
       setSelected(null);
       setForm({ outboundQty: "", outboundDate: "" });
     } else {
-      // ✅ 현재 날짜 + 시간 자동 입력
+      // ✅ 현재 날짜 자동 입력
       const now = new Date();
       const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
         .toISOString()
-        .slice(0, 10); // yyyy-MM-ddTHH:mm 형식
+        .slice(0, 10); // yyyy-MM-dd 형식
 
       setSelected(row);
       setForm({
         outboundQty: "",
-        outboundDate: localDate, // 현재 날짜+시간
+        outboundDate: localDate, // 현재 날짜
       });
     }
   };

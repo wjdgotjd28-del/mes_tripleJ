@@ -43,7 +43,16 @@ export default function RoutingRegisterModal({
   // 입력값 변경 핸들러
   const handleChange = (field: keyof typeof form, value: string) => {
     setForm({ ...form, [field]: value });
-    setError("");
+    // 공정코드 필드일 때 중복 체크
+    if (field === "process_code") {
+      if (existingCodes.includes(value)) {
+        setError("중복된 공정코드가 있습니다.");
+      } else {
+        setError("");
+      }
+    } else {
+      setError("");
+    }
   };
 
   // 등록 버튼 클릭 시 처리
@@ -85,19 +94,35 @@ export default function RoutingRegisterModal({
         }}
       >
         <DialogTitle sx={{ p: 0 }}>라우팅 등록</DialogTitle>
-        <IconButton onClick={onClose} size="small">
+        <IconButton
+          onClick={() => {
+            onClose();
+            setForm({ process_code: "", process_name: "", process_time: "", note: "" });
+            setError("");
+          }}
+          size="small"
+        >
           <CloseIcon />
         </IconButton>
       </Box>
 
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 0 }}>
-          <TextField
-            label="공정 코드"
-            value={form.process_code}
-            onChange={(e) => handleChange("process_code", e.target.value)}
-            required
-          />
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <TextField
+              label="공정 코드"
+              value={form.process_code}
+              onChange={(e) => handleChange("process_code", e.target.value)}
+              required
+              error={!!error} // 빨간 테두리 표시
+            />
+            {/* 공정코드 중복 에러 메시지 바로 아래 표시 */}
+            {error && (
+              <Typography color="error" variant="body2" sx={{ mt: 0.5 }}>
+                {error}
+              </Typography>
+            )}
+          </Box>
           <TextField
             label="공정 명"
             value={form.process_name}
@@ -105,7 +130,7 @@ export default function RoutingRegisterModal({
             required
           />
           <TextField
-            label="공정 시간"
+            label="공정 시간(분)"
             value={form.process_time}
             onChange={(e) => handleChange("process_time", e.target.value)}
             required
@@ -115,7 +140,7 @@ export default function RoutingRegisterModal({
             value={form.note}
             onChange={(e) => handleChange("note", e.target.value)}
           />
-          {error && <Typography color="error">{error}</Typography>}
+          {/* {error && <Typography color="error">{error}</Typography>} */}
         </Box>
       </DialogContent>
       <DialogActions>
