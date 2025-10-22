@@ -292,7 +292,7 @@ export default function OrderOutViewPage() {
               <TableCell align="center">출고 수량</TableCell>
               <TableCell align="center">출고 일자</TableCell>
               <TableCell align="center">분류</TableCell>
-              <TableCell align="center">기능</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -374,7 +374,7 @@ export default function OrderOutViewPage() {
                           <Button
                             variant="outlined"
                             size="small"
-                            startIcon={<EditIcon />}
+                            color="primary"
                             onClick={() => handleUpdate(row)}
                           >
                             수정
@@ -382,8 +382,7 @@ export default function OrderOutViewPage() {
                           <Button
                             variant="outlined"
                             color="error"
-                            size="small"
-                            startIcon={<DeleteIcon />}
+                            size="small" 
                             onClick={() => handleDelete(row.id!)}
                           >
                             삭제
