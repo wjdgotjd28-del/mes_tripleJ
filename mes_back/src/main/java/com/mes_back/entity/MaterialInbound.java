@@ -67,4 +67,5 @@ public class MaterialInbound {
         this.inboundDate = materialInboundDto.getInboundDate();
         this.manufacteDate = materialInboundDto.getManufacteDate();
     }
+}
 

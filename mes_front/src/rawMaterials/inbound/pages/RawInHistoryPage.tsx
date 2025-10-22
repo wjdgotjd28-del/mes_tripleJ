@@ -178,11 +178,11 @@ export default function RawInHistoryPage() {
     // Recalculate totalQty if specQty, qty, or specUnit changes
     const currentSpecQty = (name === "specQty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.specQty || 0);
     const currentQty = (name === "qty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.qty || 0);
-    const currentSpecUnit = (name === "specUnit") ? value : (editableRowData.specUnit || "");
+
 
     if (name === "specQty" || name === "qty" || name === "specUnit") {
       const calculatedTotalQty = currentSpecQty * currentQty;
-      updatedEditableRowData = { ...updatedEditableRowData, totalQty: `${calculatedTotalQty}${currentSpecUnit}` };
+      updatedEditableRowData = { ...updatedEditableRowData, totalQty: calculatedTotalQty };
     }
 
     setEditableRowData(updatedEditableRowData);

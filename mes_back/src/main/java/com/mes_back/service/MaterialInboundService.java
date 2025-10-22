@@ -99,7 +99,7 @@ public class MaterialInboundService {
                 .qty(materialInbound.getQty()) // 입고수량(Long)
                 .inboundDate(materialInbound.getInboundDate())
                 .inboundNo(materialInbound.getInboundNo())
-                .totalQty(materialInbound.getTotalQty()) // 단위 포함 String
+                .totalQty(materialInbound.getTotalQty())
                 .build();
     }
 

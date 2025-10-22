@@ -173,5 +173,5 @@ export type MaterialInbound = {
   qty: number;
   inboundDate: string;           // 'YYYY-MM-DD' 형식
   inboundNo: string;
-  totalQty?: string;
+  totalQty: number;
 }
