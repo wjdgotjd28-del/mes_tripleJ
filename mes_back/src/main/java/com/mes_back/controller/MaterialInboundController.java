@@ -31,4 +31,9 @@ public class MaterialInboundController {
     public MaterialInboundDTO updateMaterialInbound(@RequestBody MaterialInboundDTO materialInboundDto) {
         return materialInboundService.updateMaterialInbound(materialInboundDto);
     }
+
+    @DeleteMapping("/{id}")
+    public Long deleteMaterialInbound(@PathVariable("id") Long id) {
+        return materialInboundService.deleteMaterialInbound(id);
+    }
 }

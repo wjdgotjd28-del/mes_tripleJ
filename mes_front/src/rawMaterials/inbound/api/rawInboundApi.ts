@@ -8,6 +8,8 @@ export const getMaterialInbound = async (): Promise<MaterialInbound[]> => {
   return response.data;
 };
 
+
+// 원자재 입고 등록
 export const addMaterialInbound = async (materialInbound: Omit<MaterialInbound, "id">): Promise<MaterialInbound> => {
   const response = await axios.post(`${BASE_URL}/materials/inbound/new`, materialInbound);
   return response.data;
@@ -18,3 +20,9 @@ export const updateMaterialInbound = async (materialInbound: MaterialInbound): P
   const response = await axios.patch(`${BASE_URL}/materials/inbound`, materialInbound);
   return response.data;
 };
+
+// 원자재 입고 삭제 
+export const deleteMaterailInbound = async (id: number): Promise<MaterialInbound> => {
+  const response = await axios.delete(`${BASE_URL}/materials/inbound/${id}`);
+  return response.data;
+}

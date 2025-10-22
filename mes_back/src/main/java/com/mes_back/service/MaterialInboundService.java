@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class MaterialInboundService {
 
     @Transactional(readOnly = true)
     public List<MaterialInboundDTO> getMaterialInbound() {
-        return materialInboundRepository.findAll().stream()
+        return materialInboundRepository.findAllByDeletedAtIsNull().stream()
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
     }
@@ -103,5 +104,13 @@ public class MaterialInboundService {
                 .orElseThrow(EntityNotFoundException::new);
         materialInbound.updateMaterialInbound(materialInboundDto);
         return materialInboundDto;
+    }
+
+    public Long deleteMaterialInbound(Long id) {
+        MaterialInbound materialInbound = materialInboundRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("MaterialInbound not found with id: " + id));
+        materialInbound.setDeletedAt(LocalDateTime.now());
+        materialInboundRepository.save(materialInbound);
+        return id;
     }
 }

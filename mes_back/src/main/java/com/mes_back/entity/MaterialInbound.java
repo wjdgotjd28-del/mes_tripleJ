@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "material_inbound")
@@ -55,6 +56,9 @@ public class MaterialInbound {
 
     @Column(name = "total_qty", nullable = false)
     private String totalQty;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     public void updateMaterialInbound(MaterialInboundDTO materialInboundDto) {
         this.specQty = materialInboundDto.getSpecQty();

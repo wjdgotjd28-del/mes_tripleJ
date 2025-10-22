@@ -20,7 +20,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
 
 import type { MaterialInbound } from "../../../type";
-import { getMaterialInbound, updateMaterialInbound } from "../api/rawInboundApi";
+import { getMaterialInbound, updateMaterialInbound, deleteMaterailInbound } from "../api/rawInboundApi";
 
 // Helper function to filter history
 const filterInboundHistory = (
@@ -143,6 +143,17 @@ export default function RawInHistoryPage() {
     } catch (error) {
       console.error("Error saving material inbound data:", error);
       setError("데이터 저장 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("정말로 이 항목을 삭제하시겠습니까?")) return;
+    try {
+      await deleteMaterailInbound(id);
+      fetchMaterialInboundHistory();
+    } catch (error) {
+      console.error("Error deleting material inbound data:", error);
+      setError("데이터 삭제 중 오류가 발생했습니다.");
     }
   };
 
@@ -281,7 +292,7 @@ export default function RawInHistoryPage() {
                 <TableCell align="center">입고일자</TableCell>
                 <TableCell align="center">제조일자</TableCell>
                 <TableCell align="center">제조사</TableCell>
-                <TableCell align="center">수정</TableCell>
+                <TableCell align="center">기능</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -419,13 +430,24 @@ export default function RawInHistoryPage() {
                             </Button>
                           </>
                         ) : (
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => handleUpdate(row)}
-                          >
-                            수정
-                          </Button>
+                          <>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => handleUpdate(row)}
+                            >
+                              수정
+                            </Button>
+                            <Button
+                              variant="outlined"
+                              color="error"
+                              size="small"
+                              onClick={() => handleDelete(row.id)}
+                              sx={{ ml: 0.3 }}
+                            >
+                              삭제
+                            </Button>
+                          </>
                         )}
                       </TableCell>
                     </TableRow>
