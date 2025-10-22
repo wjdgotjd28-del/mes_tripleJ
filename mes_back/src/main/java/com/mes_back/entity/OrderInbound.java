@@ -5,6 +5,7 @@ import com.mes_back.constant.PaintType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -50,7 +51,7 @@ public class OrderInbound {
     private String note;
 
     @Column(name = "inbound_date", nullable = false)
-    private LocalDateTime inboundDate;
+    private LocalDate inboundDate;
 
     @Column(name = "lot_no", nullable = false, length = 20)
     private String lotNo;

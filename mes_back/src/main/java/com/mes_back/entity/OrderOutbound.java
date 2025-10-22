@@ -61,6 +61,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -103,7 +104,7 @@ public class OrderOutbound {
     private String outboundNo;
 
     @Column(name = "outbound_date", nullable = false)
-    private LocalDateTime outboundDate;
+    private LocalDate outboundDate;
 
     @Column(name = "deleted_at", columnDefinition = "TIMESTAMP(0)", nullable = true)
     private LocalDateTime deletedAt;

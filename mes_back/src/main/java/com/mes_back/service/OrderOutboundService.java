@@ -87,7 +87,7 @@ public class OrderOutboundService {
                 .qty(dto.getQty())
                 .category(dto.getCategory())
                 .outboundNo(outboundNo)
-                .outboundDate(LocalDateTime.now())
+                .outboundDate(LocalDate.now())
                 .build();
 
         OrderOutbound saved = orderOutboundRepository.save(orderOutbound);

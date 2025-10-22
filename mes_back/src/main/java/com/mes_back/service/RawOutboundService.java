@@ -58,10 +58,7 @@ public class RawOutboundService {
 
         // 4️⃣ 출고번호 자동 생성
         LocalDate today = LocalDate.now();
-        LocalDateTime startOfDay = today.atStartOfDay(); // 00:00
-        LocalDateTime endOfDay = today.plusDays(1).atStartOfDay(); // 다음날 00:00
-
-        Long count = outboundRepository.countByDateRange(startOfDay, endOfDay);
+        Long count = outboundRepository.countByDate(today);
 
         String sequence = String.format("%03d", count + 1);
         String outboundNo = "MOUT-" + today.format(DateTimeFormatter.BASIC_ISO_DATE) + "-" + sequence;
@@ -72,7 +69,7 @@ public class RawOutboundService {
         outbound.setSpecQty(item.getSpecQty());  // ✅ 여기서 MaterialItem의 specQty 사용
         outbound.setManufacturer(dto.getManufacturer());
         outbound.setQty(dto.getQty());
-        outbound.setOutboundDate(dto.getOutboundDate() != null ? dto.getOutboundDate() : LocalDateTime.now());
+        outbound.setOutboundDate(dto.getOutboundDate() != null ? dto.getOutboundDate() : LocalDate.now());
         outbound.setOutboundNo(outboundNo);
 
         outboundRepository.save(outbound);

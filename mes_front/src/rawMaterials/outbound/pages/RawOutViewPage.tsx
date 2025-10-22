@@ -166,23 +166,11 @@ export default function RawMaterialOutViewPage() {
                         <TextField
                           type="date"
                           size="small"
-                          value={editForm.outbound_date?.split("T")[0] ?? ""}
+                          value={editForm.outbound_date ?? ""}
                           onChange={(e) => {
-                            const timePart = editForm.outbound_date?.split("T")[1] ?? "00:00";
-                            setEditForm({ ...editForm, outbound_date: `${e.target.value}T${timePart}` });
+                            setEditForm({ ...editForm, outbound_date: `${e.target.value}` });
                           }}
                           sx={{width:140}}
-                        />
-                        <TextField
-                          type="time"
-                          size="small"
-                          value={editForm.outbound_date?.split("T")[1] ?? "00:00"}
-                          onChange={(e) => {
-                            const datePart = editForm.outbound_date?.split("T")[0] ?? new Date().toISOString().slice(0, 10);
-                            setEditForm({ ...editForm, outbound_date: `${datePart}T${e.target.value}` });
-                          }}
-                          sx={{width:140}}
-                          inputProps={{ step: 60 }}
                         />
                       </Box>
                     ) : r.outbound_date ? (() => {
@@ -190,9 +178,7 @@ export default function RawMaterialOutViewPage() {
                       const year = d.getFullYear();
                       const month = String(d.getMonth() + 1).padStart(2, "0");
                       const day = String(d.getDate()).padStart(2, "0");
-                      const hour = String(d.getHours()).padStart(2, "0");
-                      const minute = String(d.getMinutes()).padStart(2, "0");
-                      return `${year}-${month}-${day} ${hour}:${minute}`;
+                      return `${year}-${month}-${day}`;
                     })() : "-"}
                   </TableCell>
                   <TableCell align="center">
@@ -207,8 +193,7 @@ export default function RawMaterialOutViewPage() {
                           setEditingId(r.id!);
                           const dateObj = new Date(r.outbound_date!);
                           const datePart = dateObj.toISOString().slice(0, 10);
-                          const timePart = `${String(dateObj.getHours()).padStart(2, "0")}:${String(dateObj.getMinutes()).padStart(2, "0")}`;
-                          setEditForm({ qty: r.qty, outbound_date: `${datePart}T${timePart}` });
+                          setEditForm({ qty: r.qty, outbound_date: `${datePart}` });
                         }}>수정</Button>
                         <Button size="small" variant="outlined" color="error" startIcon={<DeleteIcon />} onClick={() => handleDelete(r.id!)}>삭제</Button>
                       </>

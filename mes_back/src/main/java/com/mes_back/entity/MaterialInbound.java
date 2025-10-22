@@ -3,7 +3,7 @@ package com.mes_back.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "material_inbound")
@@ -41,13 +41,13 @@ public class MaterialInbound {
     private String manufacturer;
 
     @Column(name = "manufacte_date", nullable = false)
-    private LocalDateTime manufacteDate;
+    private LocalDate manufacteDate;
 
     @Column(nullable = false)
     private Long qty;
 
     @Column(name = "inbound_date", nullable = false)
-    private LocalDateTime inboundDate;
+    private LocalDate inboundDate;
 
     @Column(name = "inbound_no", nullable = false, length = 255)
     private String inboundNo;
