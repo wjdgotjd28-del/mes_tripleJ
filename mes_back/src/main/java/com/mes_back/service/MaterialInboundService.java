@@ -52,7 +52,7 @@ public class MaterialInboundService {
                 .qty(materialInboundDto.getQty())
                 .inboundDate(materialInboundDto.getInboundDate())
                 .inboundNo(inboundNo) // 생성된 입고번호 사용
-                .totalQty(materialInboundDto.getTotalQty())
+                .totalQty(String.valueOf(materialInboundDto.getQty() * materialItem.getSpecQty()) + materialItem.getSpecUnit())
                 .build();
 
         // 4. 엔티티 저장
@@ -77,7 +77,7 @@ public class MaterialInboundService {
                 .qty(materialInbound.getQty())
                 .inboundDate(materialInbound.getInboundDate())
                 .inboundNo(materialInbound.getInboundNo())
-                .totalQty(materialInbound.getTotalQty())
+                .totalQty(String.valueOf(materialInbound.getQty() * materialInbound.getSpecQty()) + materialInbound.getSpecUnit())
                 .build();
     }
 
