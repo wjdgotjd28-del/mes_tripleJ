@@ -26,7 +26,21 @@ const style = {
 export default function CompanyRegisterModal({ onAdd }: Props) {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setCompany({
+      type: "CUSTOMER",
+      bizRegNo: "",
+      companyName: "",
+      ceoName: "",
+      ceoPhone: "",
+      managerName: "",
+      managerPhone: "",
+      managerEmail: "",
+      address: "",
+      note: "",
+    });
+  };
 
   const [company, setCompany] = React.useState<Omit<Company, "companyId" | "status">>({
     type: "CUSTOMER",
