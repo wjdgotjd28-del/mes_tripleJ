@@ -55,7 +55,6 @@ export default function RawViewPage() {
     itemName: "",
     useYn: "",
   });
-  const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
   const [sortAsc, setSortAsc] = useState(false);
 
   // ✅ 영어 → 한글 매핑 (표시용)
@@ -114,8 +113,6 @@ export default function RawViewPage() {
   };
 
   const handleSearch = () => {
-    setAppliedSearchValues(searchValues);
-
     // 모든 검색값이 비어있으면 전체 조회
     if (
       !searchValues.companyName &&

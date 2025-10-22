@@ -257,7 +257,7 @@ export default function OrderOutViewPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayedRows.map((row) => (
+            {paginatedData.map((row) => (
               <TableRow key={row.id}>
                 <TableCell align="center">{row.id}</TableCell>
                 <TableCell align="center">{row.outboundNo}</TableCell>
@@ -344,8 +344,8 @@ export default function OrderOutViewPage() {
       <OrdersOutDocModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        outItem={selectedOrder}
-        inboundDate={selectedInboundDate}
+        outItem={selectedOrder!}
+        inboundDate={selectedInboundDate ?? ""}
       />
      
     </Box>
