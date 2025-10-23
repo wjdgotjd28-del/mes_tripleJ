@@ -43,7 +43,7 @@ export default function CompanyViewPage() {
   const [searchCeo, setSearchCeo] = useState("");
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
 
   const [appliedFilters, setAppliedFilters] = useState({
     filterType: "모든 업체",
@@ -69,10 +69,9 @@ export default function CompanyViewPage() {
   const handleDelete = async (
     event: React.MouseEvent,
     companyId: number,
-    companyName: string
   ) => {
     event.stopPropagation();
-    if (window.confirm(`${companyName}을(를) 삭제하시겠습니까?`)) {
+    if (window.confirm(`해당 업체 정보를 삭제하시겠습니까?`)) {
       await deleteCompany(companyId);
       setAllRows((prev) => prev.filter((row) => row.companyId !== companyId));
     }
@@ -244,7 +243,7 @@ export default function CompanyViewPage() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell align="center">ID</TableCell>
+              <TableCell align="center"></TableCell>
               <TableCell align="center">업체 유형</TableCell>
               <TableCell align="center">업체명</TableCell>
               <TableCell align="center">대표명</TableCell>
@@ -265,14 +264,14 @@ export default function CompanyViewPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((row) => (
+              paginatedData.map((row, idx) => (
                 <TableRow
                   key={row.companyId}
                   hover
                   sx={{ cursor: "pointer" }}
                   onClick={() => handleRowClick(row)}
                 >
-                  <TableCell align="center">{row.companyId}</TableCell>
+                  <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
                   <TableCell align="center">
                     {translateCompanyType(row.type)}
                   </TableCell>
@@ -312,7 +311,6 @@ export default function CompanyViewPage() {
                         handleDelete(
                           e,
                           row.companyId as number,
-                          row.companyName
                         )
                       }
                     >

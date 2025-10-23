@@ -51,10 +51,12 @@ export default function RawInViewPage() {
     itemName: "",
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
   const [inboundInput, setInboundInput] = useState<
     Record<number, { manufacteDate: string; qty: number; inboundDate: string }>
   >({});
+  const [qtyInputStrings, setQtyInputStrings] = useState<Record<number, string>>({});
+  const [qtyErrors, setQtyErrors] = useState<Record<number, string | null>>({});
 
   useEffect(() => {
     fetchRawItems();
@@ -125,23 +127,73 @@ export default function RawInViewPage() {
   const handleInboundInputChange = (
     materialItemId: number,
     field: string,
-    value: string | number
+    value: string
   ) => {
-    setInboundInput((prev) => ({
-      ...prev,
-      [materialItemId]: {
-        ...(prev[materialItemId] || {
-          manufacteDate: "",
-          qty: 0,
-          inboundDate: "",
-        }),
-        [field]: value,
-      },
-    }));
+    setInboundInput((prev) => {
+      const currentItemInput = prev[materialItemId] || {
+        manufacteDate: "",
+        qty: 0,
+        inboundDate: "",
+      };
+      let newQty = currentItemInput.qty;
+      let newQtyError: string | null = null;
+      let newManufacteDate = currentItemInput.manufacteDate;
+      let newInboundDate = currentItemInput.inboundDate;
+
+      if (field === 'qty') {
+        setQtyInputStrings((prevStrings) => ({
+          ...prevStrings,
+          [materialItemId]: value,
+        }));
+
+        if (value === "") {
+          newQty = 0; // Set to 0 when cleared
+          newQtyError = null;
+        } else {
+          const numericValue = Number(value);
+          if (isNaN(numericValue) || numericValue % 1 !== 0) {
+            newQty = 0; // Set to 0 for invalid input
+            newQtyError = "입고 수량은 0보다 커야합니다.";
+          } else if (numericValue < 1) {
+            newQty = numericValue;
+            newQtyError = "입고 수량은 0보다 커야합니다.";
+          } else {
+            newQty = numericValue;
+            newQtyError = null;
+          }
+        }
+        setQtyErrors((prevErrors) => ({
+          ...prevErrors,
+          [materialItemId]: newQtyError,
+        }));
+      } else if (field === 'manufacteDate') {
+        newManufacteDate = value;
+      } else if (field === 'inboundDate') {
+        newInboundDate = value;
+      }
+
+      return {
+        ...prev,
+        [materialItemId]: {
+          ...currentItemInput,
+          manufacteDate: newManufacteDate,
+          qty: newQty,
+          inboundDate: newInboundDate,
+        },
+      };
+    });
   };
 
   const handleRegisterInbound = async (rawItem: RawItems) => {
-    const inboundData = inboundInput[rawItem.material_item_id!];
+    console.log("handleRegisterInbound called!");
+    const materialId = rawItem.material_item_id!;
+    const inboundData = inboundInput[materialId];
+
+    // Check for qty errors
+    if (qtyErrors[materialId]) {
+      alert(qtyErrors[materialId]);
+      return;
+    }
 
     if (
       !inboundData ||
@@ -152,8 +204,14 @@ export default function RawInViewPage() {
       return;
     }
 
+    // Final check for qty value (should be >= 1)
+    if (inboundData.qty < 1) {
+      alert("입고 수량은 0보다 커야합니다.");
+      return;
+    }
+
     const newMaterialInbound: Omit<MaterialInbound, "id"> = {
-      materialItemId: rawItem.material_item_id!,
+      materialItemId: materialId,
       supplierName: rawItem.company_name,
       itemName: rawItem.item_name,
       itemCode: rawItem.item_code,
@@ -164,16 +222,33 @@ export default function RawInViewPage() {
       qty: inboundData.qty,
       inboundDate: inboundData.inboundDate,
       inboundNo: "",
-      totalQty: rawItem.spec_qty * inboundData.qty,
+      totalQty: Number(rawItem.spec_qty) * inboundData.qty,
     };
 
     try {
       await addMaterialInbound(newMaterialInbound);
-      alert("입고 등록이 완료되었습니다.");
-
       // ✅ 수동 이동 플래그 설정 후 페이지 이동
       sessionStorage.setItem("manualNav", "true");
       navigate("/raw-materials/inbound/history");
+
+      alert("원자재 입고 등록이 완료되었습니다.");
+      // Clear input fields for the registered item
+      setInboundInput((prev) => {
+        const newState = { ...prev };
+        delete newState[materialId];
+        return newState;
+      });
+      setQtyInputStrings((prevStrings) => {
+        const newState = { ...prevStrings };
+        delete newState[materialId];
+        return newState;
+      });
+      setQtyErrors((prevErrors) => {
+        const newState = { ...prevErrors };
+        delete newState[materialId];
+        return newState;
+      });
+      fetchRawItems(); // Refresh the list
     } catch (err) {
       console.error("입고 등록 실패:", err);
       alert("입고 등록 중 오류가 발생했습니다.");
@@ -262,7 +337,7 @@ export default function RawInViewPage() {
           <Table sx={{ minWidth: 900 }}>
             <TableHead>
               <TableRow>
-                <TableCell align="center">ID</TableCell>
+                <TableCell align="center"></TableCell>
                 <TableCell align="center">매입처명</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -284,7 +359,7 @@ export default function RawInViewPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                paginatedData.map((row) => {
+                paginatedData.map((row, idx) => {
                   const materialId = row.material_item_id;
                   if (materialId === undefined) return null;
 
@@ -302,9 +377,7 @@ export default function RawInViewPage() {
                   if (materialId === undefined) {
                     return (
                       <TableRow key={row.item_code}>
-                        <TableCell align="center">
-                          {row.material_item_id ?? "-"}
-                        </TableCell>
+                        <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
                         <TableCell align="center">{row.company_name}</TableCell>
                         <TableCell align="center">{row.item_code}</TableCell>
                         <TableCell align="center">
@@ -336,7 +409,7 @@ export default function RawInViewPage() {
 
                   return (
                     <TableRow key={materialId}>
-                      <TableCell align="center">{materialId}</TableCell>
+                      <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
                       <TableCell align="center">{row.company_name}</TableCell>
                       <TableCell align="center">{row.item_code}</TableCell>
                       <TableCell align="center">
@@ -359,17 +432,13 @@ export default function RawInViewPage() {
                       <TableCell align="center">{row.manufacturer}</TableCell>
                       <TableCell align="center">
                         <TextField
-                          type="number"
+                          type="text"
                           size="small"
-                          value={inboundInput[materialId]?.qty || ""}
-                          onChange={(e) =>
-                            handleInboundInputChange(
-                              materialId,
-                              "qty",
-                              Number(e.target.value)
-                            )
-                          }
+                          value={qtyInputStrings[materialId] || ""}
+                          onChange={(e) => handleInboundInputChange(materialId, "qty", e.target.value)}
                           sx={{ width: 80 }}
+                          error={!!qtyErrors[materialId]}
+                          helperText={qtyErrors[materialId]}
                         />
                       </TableCell>
                       <TableCell align="center">
@@ -429,6 +498,7 @@ export default function RawInViewPage() {
                       <TableCell align="center">
                         <Button
                           variant="outlined"
+                          color="primary"
                           size="small"
                           disabled={
                             !inboundInput[materialId]?.qty ||

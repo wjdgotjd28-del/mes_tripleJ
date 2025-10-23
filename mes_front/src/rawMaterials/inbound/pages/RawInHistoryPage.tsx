@@ -13,15 +13,22 @@ import {
   Alert,
   TextField,
   Button,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
 import "dayjs/locale/ko";
+import {
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 
 import type { MaterialInbound } from "../../../type";
 import { getMaterialInbound, updateMaterialInbound, deleteMaterailInbound } from "../api/rawInboundApi";
+import { usePagination } from "../../../Common/usePagination";
 
 // Helper function to filter history
 const filterInboundHistory = (
@@ -64,6 +71,10 @@ export default function RawInHistoryPage() {
   const [editableRowData, setEditableRowData] = useState<MaterialInbound | null>(
     null
   );
+  const [specQtyInputString, setSpecQtyInputString] = useState<string>("");
+  const [qtyInputString, setQtyInputString] = useState<string>("");
+  const [specQtyError, setSpecQtyError] = useState<string | null>(null);
+  const [qtyError, setQtyError] = useState<string | null>(null);
 
   const [searchValues, setSearchValues] = useState({
     supplierName: "",
@@ -73,6 +84,7 @@ export default function RawInHistoryPage() {
     inboundDate: null as Dayjs | null,
   });
   const [appliedSearchValues, setAppliedSearchValues] = useState(searchValues);
+  const [sortAsc, setSortAsc] = useState(false);
 
   useEffect(() => {
     fetchMaterialInboundHistory();
@@ -130,15 +142,32 @@ export default function RawInHistoryPage() {
   const handleUpdate = (row: MaterialInbound) => {
     setEditRowId(row.id);
     setEditableRowData(row);
+    setSpecQtyInputString(row.specQty.toString());
+    setQtyInputString(row.qty.toString());
   };
 
   const handleSave = async () => {
     if (!editableRowData) return;
+
+    // Final validation for specQty and qty
+    if (Number(editableRowData.specQty) < 1) {
+      setSpecQtyError("규격 수량은 1 이상의 정수여야 합니다.");
+      alert('규격 수량은 1 이상의 정수여야 합니다.');
+      return;
+    }
+    if (Number(editableRowData.qty) < 1) {
+      setQtyError("입고 수량은 1 이상의 정수여야 합니다.");
+      alert('입고 수량은 1 이상의 정수여야 합니다.');
+      return;
+    }
+
     try {
       console.log("Saving data:", editableRowData);
       await updateMaterialInbound(editableRowData);
       setEditRowId(null);
       setEditableRowData(null);
+      setSpecQtyInputString(""); // Clear after saving
+      setQtyInputString(""); // Clear after saving
       fetchMaterialInboundHistory(); // To get fresh data from server
     } catch (error) {
       console.error("Error saving material inbound data:", error);
@@ -147,7 +176,7 @@ export default function RawInHistoryPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("정말로 이 항목을 삭제하시겠습니까?")) return;
+    if (!window.confirm("해당 원자재 입고 이력을 삭제하시겠습니까?")) return;
     try {
       await deleteMaterailInbound(id);
       fetchMaterialInboundHistory();
@@ -160,30 +189,61 @@ export default function RawInHistoryPage() {
   const handleCancel = () => {
     setEditRowId(null);
     setEditableRowData(null);
+    setSpecQtyInputString("");
+    setQtyInputString("");
   };
 
   const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!editableRowData) return;
     const { name, value } = e.target;
 
-    let updatedEditableRowData = { ...editableRowData, [name]: value };
+    let newSpecQtyInputString = specQtyInputString;
+    let newQtyInputString = qtyInputString;
+    let newSpecQtyError: string | null = null;
+    let newQtyError: string | null = null;
 
-    // Update specQty or qty as numbers
-    if (name === "specQty" || name === "qty") {
-      const numericValue = parseFloat(value);
-      if (!isNaN(numericValue)) {
-        updatedEditableRowData = { ...updatedEditableRowData, [name]: numericValue };
+    let updatedEditableRowData = { ...editableRowData };
+
+    if (name === "specQty") {
+      newSpecQtyInputString = value;
+      const numericValue = Number(value);
+      if (value === "" || isNaN(numericValue) || numericValue < 1) {
+        newSpecQtyError = "규격 수량은 1 이상의 정수여야 합니다.";
+        updatedEditableRowData.specQty = 0; // Set to 0 for invalid input
+      } else {
+        updatedEditableRowData.specQty = numericValue;
       }
+      setSpecQtyInputString(newSpecQtyInputString);
+      setSpecQtyError(newSpecQtyError);
+    } else if (name === "qty") {
+      newQtyInputString = value;
+      const numericValue = Number(value);
+      if (value === "" || isNaN(numericValue) || numericValue < 1) {
+        newQtyError = "입고 수량은 1 이상의 정수여야 합니다.";
+        updatedEditableRowData.qty = 0; // Set to 0 for invalid input
+      } else {
+        updatedEditableRowData.qty = numericValue;
+      }
+      setQtyInputString(newQtyInputString);
+      setQtyError(newQtyError);
+    } else {
+      // For other fields, update updatedEditableRowData directly
+      updatedEditableRowData = { ...editableRowData, [name]: value };
     }
 
-    // Recalculate totalQty if specQty, qty, or specUnit changes
-    const currentSpecQty = (name === "specQty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.specQty || 0);
-    const currentQty = (name === "qty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.qty || 0);
+    // Recalculate totalQty
+    const currentSpecQtyForCalc = updatedEditableRowData.specQty;
+    const currentQtyForCalc = updatedEditableRowData.qty;
 
+    if (!isNaN(Number(currentSpecQtyForCalc)) && !isNaN(Number(currentQtyForCalc)) && Number(currentSpecQtyForCalc) >= 0 && Number(currentQtyForCalc) >= 0) {
+      updatedEditableRowData.totalQty = Number(currentSpecQtyForCalc) * Number(currentQtyForCalc);
+    } else {
+      updatedEditableRowData.totalQty = 0; // Set to 0 if calculation is invalid
+    }
 
-    if (name === "specQty" || name === "qty" || name === "specUnit") {
-      const calculatedTotalQty = currentSpecQty * currentQty;
-      updatedEditableRowData = { ...updatedEditableRowData, totalQty: calculatedTotalQty };
+    // Update specUnit if it was changed
+    if (name === "specUnit") {
+        updatedEditableRowData.specUnit = value;
     }
 
     setEditableRowData(updatedEditableRowData);
@@ -199,6 +259,13 @@ export default function RawInHistoryPage() {
       [name]: newValue ? newValue.format("YYYY-MM-DD") : "",
     });
   };
+
+  const sortedData = [...displayedHistory].sort((a, b) =>
+    sortAsc ? (a.id ?? 0) - (b.id ?? 0) : (b.id ?? 0) - (a.id ?? 0)
+  );
+
+  const { currentPage, setCurrentPage, totalPages, paginatedData } =
+    usePagination(sortedData, 20);
 
   return (
     <Box
@@ -270,6 +337,11 @@ export default function RawInHistoryPage() {
         <Button variant="contained" color="primary" onClick={handleSearch}>
           검색
         </Button>
+        <Tooltip title={sortAsc ? "오름차순" : "내림차순"}>
+          <IconButton onClick={() => setSortAsc((prev) => !prev)}>
+            {sortAsc ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />}
+          </IconButton>
+        </Tooltip>
       </Box>
 
       {loading ? (
@@ -281,7 +353,7 @@ export default function RawInHistoryPage() {
           <Table sx={{ minWidth: 1200 }}>
             <TableHead>
               <TableRow>
-                <TableCell align="center">ID</TableCell>
+                <TableCell align="center"></TableCell>
                 <TableCell align="center">입고번호</TableCell>
                 <TableCell align="center">품목번호</TableCell>
                 <TableCell align="center">품목명</TableCell>
@@ -296,7 +368,7 @@ export default function RawInHistoryPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {displayedHistory.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={12} align="center" sx={{ py: 4 }}>
                     <Typography color="text.secondary">
@@ -305,11 +377,11 @@ export default function RawInHistoryPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                displayedHistory.map((row) => {
+                paginatedData.map((row, idx) => {
                   const isEditMode = editRowId === row.id;
                   return (
                     <TableRow key={row.id}>
-                      <TableCell align="center">{row.id}</TableCell>
+                      <TableCell align="center">{(currentPage - 1) * 20 + idx + 1}</TableCell>
                       <TableCell align="center">{row.inboundNo}</TableCell>
                       <TableCell align="center">{row.itemCode}</TableCell>
                       <TableCell align="center">{row.itemName}</TableCell>
@@ -320,10 +392,12 @@ export default function RawInHistoryPage() {
                             <TextField
                               size="small"
                               name="specQty"
-                              type="number"
-                              value={editableRowData?.specQty || ""}
+                              type="text"
+                              value={specQtyInputString}
                               onChange={handleEditChange}
                               sx={{ width: 80, mr: 1 }}
+                              error={!!specQtyError}
+                              helperText={specQtyError}
                             />
                             <TextField
                               size="small"
@@ -342,10 +416,12 @@ export default function RawInHistoryPage() {
                           <TextField
                             size="small"
                             name="qty"
-                            type="number"
-                            value={editableRowData?.qty || ""}
+                            type="text"
+                            value={qtyInputString}
                             onChange={handleEditChange}
                             sx={{ width: 80 }}
+                            error={!!qtyError}
+                            helperText={qtyError}
                           />
                         ) : (
                           row.qty
@@ -353,9 +429,9 @@ export default function RawInHistoryPage() {
                       </TableCell>
                       <TableCell align="center">
                         {isEditMode ? (
-                          editableRowData?.totalQty
+                          `${editableRowData?.totalQty}${editableRowData?.specUnit}`
                         ) : (
-                          row.totalQty
+                          `${row.totalQty}${row.specUnit}`
                         )}
                       </TableCell>
                       <TableCell align="center">
@@ -458,6 +534,26 @@ export default function RawInHistoryPage() {
           </Table>
         </TableContainer>
       )}
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+            >
+            〈
+            </Button>
+            <Typography
+            variant="body2"
+            sx={{ display: "flex", alignItems: "center" }}
+            >
+            {currentPage} / {totalPages}
+            </Typography>
+            <Button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+            >
+            〉
+            </Button>
+        </Box>
     </Box>
   );
 }
