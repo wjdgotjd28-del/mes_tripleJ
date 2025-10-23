@@ -20,5 +20,5 @@ public interface OrderOutboundRepository extends JpaRepository<OrderOutbound, Lo
     @Query("SELECT SUM(oo.qty) FROM OrderOutbound oo WHERE oo.orderInbound = :orderInbound")
     Optional<Long> sumOutboundQtyByOrderInbound(@Param("orderInbound") OrderInbound orderInbound);
 
-    List<OrderOutbound> findByOrderInboundId(Long orderInboundId);
+    List<OrderOutbound> findByOrderInbound_OrderInboundId(Long orderInboundId);
 }

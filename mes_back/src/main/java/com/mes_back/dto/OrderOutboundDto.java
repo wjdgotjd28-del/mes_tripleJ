@@ -21,4 +21,5 @@ public class OrderOutboundDto {
     private LocalDate outboundDate;
     private LocalDate inboundDate;
     private String color;
+    private Long remainingQuantity;
 }

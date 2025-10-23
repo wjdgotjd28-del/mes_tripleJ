@@ -27,12 +27,11 @@ import {
   getOrderOutbound,
   updateOrderOutbound,
 } from "../api/orderOutbound";
-import { getInboundForOut } from "../../inbound/api/OrderInViewApi";
+import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 // import EditOrderOutModal from "./EditOrderOutModal"; // Removed
 import { usePagination } from "../../../Common/usePagination";
 import OrdersOutDocModal from "./OrdersOutDocModal";
-import { exportToExcel } from "../../../Common/ExcelUtils";
 
 export default function OrderOutViewPage() {
   // ✅ 출고 리스트
@@ -67,30 +66,13 @@ export default function OrderOutViewPage() {
     setDisplayedRows(allRows);
   }, [allRows]);
 
-  const loadOrderOutboundData = async () => {
-    try {
-      const [outboundRes, inboundRes] = await Promise.all([
-        getOrderOutbound(),
-        getInboundForOut(),
-      ]);
-
-      // Create a map for quick lookup of inbound quantities
-      const inboundQtyMap = new Map<number, number>();
-      inboundRes.forEach((inbound) => {
-        inboundQtyMap.set(inbound.orderInboundId, inbound.qty);
-      });
-
-      // Enrich outbound data with inbound quantities
-      const enrichedOutboundData = outboundRes.map((outbound) => ({
-        ...outbound,
-        inboundQty: inboundQtyMap.get(outbound.orderInboundId) || 0, // Default to 0 if not found
-      }));
-
-      setAllRows(enrichedOutboundData);
-      setDisplayedRows(enrichedOutboundData);
-    } catch (err) {
-      console.log(err);
-    }
+  const loadOrderOutboundData = () => {
+    getOrderOutbound()
+      .then((res) => {
+        setAllRows(res);
+        setDisplayedRows(res);
+      })
+      .catch((err) => console.log(err));
   };
 
   // ✅ 출고 등록 처리
@@ -126,7 +108,6 @@ export default function OrderOutViewPage() {
     setEditRowId(row.id ?? null);
     setEditableRowData(row);
     setQtyInputString(row.qty.toString());
-    setQtyError(null); // Clear any previous quantity error when starting edit
   };
 
   // ✅ 인라인 수정 저장
@@ -139,11 +120,6 @@ export default function OrderOutViewPage() {
     if (isNaN(parsedQty) || parsedQty % 1 !== 0 || parsedQty < 1) {
       setQtyError("출고 수량은 1 이상의 정수여야 합니다.");
       alert('출고 수량은 1 이상의 정수여야 합니다.');
-      return;
-    }
-    if (editableRowData && parsedQty > editableRowData.inboundQty) {
-      setQtyError(`출고 수량은 입고 수량(${editableRowData.inboundQty})을 초과할 수 없습니다.`);
-      alert(`출고 수량은 입고 수량(${editableRowData.inboundQty})을 초과할 수 없습니다.`);
       return;
     }
     setQtyError(null); // Clear any previous error
@@ -187,10 +163,10 @@ export default function OrderOutViewPage() {
           setQtyError(null);
         } else {
           const numericValue = Number(value);
-          if (isNaN(numericValue) || numericValue % 1 !== 0 || numericValue < 1) {
-            setQtyError("수량은 1 이상의 정수");
-          } else if (numericValue > editableRowData.inboundQty) {
-            setQtyError(`입고 수량(${editableRowData.inboundQty}) 초과`);
+          if (isNaN(numericValue) || numericValue % 1 !== 0) {
+            setQtyError("출고수량은 0보다 커야합니다");
+          } else if (numericValue < 1) {
+            setQtyError("출고수량은 0보다 커야합니다");
           } else {
             setQtyError(null);
           }
@@ -360,16 +336,9 @@ export default function OrderOutViewPage() {
                         size="small"
                         value={qtyInputString}
                         onChange={handleEditChange}
-                        sx={{ width: 150 }}
+                        sx={{ width: 80 }}
                         error={!!qtyError}
                         helperText={qtyError}
-                        FormHelperTextProps={{
-                          sx: {
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          },
-                        }}
                       />
                     ) : (
                       row.qty

@@ -156,7 +156,7 @@ public class OrderOutboundService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 입고 정보를 찾을 수 없습니다. id=" + orderOutboundDto.getOrderInboundId()));
 
         // Calculate total outbound quantity for this orderInbound, excluding the current outbound record being updated
-        List<OrderOutbound> otherOutbounds = orderOutboundRepository.findByOrderInbound_Id(orderOutboundDto.getOrderInboundId())
+        List<OrderOutbound> otherOutbounds = orderOutboundRepository.findByOrderInbound_OrderInboundId(orderOutboundDto.getOrderInboundId())
                 .stream()
                 .filter(oo -> !oo.getId().equals(existingOrderOutbound.getId()))
                 .collect(Collectors.toList());

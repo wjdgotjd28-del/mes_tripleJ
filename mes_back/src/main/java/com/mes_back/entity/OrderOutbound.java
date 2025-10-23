@@ -54,10 +54,7 @@
 import com.mes_back.constant.OrderCategory;
 import com.mes_back.dto.OrderOutboundDto;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -109,11 +106,14 @@ public class OrderOutbound {
     @Column(name = "deleted_at", columnDefinition = "TIMESTAMP(0)", nullable = true)
     private LocalDateTime deletedAt;
 
+    @Setter
     @Column(name = "remaining_quantity")
     private Long remainingQuantity;
 
-    public void updateOrderOutbound(OrderOutboundDto orderOutboundDto){
+    public void updateOrderOutbound(OrderOutboundDto orderOutboundDto) {
         this.qty = orderOutboundDto.getQty();
         this.outboundDate = orderOutboundDto.getOutboundDate();
     }
- }
+}
+
+
