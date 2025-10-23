@@ -110,6 +110,13 @@ export default function OrderOutViewPage() {
   // ✅ 인라인 수정 저장
   const handleSave = async () => {
     if (!editableRowData || !editableRowData.id) return;
+
+    // qty 유효성 검사
+    if (typeof editableRowData.qty !== 'number' || editableRowData.qty < 1) {
+      alert('출고 수량은 1 이상의 정수여야 합니다.');
+      return;
+    }
+
     try {
       await updateOrderOutbound(editableRowData);
       setAllRows((prev) =>
@@ -136,11 +143,17 @@ export default function OrderOutViewPage() {
 
     let updatedValue: string | number = value;
     if (name === "qty") {
-      const numericValue = Number(value);
-      if (isNaN(numericValue) || numericValue < 1 || numericValue % 1 !== 0) {
-        return; // Prevent invalid input
+      if (value === "") {
+        updatedValue = ""; // Allow clearing the input
+      } else {
+        const numericValue = Number(value);
+        // Only allow integer numbers.
+        // If it's not a number or not an integer, prevent update.
+        if (isNaN(numericValue) || numericValue % 1 !== 0) {
+          return; // Prevent non-numeric or non-integer input
+        }
+        updatedValue = numericValue;
       }
-      updatedValue = numericValue;
     }
 
     setEditableRowData((prev) => ({
