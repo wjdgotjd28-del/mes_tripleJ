@@ -122,6 +122,13 @@ export default function OrderOutViewPage() {
       alert('출고 수량은 1 이상의 정수여야 합니다.');
       return;
     }
+
+    if (parsedQty > editableRowData.maxUpdatableQty) {
+      setQtyError(`수정 가능 수량을 초과할 수 없습니다. (최대: ${editableRowData.maxUpdatableQty})`);
+      alert(`수정 가능 수량을 초과할 수 없습니다. (최대: ${editableRowData.maxUpdatableQty})`);
+      return;
+    }
+
     setQtyError(null); // Clear any previous error
 
     // Create a new object with the validated qty
@@ -154,6 +161,7 @@ export default function OrderOutViewPage() {
   // ✅ 인라인 수정 필드 변경
     const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
       if (!editableRowData) return;
+      console.log("editableRowData:", editableRowData);
       const { name, value } = e.target;
   
       if (name === "qty") {
@@ -167,8 +175,8 @@ export default function OrderOutViewPage() {
             setQtyError("출고수량은 정수여야 합니다.");
           } else if (numericValue < 1) {
             setQtyError("출고수량은 1 이상이어야 합니다.");
-          } else if (numericValue > editableRowData.remainingQuantity) {
-            setQtyError(`잔여 수량을 초과할 수 없습니다. (잔여: ${editableRowData.remainingQuantity})`);
+          } else if (numericValue > editableRowData.maxUpdatableQty) {
+            setQtyError(`수정 가능 수량을 초과할 수 없습니다. (최대: ${editableRowData.maxUpdatableQty})`);
           }
           else {
             setQtyError(null);
