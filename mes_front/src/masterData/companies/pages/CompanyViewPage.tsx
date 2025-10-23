@@ -238,6 +238,13 @@ export default function CompanyViewPage() {
         </Box>
       </Box>
 
+      {/* 안내 메시지 */}
+      <Box sx={{mb:3, mt:3}}>
+        <Typography variant="body2" color="text.secondary">
+          🔹 업체 정보를 수정하려면 수정할 업체가 있는 행을 클릭하세요.
+        </Typography>
+      </Box>
+
       {/* 테이블 */}
       <TableContainer component={Paper}>
         <Table>
