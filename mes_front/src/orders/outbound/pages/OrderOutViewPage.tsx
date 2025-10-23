@@ -169,7 +169,7 @@ export default function OrderOutViewPage() {
         } else {
           const numericValue = Number(value);
           if (isNaN(numericValue) || numericValue % 1 !== 0) {
-            setQtyError("출고수량은 정수여야 합니다.");
+            setQtyError("출고수량은 1 이상의 정수여야 합니다.");
           } else if (numericValue < 1) {
             setQtyError("출고수량은 1 이상이어야 합니다.");
           } else if (numericValue > editableRowData.maxUpdatableQty) {
@@ -344,7 +344,7 @@ export default function OrderOutViewPage() {
                         size="small"
                         value={qtyInputString}
                         onChange={handleEditChange}
-                        sx={{ width: 180 }}
+                        sx={{ width: 250 }}
                         error={!!qtyError}
                         helperText={qtyError}
                       />
@@ -450,13 +450,6 @@ export default function OrderOutViewPage() {
         </Button>
       </Box>
 
-      {/* 수정 모달 */}
-      {/* <EditOrderOutModal // Removed
-        open={!!editData}
-        onClose={() => setEditData(null)}
-        editData={editData}
-        onSave={handleEditSave}
-      /> */}
 
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal
