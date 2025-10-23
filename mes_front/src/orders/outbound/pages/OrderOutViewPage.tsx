@@ -187,9 +187,9 @@ export default function OrderOutViewPage() {
         } else {
           const numericValue = Number(value);
           if (isNaN(numericValue) || numericValue % 1 !== 0 || numericValue < 1) {
-            setQtyError("출고 수량은 1 이상의 정수여야 합니다.");
+            setQtyError("수량은 1 이상의 정수");
           } else if (numericValue > editableRowData.inboundQty) {
-            setQtyError(`출고 수량은 입고 수량(${editableRowData.inboundQty})을 초과할 수 없습니다.`);
+            setQtyError(`입고 수량(${editableRowData.inboundQty}) 초과`);
           } else {
             setQtyError(null);
           }
@@ -359,9 +359,16 @@ export default function OrderOutViewPage() {
                         size="small"
                         value={qtyInputString}
                         onChange={handleEditChange}
-                        sx={{ width: 80 }}
+                        sx={{ width: 150 }}
                         error={!!qtyError}
                         helperText={qtyError}
+                        FormHelperTextProps={{
+                          sx: {
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          },
+                        }}
                       />
                     ) : (
                       row.qty
