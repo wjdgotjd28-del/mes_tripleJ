@@ -49,6 +49,7 @@ export default function OrderOutViewPage() {
   // ✅ 인라인 수정 상태
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editableRowData, setEditableRowData] = useState<OrderOutbound | null>(null);
+  const [qtyError, setQtyError] = useState<string | null>(null);
 
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -141,25 +142,31 @@ export default function OrderOutViewPage() {
     if (!editableRowData) return;
     const { name, value } = e.target;
 
-    let updatedValue: string | number = value;
+    let newEditableRowData = { ...editableRowData };
     if (name === "qty") {
       if (value === "") {
-        updatedValue = ""; // Allow clearing the input
+        newEditableRowData.qty = ""; // Allow clearing
+        setQtyError(null);
       } else {
         const numericValue = Number(value);
-        // Only allow integer numbers.
-        // If it's not a number or not an integer, prevent update.
         if (isNaN(numericValue) || numericValue % 1 !== 0) {
-          return; // Prevent non-numeric or non-integer input
+          // If not a number or not an integer
+          setQtyError("출고수량은 0보다 커야합니다");
+          newEditableRowData.qty = value; // Update with string value to show what user typed
+        } else if (numericValue < 1) {
+          setQtyError("출고수량은 0보다 커야합니다");
+          newEditableRowData.qty = numericValue;
+        } else {
+          setQtyError(null);
+          newEditableRowData.qty = numericValue;
         }
-        updatedValue = numericValue;
       }
+    } else {
+      // For other fields, just update the value
+      newEditableRowData = { ...newEditableRowData, [name]: value };
     }
 
-    setEditableRowData((prev) => ({
-      ...prev!,
-      [name]: updatedValue,
-    }));
+    setEditableRowData(newEditableRowData);
   };
 
   const handleExcelDownload = () => exportToExcel(sortedRows, "출고목록");
@@ -321,6 +328,8 @@ export default function OrderOutViewPage() {
                         onChange={handleEditChange}
                         inputProps={{ min: 1 }}
                         sx={{ width: 80 }}
+                        error={!!qtyError}
+                        helperText={qtyError}
                       />
                     ) : (
                       row.qty
