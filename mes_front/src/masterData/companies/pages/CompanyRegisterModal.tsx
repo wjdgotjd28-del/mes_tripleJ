@@ -1,4 +1,4 @@
-import { Box, Button, Modal, TextField, MenuItem, Typography, FormControl, InputLabel, Select, type SelectChangeEvent } from "@mui/material";
+import { Box, Button, Modal, TextField, MenuItem, Typography, FormControl, InputLabel, Select, type SelectChangeEvent, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import * as React from "react";
 import { addCompany } from "../api/companyApi";
 import type { Company, CompanyType } from "../../../type";
@@ -23,37 +23,45 @@ const style = {
   flexDirection: "column",
 };
 
+const initialCompanyState: Omit<Company, "companyId" | "status"> = {      
+  type: "CUSTOMER",
+  bizRegNo: "",
+  companyName: "",
+  ceoName: "",
+  ceoPhone: "",
+  managerName: "",
+  managerPhone: "",
+  managerEmail: "",
+  address: "",
+  note: "",
+};
+
 export default function CompanyRegisterModal({ onAdd }: Props) {
   const [open, setOpen] = React.useState(false);
+  const [company, setCompany] = React.useState<Omit<Company, "companyId" | "status">>(initialCompanyState);
+  const [confirmOpen, setConfirmOpen] = React.useState(false); // State for confirmation dialog
+
   const handleOpen = () => setOpen(true);
+
   const handleClose = () => {
-    setOpen(false);
-    setCompany({
-      type: "CUSTOMER",
-      bizRegNo: "",
-      companyName: "",
-      ceoName: "",
-      ceoPhone: "",
-      managerName: "",
-      managerPhone: "",
-      managerEmail: "",
-      address: "",
-      note: "",
-    });
+    const isChanged = JSON.stringify(company) !== JSON.stringify(initialCompanyState);
+    if (isChanged) {
+      setConfirmOpen(true); // Open confirmation dialog if changes exist
+    } else {
+      setOpen(false);
+      setCompany(initialCompanyState); // Reset and close if no changes
+    }
   };
 
-  const [company, setCompany] = React.useState<Omit<Company, "companyId" | "status">>({
-    type: "CUSTOMER",
-    bizRegNo: "",
-    companyName: "",
-    ceoName: "",
-    ceoPhone: "",
-    managerName: "",
-    managerPhone: "",
-    managerEmail: "",
-    address: "",
-    note: "",
-  });
+  const confirmCancel = () => {
+    setOpen(false); // Close the main modal
+    setCompany(initialCompanyState); // Reset form data
+    setConfirmOpen(false); // Close confirmation dialog
+  };
+
+  const cancelDialogClose = () => {
+    setConfirmOpen(false); // Just close the confirmation dialog
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -68,81 +76,87 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
     try {
       const newCompany = await addCompany(company);
       onAdd(newCompany);
-      handleClose();
-      // 초기화
-      setCompany({
-        type: "CUSTOMER",
-        bizRegNo: "",
-        companyName: "",
-        ceoName: "",
-        ceoPhone: "",
-        managerName: "",
-        managerPhone: "",
-        managerEmail: "",
-        address: "",
-        note: "",
-      });
+      setOpen(false); // Close the main modal
+      setCompany(initialCompanyState); // Reset after successful submission
     } catch (error) {
       console.error("회사 등록 실패:", error);
     }
   };
 
   return (
-    <div>
-      <Button 
-        variant="outlined" 
-        size="small" 
-        color="primary"
-        sx={{ height: 40 }} 
-        onClick={handleOpen}>
-        + 업체 등록
-      </Button>
+    <>
+      <div>
+        <Button 
+          variant="outlined" 
+          size="small" 
+          color="primary"
+          sx={{ height: 40 }} 
+          onClick={handleOpen}>
+          + 업체 등록
+        </Button>
 
-      <Modal open={open} onClose={handleClose}>
-        <Box sx={style}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}>
-            업체 등록
-          </Typography>
+        <Modal open={open} onClose={handleClose}>
+          <Box sx={style}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, textAlign: "center" }}>
+              업체 등록
+            </Typography>
 
-          <Box sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}>
-            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-              <InputLabel>업체 유형</InputLabel>
-              <Select
-                name="type"
-                value={company.type}
-                label="업체 유형"
-                onChange={handleTypeChange}
-              >
-                <MenuItem value="CUSTOMER">거래처</MenuItem>
-                <MenuItem value="PURCHASER">매입처</MenuItem>
-              </Select>
-            </FormControl>
+            <Box sx={{ flexGrow: 1, mb: 3, display: "flex", flexDirection: "column" }}>
+              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                <InputLabel>업체 유형</InputLabel>
+                <Select
+                  name="type"
+                  value={company.type}
+                  label="업체 유형"
+                  onChange={handleTypeChange}
+                >
+                  <MenuItem value="CUSTOMER">거래처</MenuItem>
+                  <MenuItem value="PURCHASER">매입처</MenuItem>
+                </Select>
+              </FormControl>
 
-            <TextField
-              fullWidth
-              size="small"
-              label="사업자등록번호"
-              name="bizRegNo"
-              value={company.bizRegNo}
-              onChange={handleChange}
-              sx={{ mb: 2 }}
-            />
-            <TextField fullWidth size="small" label="업체명" name="companyName" value={company.companyName} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="대표명" name="ceoName" value={company.ceoName} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="대표전화번호" name="ceoPhone" value={company.ceoPhone} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="담당자명" name="managerName" value={company.managerName} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={company.managerPhone} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="담당자 이메일" name="managerEmail" value={company.managerEmail} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="주소" name="address" value={company.address} onChange={handleChange} sx={{ mb: 2 }} />
-            <TextField fullWidth size="small" label="비고" name="note" value={company.note} onChange={handleChange} multiline rows={2} />
+              <TextField
+                fullWidth
+                size="small"
+                label="사업자등록번호"
+                name="bizRegNo"
+                value={company.bizRegNo}
+                onChange={handleChange}
+                sx={{ mb: 2 }}
+              />
+              <TextField fullWidth size="small" label="업체명" name="companyName" value={company.companyName} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="대표명" name="ceoName" value={company.ceoName} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="대표전화번호" name="ceoPhone" value={company.ceoPhone} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="담당자명" name="managerName" value={company.managerName} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={company.managerPhone} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="담당자 이메일" name="managerEmail" value={company.managerEmail} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="주소" name="address" value={company.address} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="비고" name="note" value={company.note} onChange={handleChange} multiline rows={2} />
+            </Box>
+
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
+              <Button variant="outlined" size="small" onClick={handleClose}>취소</Button> {/* Use modified handleClose */}
+              <Button variant="contained" size="small" sx={{ ml: 1 }} onClick={handleSubmit}>등록</Button>
+            </Box>
           </Box>
+        </Modal>
+      </div>
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
-            <Button variant="outlined" size="small" onClick={handleClose}>취소</Button>
-            <Button variant="contained" size="small" sx={{ ml: 1 }} onClick={handleSubmit}>등록</Button>
-          </Box>
-        </Box>
-      </Modal>
-    </div>
+      {/* ✅ 취소 확인 다이얼로그 */}
+      <Dialog open={confirmOpen} onClose={cancelDialogClose}>
+        <>
+          <DialogTitle>저장하지 않고 나가시겠습니까?</DialogTitle>
+          <DialogContent>변경된 내용은 저장되지 않습니다.</DialogContent>
+          <DialogActions>
+            <Button color="error" onClick={confirmCancel}>
+              예
+            </Button>
+            <Button onClick={cancelDialogClose}>
+              아니오
+            </Button>
+          </DialogActions>
+        </>
+      </Dialog>
+    </>
   );
 }
