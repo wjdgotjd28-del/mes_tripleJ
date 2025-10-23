@@ -285,9 +285,15 @@ export default function OrdersInDocModal({
           </table>
 
           {/* 대표 이미지 영역 */}
-          <div className="image-box">
+          <div 
+            className="image-box" 
+            style={{display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "3px 0"}}
+          >
             {mainImage ? (
-              <img src={mainImage.img_url} alt={mainImage.img_ori_name} />
+              <img src={mainImage.img_url} alt={mainImage.img_ori_name} width={200} />
             ) : (
               <span>이미지 없음</span>
             )}
