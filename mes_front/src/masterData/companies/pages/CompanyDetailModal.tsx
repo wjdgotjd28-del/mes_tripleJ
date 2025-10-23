@@ -282,14 +282,16 @@ export default function CompanyDetailModal({
                 <Button
                   variant="outlined"
                   size="small"
+                  color="primary"
                   onClick={() => setIsEditing(true)}
                   sx={{ mr: 1 }}
                 >
                   수정
                 </Button>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   size="small"
+                  color="error"
                   onClick={handleCloseModal}
                 >
                   닫기
@@ -298,7 +300,7 @@ export default function CompanyDetailModal({
             ) : (
               <>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   size="small"
                   color="primary"
                   onClick={handleSave}
@@ -309,7 +311,7 @@ export default function CompanyDetailModal({
                 <Button
                   variant="outlined"
                   size="small"
-                  color="inherit"
+                  color="error"
                   onClick={handleCancel}
                 >
                   취소

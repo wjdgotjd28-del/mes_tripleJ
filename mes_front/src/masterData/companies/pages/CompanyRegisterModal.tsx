@@ -135,8 +135,8 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
             </Box>
 
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
-              <Button variant="outlined" size="small" onClick={handleClose}>취소</Button> {/* Use modified handleClose */}
-              <Button variant="contained" size="small" sx={{ ml: 1 }} onClick={handleSubmit}>등록</Button>
+              <Button variant="outlined" color="error" size="small" onClick={handleClose}>취소</Button>
+              <Button variant="outlined" color="primary" size="small" sx={{ ml: 1 }} onClick={handleSubmit}>등록</Button>
             </Box>
           </Box>
         </Modal>

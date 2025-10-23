@@ -372,9 +372,9 @@ export default function RawInHistoryPage() {
                       </TableCell>
                       <TableCell align="center">
                         {isEditMode ? (
-                          editableRowData?.totalQty
+                          `${editableRowData?.totalQty}${editableRowData?.specUnit}`
                         ) : (
-                          row.totalQty
+                          `${row.totalQty}${row.specUnit}`
                         )}
                       </TableCell>
                       <TableCell align="center">
