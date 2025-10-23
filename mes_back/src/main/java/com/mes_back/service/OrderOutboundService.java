@@ -88,6 +88,7 @@ public class OrderOutboundService {
                 .category(dto.getCategory())
                 .outboundNo(outboundNo)
                 .outboundDate(LocalDate.now())
+                .remainingQuantity(availableQty - dto.getQty()) // Calculate and set remainingQuantity
                 .build();
 
         OrderOutbound saved = orderOutboundRepository.save(orderOutbound);
@@ -104,6 +105,7 @@ public class OrderOutboundService {
                 .outboundDate(saved.getOutboundDate())
                 .inboundDate(orderInbound.getInboundDate())
                 .color(saved.getOrderInbound().getOrderItem().getColor())
+                .remainingQuantity(saved.getRemainingQuantity()) // Include in DTO
                 .build();
     }
 
@@ -147,11 +149,35 @@ public class OrderOutboundService {
 
     @Transactional
     public OrderOutboundDto updateOrderOutbound(OrderOutboundDto orderOutboundDto) {
-        OrderOutbound orderOutbound = orderOutboundRepository.findById(orderOutboundDto.getId())
+        OrderOutbound existingOrderOutbound = orderOutboundRepository.findById(orderOutboundDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("OrderOutbound not found with id: " + orderOutboundDto.getId()));
-        orderOutbound.updateOrderOutbound(orderOutboundDto);
-        return orderOutboundDto;
 
+        OrderInbound orderInbound = orderInboundRepository.findById(orderOutboundDto.getOrderInboundId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 입고 정보를 찾을 수 없습니다. id=" + orderOutboundDto.getOrderInboundId()));
+
+        // Calculate total outbound quantity for this orderInbound, excluding the current outbound record being updated
+        List<OrderOutbound> otherOutbounds = orderOutboundRepository.findByOrderInbound_Id(orderOutboundDto.getOrderInboundId())
+                .stream()
+                .filter(oo -> !oo.getId().equals(existingOrderOutbound.getId()))
+                .collect(Collectors.toList());
+
+        Long totalOtherOutboundQty = otherOutbounds.stream()
+                .mapToLong(OrderOutbound::getQty)
+                .sum();
+
+        Long newTotalOutboundQty = totalOtherOutboundQty + orderOutboundDto.getQty();
+
+        if (orderOutboundDto.getQty() <= 0) {
+            throw new IllegalArgumentException("출고 수량은 0보다 커야 합니다.");
+        }
+        if (newTotalOutboundQty > orderInbound.getQty()) {
+            throw new IllegalArgumentException("총 출고 수량이 입고 수량(" + orderInbound.getQty() + ")을 초과할 수 없습니다.");
+        }
+
+        existingOrderOutbound.updateOrderOutbound(orderOutboundDto);
+        existingOrderOutbound.setRemainingQuantity(orderInbound.getQty() - newTotalOutboundQty); // Update remainingQuantity
+
+        return orderOutboundDto;
     }
 
     @Transactional

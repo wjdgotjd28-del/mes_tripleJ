@@ -109,6 +109,9 @@ public class OrderOutbound {
     @Column(name = "deleted_at", columnDefinition = "TIMESTAMP(0)", nullable = true)
     private LocalDateTime deletedAt;
 
+    @Column(name = "remaining_quantity")
+    private Long remainingQuantity;
+
     public void updateOrderOutbound(OrderOutboundDto orderOutboundDto){
         this.qty = orderOutboundDto.getQty();
         this.outboundDate = orderOutboundDto.getOutboundDate();

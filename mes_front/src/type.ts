@@ -94,7 +94,7 @@ export type OrderOutbound = {
   category: string;
   inboundDate: string;
   color: string;
-  inboundQty: number; // Added for validation
+  remainingQuantity: number;
 };
 
 // 수주 출고에서 쓰이는 수주 입고 데이터 조회용 타입 
