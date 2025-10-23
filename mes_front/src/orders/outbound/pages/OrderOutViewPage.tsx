@@ -153,6 +153,7 @@ export default function OrderOutViewPage() {
     setEditRowId(null);
     setEditableRowData(null);
     setQtyInputString("");
+    setQtyError(null); // Clear any quantity error
   };
 
   // ✅ 인라인 수정 필드 변경
