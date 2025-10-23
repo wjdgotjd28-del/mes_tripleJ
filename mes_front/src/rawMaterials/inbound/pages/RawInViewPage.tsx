@@ -23,7 +23,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
-
+import "dayjs/locale/ko";
 import RawRegisterModal from "../../../masterData/items/pages/RawRegisterModal";
 import RawDetailModal from "../../../masterData/items/pages/RawDetailModal";
 import { exportToExcel } from "../../../Common/ExcelUtils";
@@ -361,18 +361,23 @@ export default function RawInViewPage() {
                         />
                       </TableCell>
                       <TableCell align="center">
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <LocalizationProvider
+                          dateAdapter={AdapterDayjs}
+                          adapterLocale="ko"
+                        >
                           <DatePicker
                             value={
                               inboundInput[materialId]?.inboundDate
                                 ? dayjs(inboundInput[materialId]?.inboundDate)
-                                : null
+                                : dayjs() // 기본값 오늘 날짜
                             }
                             onChange={(newDate) =>
                               handleInboundInputChange(
                                 materialId,
                                 "inboundDate",
-                                newDate ? newDate.format("YYYY-MM-DD") : ""
+                                newDate
+                                  ? newDate.format("YYYY-MM-DD")
+                                  : dayjs().format("YYYY-MM-DD")
                               )
                             }
                             format="YYYY-MM-DD"
@@ -383,18 +388,23 @@ export default function RawInViewPage() {
                         </LocalizationProvider>
                       </TableCell>
                       <TableCell align="center">
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <LocalizationProvider
+                          dateAdapter={AdapterDayjs}
+                          adapterLocale="ko"
+                        >
                           <DatePicker
                             value={
                               inboundInput[materialId]?.manufacteDate
                                 ? dayjs(inboundInput[materialId]?.manufacteDate)
-                                : null
+                                : dayjs() // 기본값 오늘 날짜
                             }
                             onChange={(newDate) =>
                               handleInboundInputChange(
                                 materialId,
                                 "manufacteDate",
-                                newDate ? newDate.format("YYYY-MM-DD") : ""
+                                newDate
+                                  ? newDate.format("YYYY-MM-DD")
+                                  : dayjs().format("YYYY-MM-DD")
                               )
                             }
                             format="YYYY-MM-DD"

@@ -130,12 +130,10 @@ export default function RawViewPage() {
 
   const handleDelete = async (
     id: number,
-    company_name: string,
-    item_name: string
   ) => {
     if (
       window.confirm(
-        `${company_name}의 '${item_name}' 데이터를 삭제하시겠습니까?`
+        `해당 원자재 품목을 삭제하시겠습니까?`
       )
     ) {
       try {
@@ -148,11 +146,16 @@ export default function RawViewPage() {
     }
   };
 
-  const handleToggleUseYn = async (id: number) => {
+  const handleToggleUseYn = async (id: number, currentUseYn: "Y" | "N"): Promise<void> => {
+    const actionText = currentUseYn === "Y" ? "사용 중지" : "사용 재개";
+    if (!window.confirm(`현재 상태가 '${currentUseYn === "Y" ? "사용중" : "사용중지"}'입니다. '${actionText}' 하시겠습니까?`)) {
+      return;
+    }
+
     try {
       await restoreRawItems(id);
       await fetchRawItems();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("사용여부 변경 실패:", err);
       alert("사용여부 변경 중 오류가 발생했습니다.");
     }
@@ -260,7 +263,7 @@ export default function RawViewPage() {
         {/* 정렬 토글 버튼 */}
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button variant="outlined" onClick={() => setOpenModal(true)}>
-            + 등록
+            + 원자재 품목 등록
           </Button>
           <Button
             color="success"
@@ -350,11 +353,11 @@ export default function RawViewPage() {
                       <Button
                         variant="outlined"
                         size="small"
-                        color={row.use_yn === "Y" ? "error" : "success"}
-                        onClick={() => handleToggleUseYn(row.material_item_id!)}
+                        color={row.use_yn === "Y" ? "warning" : "success"}
+                        onClick={() => handleToggleUseYn(row.material_item_id!, row.use_yn)}
                         sx={{ mr: 1 }}
                       >
-                        {row.use_yn === "Y" ? "사용 중지" : "복원"}
+                        {row.use_yn === "Y" ? "사용 중지" : "사용 재개"}
                       </Button>
                       <Button
                         variant="outlined"
@@ -363,8 +366,6 @@ export default function RawViewPage() {
                         onClick={() =>
                           handleDelete(
                             row.material_item_id!,
-                            row.company_name,
-                            row.item_name
                           )
                         }
                       >

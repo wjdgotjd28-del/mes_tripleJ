@@ -18,6 +18,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
+import "dayjs/locale/ko";
 
 import type { MaterialInbound } from "../../../type";
 import { getMaterialInbound, updateMaterialInbound, deleteMaterailInbound } from "../api/rawInboundApi";
@@ -257,7 +258,7 @@ export default function RawInHistoryPage() {
           onChange={handleTextChange}
           sx={{ width: 150 }}
         />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
           <DatePicker
             label="입고일자"
             value={searchValues.inboundDate}
@@ -359,7 +360,7 @@ export default function RawInHistoryPage() {
                       </TableCell>
                       <TableCell align="center">
                         {isEditMode ? (
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                             <DatePicker
                               value={
                                 editableRowData?.inboundDate
@@ -373,7 +374,7 @@ export default function RawInHistoryPage() {
                               slotProps={{
                                 textField: {
                                   size: "small",
-                                  sx: { width: 170 },
+                                  sx: { width: 150 },
                                 },
                               }}
                             />
@@ -384,7 +385,7 @@ export default function RawInHistoryPage() {
                       </TableCell>
                       <TableCell align="center">
                         {isEditMode ? (
-                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                             <DatePicker
                               value={
                                 editableRowData?.manufacteDate
@@ -398,7 +399,7 @@ export default function RawInHistoryPage() {
                               slotProps={{
                                 textField: {
                                   size: "small",
-                                  sx: { width: 170 },
+                                  sx: { width: 150 },
                                 },
                               }}
                             />

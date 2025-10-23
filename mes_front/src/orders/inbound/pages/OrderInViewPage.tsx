@@ -22,6 +22,8 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
+import "dayjs/locale/ko";
+
 import {
   ArrowDownward,
   ArrowUpward,
@@ -175,7 +177,10 @@ export default function OrderInViewPage() {
   const handleDateChange = (id: string, value: dayjs.Dayjs | null) => {
     setInputValues((prev) => ({
       ...prev,
-      [id]: { ...prev[id], date: value ? value.format("YYYY-MM-DD") : "" },
+      [id]: {
+        ...prev[id],
+        date: value ? value.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD"),
+      },
     }));
   };
 
@@ -379,15 +384,18 @@ export default function OrderInViewPage() {
 
                       {/* 입고 일자 선택 */}
                       <TableCell align="center">
-                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <LocalizationProvider
+                          dateAdapter={AdapterDayjs}
+                          adapterLocale="ko"
+                        >
                           <DatePicker
-                            value={values.date ? dayjs(values.date) : null}
+                            value={values.date ? dayjs(values.date) : dayjs()} // 비어있으면 오늘 날짜
                             onChange={(newDate) =>
                               handleDateChange(id, newDate)
                             }
                             format="YYYY-MM-DD"
                             slotProps={{
-                              textField: { size: "small", sx: { width: 147 } },
+                              textField: { size: "small", sx: { width: 150 } },
                             }}
                           />
                         </LocalizationProvider>
