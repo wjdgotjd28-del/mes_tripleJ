@@ -134,6 +134,8 @@ export default function RawInViewPage() {
       };
       let newQty = currentItemInput.qty;
       let newQtyError: string | null = null;
+      let newManufacteDate = currentItemInput.manufacteDate;
+      let newInboundDate = currentItemInput.inboundDate;
 
       if (field === 'qty') {
         setQtyInputStrings((prevStrings) => ({
@@ -161,24 +163,19 @@ export default function RawInViewPage() {
           ...prevErrors,
           [materialItemId]: newQtyError,
         }));
-      } else {
-        // For other fields (manufacteDate, inboundDate)
-        setInboundInput((prev) => ({
-          ...prev,
-          [materialItemId]: {
-            ...currentItemInput,
-            [field]: value,
-          },
-        }));
-        return prev; // Return previous state as it's already updated
+      } else if (field === 'manufacteDate') {
+        newManufacteDate = value;
+      } else if (field === 'inboundDate') {
+        newInboundDate = value;
       }
 
-      // Update qty in inboundInput
       return {
         ...prev,
         [materialItemId]: {
           ...currentItemInput,
+          manufacteDate: newManufacteDate,
           qty: newQty,
+          inboundDate: newInboundDate,
         },
       };
     });
