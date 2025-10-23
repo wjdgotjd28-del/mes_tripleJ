@@ -439,6 +439,9 @@ export default function RawInViewPage() {
                           sx={{ width: 80 }}
                           error={!!qtyErrors[materialId]}
                           helperText={qtyErrors[materialId]}
+                          InputProps={{
+                            endAdornment: <span style={{ marginLeft: 1 }}>{row.spec_unit}</span>,
+                          }}
                         />
                       </TableCell>
                       <TableCell align="center">

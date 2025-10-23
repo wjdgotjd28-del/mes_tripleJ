@@ -16,6 +16,7 @@ import {
   CircularProgress,
   Tooltip,
   IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -406,7 +407,10 @@ export default function OrderInViewPage() {
                             pattern: "[0-9]*",
                             min: 1,
                           }}
-                          sx={{ width: 70 }}
+                          InputProps={{
+                            endAdornment: <InputAdornment position="end">EA</InputAdornment>,
+                          }}
+                          sx={{ width: 110 }}
                         />
                         {values.qty !== "" && Number(values.qty) <= 0 && (
                           <Typography

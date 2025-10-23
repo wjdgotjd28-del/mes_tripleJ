@@ -15,6 +15,7 @@ import {
   Tooltip,
   IconButton,
   CircularProgress,
+  InputAdornment,
 } from "@mui/material";
 import {
   ArrowUpward,
@@ -416,7 +417,10 @@ export default function InboundHistoryPage() {
                           pattern: "[0-9]*",
                           min: 1,
                         }}
-                        sx={{ width: 70 }}
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">EA</InputAdornment>,
+                        }}
+                        sx={{ width: 100 }}
                       />
                     ) : (
                       row.qty
