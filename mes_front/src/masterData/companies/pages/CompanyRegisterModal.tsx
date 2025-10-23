@@ -73,6 +73,25 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
   };
 
   const handleSubmit = async () => {
+    // Required fields for validation
+    const requiredFields: Array<keyof Omit<Company, "companyId" | "status" | "note">> = [
+      "bizRegNo",
+      "companyName",
+      "ceoName",
+      "ceoPhone",
+      "managerName",
+      "managerPhone",
+      "managerEmail",
+      "address",
+    ];
+
+    for (const field of requiredFields) {
+      if (!company[field]) {
+        alert("업체 정보를 모두 입력해주세요.");
+        return;
+      }
+    }
+
     try {
       const newCompany = await addCompany(company);
       onAdd(newCompany);
