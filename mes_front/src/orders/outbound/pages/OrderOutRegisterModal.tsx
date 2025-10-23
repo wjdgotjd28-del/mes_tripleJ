@@ -216,7 +216,8 @@ export default function OrderOutRegisterModal({
       category: selected.category,
       inboundDate: selected.inboundDate,
       color: "", // 필요하다면 color 값 추가
-      inboundQty: selected.qty, // Add inboundQty
+      remainingQuantity: selected.qty, // Use selected.qty as remainingQuantity
+      maxUpdatableQty: selected.qty, // Set maxUpdatableQty for new outbound record
     });
     
     alert("출고 정보가 등록되었습니다.");
