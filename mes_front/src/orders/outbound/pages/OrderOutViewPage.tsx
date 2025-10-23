@@ -343,7 +343,7 @@ export default function OrderOutViewPage() {
                         size="small"
                         value={qtyInputString}
                         onChange={handleEditChange}
-                        sx={{ width: 80 }}
+                        sx={{ width: 180 }}
                         error={!!qtyError}
                         helperText={qtyError}
                       />
