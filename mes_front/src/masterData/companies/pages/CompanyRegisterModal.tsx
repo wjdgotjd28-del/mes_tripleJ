@@ -100,7 +100,7 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
     }
 
     // Validate managerEmail format
-    const emailRegex = /^[^\s@]+@[^\s@]+\\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (company.managerEmail && !emailRegex.test(company.managerEmail)) {
       alert("담당자 이메일을 올바른 형식으로 입력해주세요.");
       return;
