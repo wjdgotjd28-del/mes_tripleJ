@@ -144,24 +144,23 @@ export default function OrderOutViewPage() {
 
     let newEditableRowData = { ...editableRowData };
     if (name === "qty") {
-      if (value === "") {
-        newEditableRowData.qty = ""; // Allow clearing
-        setQtyError(null);
-      } else {
-        const numericValue = Number(value);
-        if (isNaN(numericValue) || numericValue % 1 !== 0) {
-          // If not a number or not an integer
-          setQtyError("출고수량은 0보다 커야합니다");
-          newEditableRowData.qty = value; // Update with string value to show what user typed
-        } else if (numericValue < 1) {
-          setQtyError("출고수량은 0보다 커야합니다");
-          newEditableRowData.qty = numericValue;
-        } else {
-          setQtyError(null);
-          newEditableRowData.qty = numericValue;
-        }
-      }
-    } else {
+              if (value === "") {
+                newEditableRowData.qty = 0; // Set to 0 when cleared
+                setQtyError(null);
+              } else {
+                const numericValue = Number(value);
+                if (isNaN(numericValue) || numericValue % 1 !== 0) {
+                  // If not a number or not an integer, set to 0 and show error
+                  setQtyError("출고수량은 0보다 커야합니다");
+                  newEditableRowData.qty = 0; // Set to 0 for invalid input
+                } else if (numericValue < 1) {
+                  setQtyError("출고수량은 0보다 커야합니다");
+                  newEditableRowData.qty = numericValue;
+                } else {
+                  setQtyError(null);
+                  newEditableRowData.qty = numericValue;
+                }
+              }    } else {
       // For other fields, just update the value
       newEditableRowData = { ...newEditableRowData, [name]: value };
     }
