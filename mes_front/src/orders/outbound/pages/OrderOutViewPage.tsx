@@ -50,6 +50,7 @@ export default function OrderOutViewPage() {
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editableRowData, setEditableRowData] = useState<OrderOutbound | null>(null);
   const [qtyError, setQtyError] = useState<string | null>(null);
+  const [qtyInputString, setQtyInputString] = useState<string>("");
 
   // ✅ 출고 등록 모달 상태
   const [registerOpen, setRegisterOpen] = useState(false);
@@ -106,25 +107,37 @@ export default function OrderOutViewPage() {
   const handleUpdate = (row: OrderOutbound) => {
     setEditRowId(row.id ?? null);
     setEditableRowData(row);
+    setQtyInputString(row.qty.toString());
   };
 
   // ✅ 인라인 수정 저장
   const handleSave = async () => {
     if (!editableRowData || !editableRowData.id) return;
 
-    // qty 유효성 검사
-    if (typeof editableRowData.qty !== 'number' || editableRowData.qty < 1) {
+    const parsedQty = Number(qtyInputString);
+
+    // Validation for qtyInputString
+    if (isNaN(parsedQty) || parsedQty % 1 !== 0 || parsedQty < 1) {
+      setQtyError("출고 수량은 1 이상의 정수여야 합니다.");
       alert('출고 수량은 1 이상의 정수여야 합니다.');
       return;
     }
+    setQtyError(null); // Clear any previous error
+
+    // Create a new object with the validated qty
+    const updatedEditableRowData = {
+      ...editableRowData,
+      qty: parsedQty,
+    };
 
     try {
-      await updateOrderOutbound(editableRowData);
+      await updateOrderOutbound(updatedEditableRowData);
       setAllRows((prev) =>
-        prev.map((r) => (r.id === editableRowData.id ? editableRowData : r))
+        prev.map((r) => (r.id === updatedEditableRowData.id ? updatedEditableRowData : r))
       );
       setEditRowId(null);
       setEditableRowData(null);
+      setQtyInputString(""); // Clear qtyInputString after saving
     } catch (error) {
       console.error("출고 정보 수정 실패:", error);
       alert("출고 정보 수정에 실패했습니다.");
@@ -135,38 +148,36 @@ export default function OrderOutViewPage() {
   const handleCancel = () => {
     setEditRowId(null);
     setEditableRowData(null);
+    setQtyInputString("");
   };
 
   // ✅ 인라인 수정 필드 변경
-  const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!editableRowData) return;
-    const { name, value } = e.target;
-
-    let newEditableRowData = { ...editableRowData };
-    if (name === "qty") {
-              if (value === "") {
-                newEditableRowData.qty = 0; // Set to 0 when cleared
-                setQtyError(null);
-              } else {
-                const numericValue = Number(value);
-                if (isNaN(numericValue) || numericValue % 1 !== 0) {
-                  // If not a number or not an integer, set to 0 and show error
-                  setQtyError("출고수량은 0보다 커야합니다");
-                  newEditableRowData.qty = 0; // Set to 0 for invalid input
-                } else if (numericValue < 1) {
-                  setQtyError("출고수량은 0보다 커야합니다");
-                  newEditableRowData.qty = numericValue;
-                } else {
-                  setQtyError(null);
-                  newEditableRowData.qty = numericValue;
-                }
-              }    } else {
-      // For other fields, just update the value
-      newEditableRowData = { ...newEditableRowData, [name]: value };
-    }
-
-    setEditableRowData(newEditableRowData);
-  };
+    const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
+      if (!editableRowData) return;
+      const { name, value } = e.target;
+  
+      if (name === "qty") {
+        setQtyInputString(value);
+  
+        if (value === "") {
+          setQtyError(null);
+        } else {
+          const numericValue = Number(value);
+          if (isNaN(numericValue) || numericValue % 1 !== 0) {
+            setQtyError("출고수량은 0보다 커야합니다");
+          } else if (numericValue < 1) {
+            setQtyError("출고수량은 0보다 커야합니다");
+          } else {
+            setQtyError(null);
+          }
+        }
+      } else {
+        setEditableRowData((prev) => ({
+          ...(prev as OrderOutbound),
+          [name]: value,
+        }));
+      }
+    };
 
   const handleExcelDownload = () => exportToExcel(sortedRows, "출고목록");
 
@@ -321,11 +332,10 @@ export default function OrderOutViewPage() {
                     {isEditMode ? (
                       <TextField
                         name="qty"
-                        type="number"
+                        type="text"
                         size="small"
-                        value={editableRowData?.qty ?? ""}
+                        value={qtyInputString}
                         onChange={handleEditChange}
-                        inputProps={{ min: 1 }}
                         sx={{ width: 80 }}
                         error={!!qtyError}
                         helperText={qtyError}
