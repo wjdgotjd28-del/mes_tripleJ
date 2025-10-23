@@ -22,4 +22,5 @@ public class OrderOutboundDto {
     private LocalDate inboundDate;
     private String color;
     private Long remainingQuantity;
+    private Long maxUpdatableQty;
 }

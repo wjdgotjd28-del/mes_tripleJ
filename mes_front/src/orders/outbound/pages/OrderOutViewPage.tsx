@@ -164,10 +164,13 @@ export default function OrderOutViewPage() {
         } else {
           const numericValue = Number(value);
           if (isNaN(numericValue) || numericValue % 1 !== 0) {
-            setQtyError("출고수량은 0보다 커야합니다");
+            setQtyError("출고수량은 정수여야 합니다.");
           } else if (numericValue < 1) {
-            setQtyError("출고수량은 0보다 커야합니다");
-          } else {
+            setQtyError("출고수량은 1 이상이어야 합니다.");
+          } else if (numericValue > editableRowData.remainingQuantity) {
+            setQtyError(`잔여 수량을 초과할 수 없습니다. (잔여: ${editableRowData.remainingQuantity})`);
+          }
+          else {
             setQtyError(null);
           }
         }

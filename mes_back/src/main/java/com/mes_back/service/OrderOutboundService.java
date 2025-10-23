@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -129,20 +130,37 @@ public class OrderOutboundService {
 
     @Transactional(readOnly = true)
     public List<OrderOutboundDto> findAll() {
-        return orderOutboundRepository.findAll().stream()
-                .map(o -> OrderOutboundDto.builder()
-                        .id(o.getId())
-                        .orderInboundId(o.getOrderInbound().getOrderInboundId())
-                        .customerName(o.getCustomerName())
-                        .itemName(o.getItemName())
-                        .itemCode(o.getItemCode())
-                        .qty(o.getQty())
-                        .category(o.getCategory())
-                        .outboundNo(o.getOutboundNo())
-                        .outboundDate(o.getOutboundDate())
-                        .inboundDate(o.getOrderInbound().getInboundDate())
-                        .color(o.getOrderInbound().getOrderItem().getColor())
-                        .build())
+        List<OrderOutbound> allOutbounds = orderOutboundRepository.findAll();
+
+        // Group outbounds by their associated OrderInbound for efficient calculation
+        Map<Long, Long> inboundIdToTotalOutboundQty = allOutbounds.stream()
+                .collect(Collectors.groupingBy(
+                        outbound -> outbound.getOrderInbound().getOrderInboundId(),
+                        Collectors.summingLong(OrderOutbound::getQty)
+                ));
+
+        return allOutbounds.stream()
+                .map(o -> {
+                    OrderInbound orderInbound = o.getOrderInbound();
+                    Long totalOutboundForThisInbound = inboundIdToTotalOutboundQty.getOrDefault(orderInbound.getOrderInboundId(), 0L);
+                    Long dynamicRemainingQuantity = orderInbound.getQty() - totalOutboundForThisInbound;
+
+                    return OrderOutboundDto.builder()
+                            .id(o.getId())
+                            .orderInboundId(orderInbound.getOrderInboundId())
+                            .customerName(o.getCustomerName())
+                            .itemName(o.getItemName())
+                            .itemCode(o.getItemCode())
+                            .qty(o.getQty())
+                            .category(o.getCategory())
+                            .outboundNo(o.getOutboundNo())
+                            .outboundDate(o.getOutboundDate())
+                            .inboundDate(orderInbound.getInboundDate())
+                            .color(o.getOrderInbound().getOrderItem().getColor())
+                            .remainingQuantity(dynamicRemainingQuantity) // Dynamically calculated
+                            .maxUpdatableQty(orderInbound.getQty() - (inboundIdToTotalOutboundQty.getOrDefault(orderInbound.getOrderInboundId(), 0L) - o.getQty())) // Calculate maxUpdatableQty
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -176,6 +194,10 @@ public class OrderOutboundService {
 
         existingOrderOutbound.updateOrderOutbound(orderOutboundDto);
         existingOrderOutbound.setRemainingQuantity(orderInbound.getQty() - newTotalOutboundQty); // Update remainingQuantity
+
+        // Calculate maxUpdatableQty for the returned DTO
+        Long maxUpdatableQty = orderInbound.getQty() - totalOtherOutboundQty;
+        orderOutboundDto.setMaxUpdatableQty(maxUpdatableQty);
 
         return orderOutboundDto;
     }
