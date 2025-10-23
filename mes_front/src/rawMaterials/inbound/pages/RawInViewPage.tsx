@@ -150,10 +150,10 @@ export default function RawInViewPage() {
           const numericValue = Number(value);
           if (isNaN(numericValue) || numericValue % 1 !== 0) {
             newQty = 0; // Set to 0 for invalid input
-            newQtyError = "입고 수량은 1 이상의 정수여야 합니다.";
+            newQtyError = "입고 수량은 0보다 커야합니다.";
           } else if (numericValue < 1) {
             newQty = numericValue;
-            newQtyError = "입고 수량은 1 이상의 정수여야 합니다.";
+            newQtyError = "입고 수량은 0보다 커야합니다.";
           } else {
             newQty = numericValue;
             newQtyError = null;
@@ -204,7 +204,7 @@ export default function RawInViewPage() {
 
     // Final check for qty value (should be >= 1)
     if (inboundData.qty < 1) {
-      alert("입고 수량은 1 이상의 정수여야 합니다.");
+      alert("입고 수량은 0보다 커야합니다.");
       return;
     }
 
