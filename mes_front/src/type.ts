@@ -128,7 +128,7 @@ export type RawMaterialOutItems = {
   item_name: string;
   total_qty: number;
   unit: string;
-  qty:number
+  qty:number | "";
   outbound_no?: string; // 출고번호 (백엔드 생성)
   outbound_date?: string; // 출고일자
   manufacturer?: string;

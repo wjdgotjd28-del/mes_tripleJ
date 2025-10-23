@@ -237,32 +237,47 @@ export default function RawRegisterModal({ open, onClose, onSubmit }: RawRegiste
               <Typography color="text.secondary" alignSelf="center">
                 규격(양) *
               </Typography>
-              <TextField
-                type="number"
-                value={newData.spec_qty}
-                onChange={(e) => handleChange("spec_qty", Number(e.target.value))}
-                size="small"
-                fullWidth
-                required
-                inputProps={{ min: 1 }}
-                error={newData.spec_qty !== "" && Number(newData.spec_qty) <= 0}
-                helperText={
-                  newData.spec_qty !== "" && Number(newData.spec_qty) <= 0
-                    ? "규격(양)은 0보다 커야 합니다."
-                    : ""
-                }
-              />
-              <Typography color="text.secondary" alignSelf="center">
-                규격(단위) *
-              </Typography>
-              <TextField
-                value={newData.spec_unit}
-                onChange={(e) => handleChange("spec_unit", e.target.value)}
-                size="small"
-                fullWidth
-                required
-              />
-
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {/* 규격(양) */}
+                <TextField
+                  type="text"
+                  value={newData.spec_qty}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d*$/.test(val)) {
+                      handleChange("spec_qty", val === "" ? "" : parseInt(val, 10));
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (["e", "E", "+", "-", "."].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  size="small"
+                  sx={{ width: 100 }}
+                  inputProps={{ inputMode: "numeric", min: 1 }}
+                  error={newData.spec_qty !== "" && Number(newData.spec_qty) <= 0}
+                  helperText={
+                    newData.spec_qty !== "" && Number(newData.spec_qty) <= 0
+                      ? "규격(양)은 0보다 커야 합니다."
+                      : ""
+                  }
+                  FormHelperTextProps={{
+                    sx: { whiteSpace: "nowrap", mt: 0 },
+                  }}
+                />
+                {/* 규격(단위) */}
+                <Typography color="text.secondary" alignSelf="center" sx={{ml:3}}>
+                  규격(단위) *
+                </Typography>
+                <TextField
+                  value={newData.spec_unit}
+                  onChange={(e) => handleChange("spec_unit", e.target.value)}
+                  size="small"
+                  sx={{ width: 150, ml:1 }}
+                  required
+                />
+              </Box>
               <Typography color="text.secondary" alignSelf="center">
                 제조사
               </Typography>

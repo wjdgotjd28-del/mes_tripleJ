@@ -305,13 +305,22 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
                 />
                 <Typography color="text.secondary" alignSelf="center">단가 *</Typography>
                 <TextField
-                  type="number"
+                  type="text"
                   value={newData.unit_price}
-                  onChange={(e) => handleChange("unit_price", parseInt(e.target.value))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d*$/.test(val)) {
+                      handleChange("unit_price", val === "" ? "" : parseInt(val, 10));
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (["e", "E", "+", "-", "."].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   size="small"
                   fullWidth
-                  required
-                  inputProps={{ min: 1 }}
+                  inputProps={{ inputMode: "numeric", min: 1 }}
                   error={newData.unit_price !== "" && Number(newData.unit_price) <= 0}
                   helperText={
                     newData.unit_price !== "" && Number(newData.unit_price) <= 0

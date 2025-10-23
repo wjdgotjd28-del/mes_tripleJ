@@ -323,8 +323,31 @@ export default function OrderDetailModal({
                 <TextField value={editData.color ?? ""} onChange={e=>handleChange("color", e.target.value)} size="small" fullWidth InputProps={{ readOnly: !isEditing }} />
 
                 <Typography color="text.secondary" alignSelf="center">단가 *</Typography>
-                <TextField type="number" value={editData.unit_price ?? 0} inputProps={{ min: 1 }} onChange={e=>handleChange("unit_price", parseInt(e.target.value, 10) || 0)} size="small" fullWidth InputProps={{ readOnly: !isEditing }} />
-
+                {/* <TextField type="number" value={editData.unit_price ?? 0} inputProps={{ min: 1 }} onChange={e=>handleChange("unit_price", parseInt(e.target.value, 10) || 0)} size="small" fullWidth InputProps={{ readOnly: !isEditing }} /> */}
+                <TextField
+                  type="text"
+                  value={editData.unit_price}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (/^\d*$/.test(val)) {
+                      handleChange("unit_price", val === "" ? "" : parseInt(val, 10));
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (["e", "E", "+", "-", "."].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  size="small"
+                  fullWidth
+                  inputProps={{ inputMode: "numeric", min: 1 }}
+                  error={editData.unit_price !== "" && Number(editData.unit_price) <= 0}
+                  helperText={
+                    editData.unit_price !== "" && Number(editData.unit_price) <= 0
+                      ? "단가는 0보다 커야 합니다."
+                      : ""
+                  }
+                />
                 <Typography color="text.secondary" alignSelf="center">도장방식 *</Typography>
                 <FormControl>
                   <RadioGroup row value={editData.paint_type ?? "LIQUID"} onChange={e=>handleChange("paint_type", e.target.value)}>

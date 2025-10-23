@@ -198,13 +198,33 @@ export default function RawDetailModal({ open, onClose, data, onSave }: RawDetai
                 <Typography color="text.secondary">규격(양/단위) *</Typography>
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <TextField
+                    type="text"
                     value={editData.spec_qty}
-                    onChange={(e) => handleChange("spec_qty", e.target.value)}
-                    size="small"
                     disabled={!isEditing}
                     sx={{ width: 100 }}
-                    inputProps={{ min: 1 }}
-                    required
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (/^\d*$/.test(val)) {
+                        handleChange("spec_qty", val === "" ? "" : parseInt(val, 10));
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (["e", "E", "+", "-", "."].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    size="small"
+                    fullWidth
+                    inputProps={{ inputMode: "numeric", min: 1 }}
+                    error={editData.spec_qty !== "" && Number(editData.spec_qty) <= 0}
+                    helperText={
+                      editData.spec_qty !== "" && Number(editData.spec_qty) <= 0
+                        ? "규격(양)은 0보다 커야 합니다."
+                        : ""
+                    }
+                    FormHelperTextProps={{
+                      sx: { whiteSpace: "nowrap", mt: 0 }, // ✅ 줄바꿈 방지 + 여백 최소화
+                    }}
                   />
                   <TextField
                     value={editData.spec_unit}

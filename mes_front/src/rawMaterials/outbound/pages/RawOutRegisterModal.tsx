@@ -271,9 +271,21 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
               <TextField
                 label="출고수량"
                 name="outboundQty"
-                type="number"
+                type="text"
                 value={form.outboundQty}
-                onChange={handleFormChange}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  // 숫자만 허용
+                  if (/^\d*$/.test(val)) {
+                    setForm({ ...form, outboundQty: val });
+                  }
+                }}
+                onKeyDown={(e) => {
+                  // 숫자 외 입력 차단
+                  if (["e", "E", "+", "-", "."].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
                 size="small"
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: 1 }}

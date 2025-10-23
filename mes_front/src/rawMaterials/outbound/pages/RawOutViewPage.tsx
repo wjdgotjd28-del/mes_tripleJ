@@ -140,7 +140,7 @@ export default function RawMaterialOutViewPage() {
           <Box sx={{ display: "flex", gap: 1, flexWrap: "nowrap", mb: 1 }}>
             <TextField
               size="small"
-              label="출고번호"
+              placeholder="출고번호"
               sx={{ width: 150 }}
               name="outbound_no"
               value={searchValues.outbound_no}
@@ -148,7 +148,7 @@ export default function RawMaterialOutViewPage() {
             />
             <TextField
               size="small"
-              label="매입처명"
+              placeholder="매입처명"
               sx={{ width: 150 }}
               name="company_name"
               value={searchValues.company_name}
@@ -156,7 +156,7 @@ export default function RawMaterialOutViewPage() {
             />
             <TextField
               size="small"
-              label="품목번호"
+              placeholder="품목번호"
               sx={{ width: 150 }}
               name="item_code"
               value={searchValues.item_code}
@@ -164,7 +164,7 @@ export default function RawMaterialOutViewPage() {
             />
             <TextField
               size="small"
-              label="품목명"
+              placeholder="품목명"
               sx={{ width: 150 }}
               name="item_name"
               value={searchValues.item_name}
@@ -244,17 +244,34 @@ export default function RawMaterialOutViewPage() {
                         <TextField
                           size="small"
                           value={editForm.qty ?? r.qty}
-                          onChange={(e) =>
-                            setEditForm({
-                              ...editForm,
-                              qty: Number(e.target.value),
-                            })
-                          }
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            // 숫자만 허용
+                            if (/^\d*$/.test(val)) {
+                              setEditForm({
+                                ...editForm,
+                                qty: val === "" ? undefined : Number(val),
+                              });
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            // e, E, +, -, . 입력 차단
+                            if (["e", "E", "+", "-", "."].includes(e.key)) {
+                              e.preventDefault();
+                            }
+                          }}
                           sx={{ width: 95 }}
                           InputProps={{
-                            endAdornment: (
-                              <span style={{ marginLeft: 4 }}>{r.unit}</span>
-                            ),
+                            endAdornment: <span style={{ marginLeft: 1 }}>{r.unit}</span>,
+                          }}
+                          error={editForm.qty !== "" && Number(editForm.qty) <= 0}
+                          helperText={
+                            editForm.qty !== "" && Number(editForm.qty) <= 0
+                              ? "출고수량은 0보다 커야 합니다."
+                              : ""
+                          }
+                          FormHelperTextProps={{
+                            sx: { whiteSpace: "nowrap", mt: 0 }, // ✅ 줄바꿈 방지 + 여백 최소화
                           }}
                         />
                       ) : (
