@@ -21,4 +21,7 @@ public class OrderItemImgDTO {
 
     @JsonProperty("img_name")
     private String imgName;
+
+    @JsonProperty("reg_yn")
+    private String regYn;
 }

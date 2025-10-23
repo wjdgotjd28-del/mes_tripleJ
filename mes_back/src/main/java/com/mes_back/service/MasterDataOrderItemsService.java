@@ -134,6 +134,22 @@ public class MasterDataOrderItemsService {
 
         syncRouting(orderItem, routingList);
 
+        // ✅ 기존 이미지 reg_yn 업데이트
+        if (requestDTO.getImage() != null) {
+            for (OrderItemImgDTO imgDto : requestDTO.getImage()) {
+                if (imgDto.getOrderItemImgId() != null) {
+                    OrderItemImg existingImg = orderItemImgRepository.findById(imgDto.getOrderItemImgId())
+                            .orElse(null);
+                    if (existingImg != null) {
+                        existingImg.setRegYn(imgDto.getRegYn());
+                        orderItemImgRepository.save(existingImg);
+                        log.info("기존 이미지 reg_yn 업데이트: ID={}, reg_yn={}",
+                                existingImg.getOrderItemImgId(), existingImg.getRegYn());
+                    }
+                }
+            }
+        }
+
         // === 수정: 기존 이미지 ID 포함 여부 체크 ===
         List<Long> keepImageIds = (requestDTO.getImage() != null)
                 ? requestDTO.getImage().stream()
@@ -164,13 +180,16 @@ public class MasterDataOrderItemsService {
         if (keepImageIds == null) {
             keepImageIds = List.of(); // Immutable empty list
         }
-
-        // 삭제할 이미지 선정
+        // 1. 기존 이미지 중 유지할 이미지의 reg_yn 업데이트 (requestDTO.getImage()에서 전달된 정보 반영)
+        // 2. 삭제할 이미지 선정
         List<Long> safeKeepImageIds = (keepImageIds != null) ? keepImageIds : List.of();
-
         List<OrderItemImg> imagesToDelete = existingImages.stream()
                 .filter(img -> !safeKeepImageIds.contains(img.getOrderItemImgId()))
                 .toList();
+
+        // 대표 이미지 삭제 체크
+        boolean deletedRepImage = imagesToDelete.stream()
+                .anyMatch(img -> "Y".equalsIgnoreCase(img.getRegYn()));
 
         // 실제 DB와 파일에서 삭제
         for (OrderItemImg img : imagesToDelete) {
@@ -183,13 +202,20 @@ public class MasterDataOrderItemsService {
             orderItem.setImages(new java.util.ArrayList<>());
         }
 
-        // 새 이미지 추가
+        // 3. 새 이미지 추가 (첫 번째만 대표로 지정, 기존 대표가 없는 경우만)
         if (newImages != null && !newImages.isEmpty()) {
             String uploadDir = imgFileLocation + "/order_items/";
             Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
 
-            for (MultipartFile file : newImages) {
+            // 기존에 대표 이미지가 있는지 확인
+            boolean hasExistingRep = existingImages.stream()
+                    .filter(img -> !imagesToDelete.contains(img))
+                    .anyMatch(img -> "Y".equalsIgnoreCase(img.getRegYn()));
+
+            for (int i = 0; i < newImages.size(); i++) {
+                MultipartFile file = newImages.get(i);
+
                 if (file.isEmpty()) continue;
 
                 String timestamp = String.valueOf(System.currentTimeMillis());
@@ -209,16 +235,68 @@ public class MasterDataOrderItemsService {
                 imgEntity.setImgName(savedFileName);
                 imgEntity.setImgUrl("http://localhost:8080/uploads/order_items/" + savedFileName);
 
+                // 첫 번째 신규 이미지이고 기존 대표가 없으면 대표로 지정
+                imgEntity.setRegYn((i == 0 && !hasExistingRep) ? "Y" : "N");
+
                 OrderItemImg savedImg = orderItemImgRepository.save(imgEntity);
                 orderItem.getImages().add(savedImg);
 
-                log.info("새 이미지 추가: ID={}, 파일명={}", savedImg.getOrderItemImgId(), savedFileName);
+                log.info("새 이미지 추가: ID={}, 파일명={}, 대표이미지={}",
+                        savedImg.getOrderItemImgId(), savedFileName, savedImg.getRegYn());
             }
         }
+
+        // 4. 대표 이미지가 삭제된 경우, 다음 순서 이미지를 대표로 지정
+        if (deletedRepImage) {
+            ensureRepresentativeImage(orderItem);
+        }
+
+        // 5. 대표 이미지가 하나만 있는지 확인 (여러 개 Y면 첫 번째만 Y로 유지)
+        ensureSingleRepresentativeImage(orderItem);
 
         log.info("이미지 동기화 완료: 유지된 이미지 수={}, 새 이미지 수={}",
                 existingImages.size() - imagesToDelete.size(),
                 newImages != null ? newImages.size() : 0);
+    }
+
+    /* =========================================
+       대표 이미지 자동 지정
+     ========================================= */
+    private void ensureRepresentativeImage(OrderItem orderItem) {
+        List<OrderItemImg> allImages = orderItemImgRepository.findByOrderItem(orderItem);
+
+        // 대표 이미지가 있는지 확인
+        boolean hasRepImage = allImages.stream()
+                .anyMatch(img -> "Y".equalsIgnoreCase(img.getRegYn()));
+
+        // 대표 이미지가 없고, 이미지가 하나라도 있으면 첫 번째를 대표로 지정
+        if (!hasRepImage && !allImages.isEmpty()) {
+            OrderItemImg firstImage = allImages.get(0);
+            firstImage.setRegYn("Y");
+            orderItemImgRepository.save(firstImage);
+            log.info("대표 이미지 자동 지정: ID={}", firstImage.getOrderItemImgId());
+        }
+    }
+
+    /* =========================================
+       대표 이미지 단일성 보장
+     ========================================= */
+    private void ensureSingleRepresentativeImage(OrderItem orderItem) {
+        List<OrderItemImg> allImages = orderItemImgRepository.findByOrderItem(orderItem);
+
+        List<OrderItemImg> repImages = allImages.stream()
+                .filter(img -> "Y".equalsIgnoreCase(img.getRegYn()))
+                .toList();
+
+        // 대표 이미지가 2개 이상이면 첫 번째만 Y로 유지
+        if (repImages.size() > 1) {
+            for (int i = 1; i < repImages.size(); i++) {
+                OrderItemImg img = repImages.get(i);
+                img.setRegYn("N");
+                orderItemImgRepository.save(img);
+                log.info("중복 대표 이미지 해제: ID={}", img.getOrderItemImgId());
+            }
+        }
     }
 
     /* 개별 이미지 삭제 */
@@ -226,14 +304,44 @@ public class MasterDataOrderItemsService {
         OrderItemImg img = orderItemImgRepository.findById(imageId)
                 .orElseThrow(() -> new EntityNotFoundException("Image not found: " + imageId));
 
-        // 1. OrderItem 컬렉션에서 제거
+        boolean wasRepImage = "Y".equalsIgnoreCase(img.getRegYn());
         OrderItem orderItem = img.getOrderItem();
+
+        // 1. OrderItem 컬렉션에서 제거
         if (orderItem.getImages() != null) {
             orderItem.getImages().remove(img);
         }
 
         // 2. DB + 파일 삭제
         deleteOrderItemImage(img);
+
+        // 3. 대표 이미지였다면 다음 이미지를 대표로 지정
+        if (wasRepImage) {
+            ensureRepresentativeImage(orderItem);
+        }
+    }
+
+    /* =========================================
+       대표 이미지 변경
+     ========================================= */
+    public void changeRepresentativeImage(Long imageId) {
+        OrderItemImg newRepImg = orderItemImgRepository.findById(imageId)
+                .orElseThrow(() -> new EntityNotFoundException("Image not found: " + imageId));
+
+        OrderItem orderItem = newRepImg.getOrderItem();
+        List<OrderItemImg> allImages = orderItemImgRepository.findByOrderItem(orderItem);
+
+        // 모든 이미지를 N으로 변경
+        for (OrderItemImg img : allImages) {
+            img.setRegYn("N");
+            orderItemImgRepository.save(img);
+        }
+
+        // 선택한 이미지를 Y로 변경
+        newRepImg.setRegYn("Y");
+        orderItemImgRepository.save(newRepImg);
+
+        log.info("대표 이미지 변경: 새 대표 이미지 ID={}", imageId);
     }
 
     /* 이미지 삭제 수정 */
@@ -345,6 +453,14 @@ public class MasterDataOrderItemsService {
                     OrderItemImgDTO dtoImg = modelMapper.map(img, OrderItemImgDTO.class);
                     dtoImg.setOrderItemId(img.getOrderItem() != null ? img.getOrderItem().getOrderItemId() : null);
                     return dtoImg;
+                })
+                .sorted((img1, img2) -> {
+                    // reg_yn이 'Y'인 것을 앞으로
+                    boolean isMain1 = "Y".equalsIgnoreCase(img1.getRegYn());
+                    boolean isMain2 = "Y".equalsIgnoreCase(img2.getRegYn());
+                    if (isMain1 && !isMain2) return -1;
+                    if (!isMain1 && isMain2) return 1;
+                    return 0;
                 })
                 .collect(Collectors.toList());
         dto.setImage(images);

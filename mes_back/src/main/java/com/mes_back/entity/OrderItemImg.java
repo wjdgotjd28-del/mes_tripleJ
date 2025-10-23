@@ -27,4 +27,7 @@ public class OrderItemImg {
 
     @Column(name = "img_name", nullable = false, length = 255)
     private String imgName;
+
+    @Column(name = "reg_yn")
+    private String regYn;
 }
