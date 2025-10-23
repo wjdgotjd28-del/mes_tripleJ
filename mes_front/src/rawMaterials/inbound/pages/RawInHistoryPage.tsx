@@ -151,12 +151,12 @@ export default function RawInHistoryPage() {
 
     // Final validation for specQty and qty
     if (Number(editableRowData.specQty) < 1) {
-      setSpecQtyError("규격 수량은 1 이상의 정수여야 합니다.");
+      setSpecQtyError("규격 수량은 1 이상");
       alert('규격 수량은 1 이상의 정수여야 합니다.');
       return;
     }
     if (Number(editableRowData.qty) < 1) {
-      setQtyError("입고 수량은 1 이상의 정수여야 합니다.");
+      setQtyError("입고 수량은 1 이상");
       alert('입고 수량은 1 이상의 정수여야 합니다.');
       return;
     }
@@ -208,7 +208,7 @@ export default function RawInHistoryPage() {
       newSpecQtyInputString = value;
       const numericValue = Number(value);
       if (value === "" || isNaN(numericValue) || numericValue < 1) {
-        newSpecQtyError = "규격 수량은 1 이상의 정수여야 합니다.";
+        newSpecQtyError = "규격 수량은 1 이상";
         updatedEditableRowData.specQty = 0; // Set to 0 for invalid input
       } else {
         updatedEditableRowData.specQty = numericValue;
@@ -219,7 +219,7 @@ export default function RawInHistoryPage() {
       newQtyInputString = value;
       const numericValue = Number(value);
       if (value === "" || isNaN(numericValue) || numericValue < 1) {
-        newQtyError = "입고 수량은 1 이상의 정수여야 합니다.";
+        newQtyError = "입고 수량은 1 이상";
         updatedEditableRowData.qty = 0; // Set to 0 for invalid input
       } else {
         updatedEditableRowData.qty = numericValue;
@@ -395,7 +395,7 @@ export default function RawInHistoryPage() {
                               type="text"
                               value={specQtyInputString}
                               onChange={handleEditChange}
-                              sx={{ width: 80, mr: 1 }}
+                              sx={{ width: 150, mr: 1 }}
                               error={!!specQtyError}
                               helperText={specQtyError}
                               InputProps={{
@@ -415,7 +415,7 @@ export default function RawInHistoryPage() {
                             type="text"
                             value={qtyInputString}
                             onChange={handleEditChange}
-                            sx={{ width: 80 }}
+                            sx={{ width: 150 }}
                             error={!!qtyError}
                             helperText={qtyError}
                           />

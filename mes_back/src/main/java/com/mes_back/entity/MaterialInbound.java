@@ -66,6 +66,7 @@ public class MaterialInbound {
         this.qty = materialInboundDto.getQty();
         this.inboundDate = materialInboundDto.getInboundDate();
         this.manufacteDate = materialInboundDto.getManufacteDate();
+        this.totalQty = materialInboundDto.getQty() * materialInboundDto.getSpecQty(); // Recalculate and update totalQty
     }
 }
 
