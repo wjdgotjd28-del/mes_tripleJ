@@ -138,14 +138,8 @@ export default function OrderViewPage() {
   };
 
   // 삭제
-  const handleDelete = async (
-    id: number,
-  ): Promise<void> => {
-    if (
-      window.confirm(
-        `해당 수주 품목을 삭제하시겠습니까?`
-      )
-    ) {
+  const handleDelete = async (id: number): Promise<void> => {
+    if (window.confirm(`해당 수주 품목을 삭제하시겠습니까?`)) {
       try {
         await deleteOrderItems(id);
         await fetchOrderItems();
@@ -161,9 +155,18 @@ export default function OrderViewPage() {
   };
 
   // 사용 여부 토글
-  const handleToggleUseYn = async (id: number, currentUseYn: "Y" | "N"): Promise<void> => {
+  const handleToggleUseYn = async (
+    id: number,
+    currentUseYn: "Y" | "N"
+  ): Promise<void> => {
     const actionText = currentUseYn === "Y" ? "사용 중지" : "사용 재개";
-    if (!window.confirm(`현재 상태가 '${currentUseYn === "Y" ? "사용중" : "사용중지"}'입니다. '${actionText}' 하시겠습니까?`)) {
+    if (
+      !window.confirm(
+        `현재 상태가 '${
+          currentUseYn === "Y" ? "사용중" : "사용중지"
+        }'입니다. '${actionText}' 하시겠습니까?`
+      )
+    ) {
       return;
     }
 
@@ -342,7 +345,9 @@ export default function OrderViewPage() {
               ) : (
                 paginatedData.map((row, idx) => (
                   <TableRow key={row.order_item_id}>
-                    <TableCell align="center">{idx+1}</TableCell>
+                    <TableCell align="center">
+                      {(currentPage - 1) * 20 + idx + 1}
+                    </TableCell>
                     <TableCell align="center">{row.company_name}</TableCell>
                     <TableCell align="center">{row.item_code}</TableCell>
                     <TableCell align="center">
@@ -390,7 +395,9 @@ export default function OrderViewPage() {
                         variant="outlined"
                         size="small"
                         color={row.use_yn === "Y" ? "warning" : "success"}
-                        onClick={() => handleToggleUseYn(row.order_item_id, row.use_yn)}
+                        onClick={() =>
+                          handleToggleUseYn(row.order_item_id, row.use_yn)
+                        }
                         sx={{ mr: 1 }}
                       >
                         {row.use_yn === "Y" ? "사용 중지" : "사용 재개"}
@@ -399,11 +406,7 @@ export default function OrderViewPage() {
                         variant="outlined"
                         size="small"
                         color="error"
-                        onClick={() =>
-                          handleDelete(
-                            row.order_item_id,
-                          )
-                        }
+                        onClick={() => handleDelete(row.order_item_id)}
                       >
                         삭제
                       </Button>

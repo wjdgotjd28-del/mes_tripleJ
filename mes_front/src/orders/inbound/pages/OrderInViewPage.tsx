@@ -322,7 +322,9 @@ export default function OrderInViewPage() {
 
                   return (
                     <TableRow key={id}>
-                      <TableCell align="center">{idx + 1}</TableCell>
+                      <TableCell align="center">
+                        {(currentPage - 1) * 20 + idx + 1}
+                      </TableCell>
                       <TableCell align="center">{row.company_name}</TableCell>
                       <TableCell align="center">{row.item_code}</TableCell>
 

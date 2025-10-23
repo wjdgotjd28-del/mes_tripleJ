@@ -355,7 +355,9 @@ export default function InboundHistoryPage() {
             ) : (
               paginatedData.map((row, idx) => (
                 <TableRow key={row.order_inbound_id}>
-                  <TableCell align="center">{idx + 1}</TableCell>
+                  <TableCell align="center">
+                    {(currentPage - 1) * 20 + idx + 1}
+                  </TableCell>
                   <TableCell align="center">
                     <Typography
                       variant="body2"
