@@ -35,11 +35,6 @@ const ReadOnlyInputProps = {
   sx: { backgroundColor: "#f5f5f5" },
 };
 
-// 출고수량 및 출고일자 필드의 선택 안 되었을 때 스타일 (배경색 제거)
-const InactiveInputProps = {
-  readOnly: true,
-  style: { color: "black" },
-};
 
 const categoryKorMap: { [key: string]: string } = {
   DEFENSE: "방산",
@@ -394,7 +389,7 @@ export default function OrderOutRegisterModal({
               label="출고수량"
               value="-"
               size="small"
-              InputProps={InactiveInputProps}
+              InputProps={ReadOnlyInputProps} // ⬅️ 회색 배경 스타일 적용됨
               sx={{ width: 200 }}
             />
           )}
@@ -418,7 +413,7 @@ export default function OrderOutRegisterModal({
               label="출고일자"
               value="-"
               size="small"
-              InputProps={InactiveInputProps}
+              InputProps={ReadOnlyInputProps} // ⬅️ 회색 배경 스타일 적용됨
               sx={{ width: 200 }}
             />
           )}
