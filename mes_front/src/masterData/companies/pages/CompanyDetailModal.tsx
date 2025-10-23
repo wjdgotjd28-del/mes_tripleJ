@@ -80,6 +80,27 @@ export default function CompanyDetailModal({
   };
 
   const handleSave = async () => {
+    if (!formData) return;
+
+    // Required fields for validation
+    const requiredFields: Array<keyof Omit<Company, "companyId" | "status" | "note">> = [
+      "bizRegNo",
+      "companyName",
+      "ceoName",
+      "ceoPhone",
+      "managerName",
+      "managerPhone",
+      "managerEmail",
+      "address",
+    ];
+
+    for (const field of requiredFields) {
+      if (!formData[field]) {
+        alert("업체 정보를 모두 입력해주세요.");
+        return;
+      }
+    }
+
     await updateCompany(formData);
 
     if (formData) {

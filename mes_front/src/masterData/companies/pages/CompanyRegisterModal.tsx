@@ -92,11 +92,25 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
       }
     }
 
+    // Validate managerPhone format
+    const phoneRegex = /^\\d{3}-\\d{4}-\\d{4}$/;
+    if (company.managerPhone && !phoneRegex.test(company.managerPhone)) {
+      alert("담당자 전화번호를 010-0000-0000 형식으로 입력해주세요.");
+      return;
+    }
+
+    // Validate managerEmail format
+    const emailRegex = /^[^\s@]+@[^\s@]+\\.[^\s@]+$/;
+    if (company.managerEmail && !emailRegex.test(company.managerEmail)) {
+      alert("담당자 이메일을 올바른 형식으로 입력해주세요.");
+      return;
+    }
+
     try {
       const newCompany = await addCompany(company);
       onAdd(newCompany);
-      setOpen(false); 
-      setCompany(initialCompanyState); 
+      setOpen(false);
+      setCompany(initialCompanyState);
     } catch (error) {
       console.error("회사 등록 실패:", error);
     }
@@ -147,8 +161,8 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
               <TextField fullWidth size="small" label="대표명" name="ceoName" value={company.ceoName} onChange={handleChange} sx={{ mb: 2 }} />
               <TextField fullWidth size="small" label="대표전화번호" name="ceoPhone" value={company.ceoPhone} onChange={handleChange} sx={{ mb: 2 }} />
               <TextField fullWidth size="small" label="담당자명" name="managerName" value={company.managerName} onChange={handleChange} sx={{ mb: 2 }} />
-              <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={company.managerPhone} onChange={handleChange} sx={{ mb: 2 }} />
-              <TextField fullWidth size="small" label="담당자 이메일" name="managerEmail" value={company.managerEmail} onChange={handleChange} sx={{ mb: 2 }} />
+              <TextField fullWidth size="small" label="담당자전화번호" name="managerPhone" value={company.managerPhone} onChange={handleChange} sx={{ mb: 2 }} helperText="담당자 전화번호는 - 을 넣어서 입력해주세요 " />
+              <TextField fullWidth size="small" label="담당자 이메일" name="managerEmail" type="email" value={company.managerEmail} onChange={handleChange} sx={{ mb: 2 }} helperText="이메일 형식으로 입력해주세요." />
               <TextField fullWidth size="small" label="주소" name="address" value={company.address} onChange={handleChange} sx={{ mb: 2 }} />
               <TextField fullWidth size="small" label="비고" name="note" value={company.note} onChange={handleChange} multiline rows={2} />
             </Box>
