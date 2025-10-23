@@ -387,18 +387,42 @@ export default function InboundHistoryPage() {
                     {editRowId === row.order_inbound_id ? (
                       <TextField
                         size="small"
-                        type="number"
+                        type="text"
                         value={values[row.order_inbound_id]?.qty ?? row.qty}
-                        onChange={(e) =>
-                          handleQtyChange(row.order_inbound_id!, e.target.value)
-                        }
-                        inputProps={{ min: 1 }}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          // 숫자만 허용
+                          if (/^\d*$/.test(val)) {
+                            handleQtyChange(row.order_inbound_id!, val);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          // 숫자와 제어키만 허용
+                          if (
+                            !(
+                              (e.key >= "0" && e.key <= "9") ||
+                              e.key === "Backspace" ||
+                              e.key === "Delete" ||
+                              e.key === "ArrowLeft" ||
+                              e.key === "ArrowRight" ||
+                              e.key === "Tab"
+                            )
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
+                        inputProps={{
+                          inputMode: "numeric",
+                          pattern: "[0-9]*",
+                          min: 1,
+                        }}
                         sx={{ width: 70 }}
                       />
                     ) : (
                       row.qty
                     )}
                   </TableCell>
+
                   <TableCell align="center">
                     {editRowId === row.order_inbound_id ? (
                       <LocalizationProvider

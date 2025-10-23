@@ -8,9 +8,8 @@ import {
   Button,
   Box,
   Typography,
-  IconButton,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
+
 import { registerRouting } from "../api/RoutingApi";
 import type { RoutingFormData } from "../../../type";
 
@@ -36,6 +35,7 @@ export default function RoutingRegisterModal({
     process_time: "",
     note: "",
   });
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   // 에러 메시지 상태 (중복 코드 등)
   const [error, setError] = useState("");
@@ -44,25 +44,71 @@ export default function RoutingRegisterModal({
 
   // 입력값 변경 핸들러
   const handleChange = (field: keyof typeof form, value: string) => {
+    if (field === "process_time") {
+      // 숫자만 허용
+      const filtered = value.replace(/[^0-9]/g, "");
+      if (filtered !== value) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          [field]: "숫자만 입력 가능합니다.",
+        }));
+      } else {
+        setFieldErrors((prev) => ({ ...prev, [field]: "" }));
+      }
+      setForm((prev) => ({ ...prev, [field]: filtered }));
+      return;
+    }
+
+    // 기존 공정 코드/공정명 처리
+    const isValid = /^[가-힣a-zA-Z0-9]*$/.test(value);
+
+    if (!isValid) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [field]: "숫자와 문자만 입력 가능합니다.",
+      }));
+    } else {
+      setFieldErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+
     setForm({ ...form, [field]: value });
-    // 공정코드 필드일 때 중복 체크
+
+    // 공정코드 중복 체크
     if (field === "process_code") {
       if (existingCodes.includes(value)) {
         setError("중복된 공정코드가 있습니다.");
-      } else {
+      } else if (isValid) {
         setError("");
       }
-    } else {
-      setError("");
     }
   };
-
   // 등록 버튼 클릭 시 처리
   const handleSubmit = async () => {
+    // 숫자/문자 검증 (공정 코드, 공정명)
+    const codeValid = /^[가-힣a-zA-Z0-9]+$/.test(form.process_code);
+    const nameValid = /^[가-힣a-zA-Z0-9]+$/.test(form.process_name);
+
+    if (!codeValid) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        process_code: "숫자와 문자만 입력 가능합니다.",
+      }));
+      return;
+    }
+
+    if (!nameValid) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        process_name: "숫자와 문자만 입력 가능합니다.",
+      }));
+      return;
+    }
+
     if (existingCodes.includes(form.process_code)) {
       setError("중복된 공정코드가 있습니다.");
       return;
     }
+
     if (!form.process_code || !form.process_name || !form.process_time) {
       alert("필수 항목을 모두 입력하세요.");
       return;
@@ -78,6 +124,8 @@ export default function RoutingRegisterModal({
         process_time: "",
         note: "",
       });
+      setFieldErrors({});
+      setError("");
     } catch (err) {
       setError("등록 중 오류가 발생했습니다.");
       console.error(err);
@@ -96,21 +144,6 @@ export default function RoutingRegisterModal({
         }}
       >
         <DialogTitle sx={{ p: 0 }}>라우팅 등록</DialogTitle>
-        <IconButton
-          onClick={() => {
-            onClose();
-            setForm({
-              process_code: "",
-              process_name: "",
-              process_time: "",
-              note: "",
-            });
-            setError("");
-          }}
-          size="small"
-        >
-          <CloseIcon />
-        </IconButton>
       </Box>
 
       <DialogContent>
@@ -121,7 +154,8 @@ export default function RoutingRegisterModal({
               value={form.process_code}
               onChange={(e) => handleChange("process_code", e.target.value)}
               required
-              error={!!error} // 빨간 테두리 표시
+              error={!!fieldErrors.process_code || !!error}
+              helperText={fieldErrors.process_code || error}
             />
             {/* 공정코드 중복 에러 메시지 바로 아래 표시 */}
             {error && (
@@ -135,6 +169,8 @@ export default function RoutingRegisterModal({
             value={form.process_name}
             onChange={(e) => handleChange("process_name", e.target.value)}
             required
+            error={!!fieldErrors.process_name}
+            helperText={fieldErrors.process_name}
           />
           <TextField
             label="공정 시간(분)"

@@ -286,7 +286,19 @@ export default function RawInViewPage() {
               ) : (
                 paginatedData.map((row) => {
                   const materialId = row.material_item_id;
+                  if (materialId === undefined) return null;
 
+                  // 기본값 세팅
+                  if (!inboundInput[materialId]) {
+                    setInboundInput((prev) => ({
+                      ...prev,
+                      [materialId]: {
+                        qty: 0,
+                        inboundDate: dayjs().format("YYYY-MM-DD"),
+                        manufacteDate: dayjs().format("YYYY-MM-DD"),
+                      },
+                    }));
+                  }
                   if (materialId === undefined) {
                     return (
                       <TableRow key={row.item_code}>
