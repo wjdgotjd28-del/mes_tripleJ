@@ -176,6 +176,10 @@ export default function OrderOutRegisterModal({
       inboundDate: selected.inboundDate,
       color: "",
     });
+    
+    // ✅ 출고 등록 성공 알림 추가
+    alert("출고 정보가 등록되었습니다.");
+    
     onClose();
   };
 
@@ -361,7 +365,7 @@ export default function OrderOutRegisterModal({
             sx={{ width: 200 }}
           />
 
-          {/* ✅ 출고 수량 필드: 선택 유무에 따라 스타일 분기 (배경색 없음) */}
+          {/* ✅ 출고 수량 필드: 선택 유무에 따라 스타일 분기 */}
           {selected ? (
             // 항목 선택됨: 활성 입력 필드
             <TextField
@@ -384,17 +388,17 @@ export default function OrderOutRegisterModal({
               }}
             />
           ) : (
-            // 항목 선택 안됨: Read-only 필드처럼 '-' 표시 (배경색 없음)
+            // 항목 선택 안됨: Read-only 필드처럼 회색 배경 적용
             <TextField
               label="출고수량"
               value="-"
               size="small"
-              InputProps={ReadOnlyInputProps} // ⬅️ 회색 배경 스타일 적용됨
+              InputProps={ReadOnlyInputProps}
               sx={{ width: 200 }}
             />
           )}
 
-          {/* ✅ 출고일자 필드: 선택 유무에 따라 스타일 분기 (배경색 없음) */}
+          {/* ✅ 출고일자 필드: 선택 유무에 따라 스타일 분기 */}
           {selected ? (
             // 항목 선택됨: 활성 입력 필드
             <TextField
@@ -408,12 +412,12 @@ export default function OrderOutRegisterModal({
               sx={{ width: 200 }}
             />
           ) : (
-            // 항목 선택 안됨: Read-only 필드처럼 '-' 표시 (배경색 없음)
+            // 항목 선택 안됨: Read-only 필드처럼 회색 배경 적용
             <TextField
               label="출고일자"
               value="-"
               size="small"
-              InputProps={ReadOnlyInputProps} // ⬅️ 회색 배경 스타일 적용됨
+              InputProps={ReadOnlyInputProps}
               sx={{ width: 200 }}
             />
           )}
