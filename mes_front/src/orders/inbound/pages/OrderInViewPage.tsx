@@ -318,7 +318,17 @@ export default function OrderInViewPage() {
                 // 품목 데이터 반복 렌더링
                 sortedItems.map((row, idx) => {
                   const id = row.order_item_id.toString();
-                  const values = inputValues[id] || { qty: "", date: "" };
+                  const values = inputValues[id] || {
+                    qty: "",
+                    date: dayjs().format("YYYY-MM-DD"),
+                  };
+
+                  if (!inputValues[id]) {
+                    setInputValues((prev) => ({
+                      ...prev,
+                      [id]: { ...values },
+                    }));
+                  }
 
                   return (
                     <TableRow key={id}>
@@ -367,10 +377,35 @@ export default function OrderInViewPage() {
                       <TableCell align="center">
                         <TextField
                           size="small"
-                          type="number"
+                          type="text" // type="number" 대신 text 사용
                           value={values.qty}
-                          onChange={(e) => handleQtyChange(id, e.target.value)}
-                          inputProps={{ min: 1 }}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            // 숫자만 허용
+                            if (/^\d*$/.test(val)) {
+                              handleQtyChange(id, val);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            // 숫자, 제어키만 허용
+                            if (
+                              !(
+                                (e.key >= "0" && e.key <= "9") ||
+                                e.key === "Backspace" ||
+                                e.key === "Delete" ||
+                                e.key === "ArrowLeft" ||
+                                e.key === "ArrowRight" ||
+                                e.key === "Tab"
+                              )
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                          inputProps={{
+                            inputMode: "numeric",
+                            pattern: "[0-9]*",
+                            min: 1,
+                          }}
                           sx={{ width: 70 }}
                         />
                         {values.qty !== "" && Number(values.qty) <= 0 && (

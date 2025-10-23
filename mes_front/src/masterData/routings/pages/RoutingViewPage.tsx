@@ -130,7 +130,9 @@ export default function RoutingViewPage() {
             ) : (
               paginatedData.map((row, idx) => (
                 <TableRow key={row.routing_id}>
-                  <TableCell align="center">{idx + 1}</TableCell>
+                  <TableCell align="center">
+                    {(currentPage - 1) * 20 + idx + 1}
+                  </TableCell>
                   <TableCell align="center">{row.process_code}</TableCell>
                   <TableCell align="center">{row.process_name}</TableCell>
                   <TableCell align="center">{row.process_time}</TableCell>
