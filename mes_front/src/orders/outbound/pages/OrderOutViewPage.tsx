@@ -121,7 +121,7 @@ export default function OrderOutViewPage() {
     }
 
     if (parsedQty > editableRowData.maxUpdatableQty) {
-      setQtyError(`수정 가능 수량을 초과할 수 없습니다. (최대: ${editableRowData.maxUpdatableQty})`);
+      setQtyError(`수정 가능 수량 최대 (${editableRowData.maxUpdatableQty})`);
       alert(`수정 가능 수량을 초과할 수 없습니다. (최대: ${editableRowData.maxUpdatableQty})`);
       return;
     }
@@ -172,7 +172,7 @@ export default function OrderOutViewPage() {
           } else if (numericValue < 1) {
             setQtyError("출고수량은 1 이상이어야 합니다.");
           } else if (numericValue > editableRowData.maxUpdatableQty) {
-            setQtyError(`수정 가능 수량을 초과할 수 없습니다. (최대: ${editableRowData.maxUpdatableQty})`);
+            setQtyError(`수정 가능 수량 최대 (${editableRowData.maxUpdatableQty})`);
           }
           else {
             setQtyError(null);
