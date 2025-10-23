@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -88,6 +89,7 @@ public class OrderOutboundService {
                 .category(dto.getCategory())
                 .outboundNo(outboundNo)
                 .outboundDate(LocalDate.now())
+                .remainingQuantity(availableQty - dto.getQty()) // Calculate and set remainingQuantity
                 .build();
 
         OrderOutbound saved = orderOutboundRepository.save(orderOutbound);
@@ -104,6 +106,7 @@ public class OrderOutboundService {
                 .outboundDate(saved.getOutboundDate())
                 .inboundDate(orderInbound.getInboundDate())
                 .color(saved.getOrderInbound().getOrderItem().getColor())
+                .remainingQuantity(saved.getRemainingQuantity()) // Include in DTO
                 .build();
     }
 
@@ -127,31 +130,76 @@ public class OrderOutboundService {
 
     @Transactional(readOnly = true)
     public List<OrderOutboundDto> findAll() {
-        return orderOutboundRepository.findAll().stream()
-                .map(o -> OrderOutboundDto.builder()
-                        .id(o.getId())
-                        .orderInboundId(o.getOrderInbound().getOrderInboundId())
-                        .customerName(o.getCustomerName())
-                        .itemName(o.getItemName())
-                        .itemCode(o.getItemCode())
-                        .qty(o.getQty())
-                        .category(o.getCategory())
-                        .outboundNo(o.getOutboundNo())
-                        .outboundDate(o.getOutboundDate())
-                        .inboundDate(o.getOrderInbound().getInboundDate())
-                        .color(o.getOrderInbound().getOrderItem().getColor())
-                        .build())
+        List<OrderOutbound> allOutbounds = orderOutboundRepository.findAll();
+
+        // Group outbounds by their associated OrderInbound for efficient calculation
+        Map<Long, Long> inboundIdToTotalOutboundQty = allOutbounds.stream()
+                .collect(Collectors.groupingBy(
+                        outbound -> outbound.getOrderInbound().getOrderInboundId(),
+                        Collectors.summingLong(OrderOutbound::getQty)
+                ));
+
+        return allOutbounds.stream()
+                .map(o -> {
+                    OrderInbound orderInbound = o.getOrderInbound();
+                    Long totalOutboundForThisInbound = inboundIdToTotalOutboundQty.getOrDefault(orderInbound.getOrderInboundId(), 0L);
+                    Long dynamicRemainingQuantity = orderInbound.getQty() - totalOutboundForThisInbound;
+
+                    return OrderOutboundDto.builder()
+                            .id(o.getId())
+                            .orderInboundId(orderInbound.getOrderInboundId())
+                            .customerName(o.getCustomerName())
+                            .itemName(o.getItemName())
+                            .itemCode(o.getItemCode())
+                            .qty(o.getQty())
+                            .category(o.getCategory())
+                            .outboundNo(o.getOutboundNo())
+                            .outboundDate(o.getOutboundDate())
+                            .inboundDate(orderInbound.getInboundDate())
+                            .color(o.getOrderInbound().getOrderItem().getColor())
+                            .remainingQuantity(dynamicRemainingQuantity) // Dynamically calculated
+                            .maxUpdatableQty(orderInbound.getQty() - (inboundIdToTotalOutboundQty.getOrDefault(orderInbound.getOrderInboundId(), 0L) - o.getQty())) // Calculate maxUpdatableQty
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
 
     @Transactional
     public OrderOutboundDto updateOrderOutbound(OrderOutboundDto orderOutboundDto) {
-        OrderOutbound orderOutbound = orderOutboundRepository.findById(orderOutboundDto.getId())
+        OrderOutbound existingOrderOutbound = orderOutboundRepository.findById(orderOutboundDto.getId())
                 .orElseThrow(() -> new EntityNotFoundException("OrderOutbound not found with id: " + orderOutboundDto.getId()));
-        orderOutbound.updateOrderOutbound(orderOutboundDto);
-        return orderOutboundDto;
 
+        OrderInbound orderInbound = orderInboundRepository.findById(orderOutboundDto.getOrderInboundId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 입고 정보를 찾을 수 없습니다. id=" + orderOutboundDto.getOrderInboundId()));
+
+        // Calculate total outbound quantity for this orderInbound, excluding the current outbound record being updated
+        List<OrderOutbound> otherOutbounds = orderOutboundRepository.findByOrderInbound_OrderInboundId(orderOutboundDto.getOrderInboundId())
+                .stream()
+                .filter(oo -> !oo.getId().equals(existingOrderOutbound.getId()))
+                .collect(Collectors.toList());
+
+        Long totalOtherOutboundQty = otherOutbounds.stream()
+                .mapToLong(OrderOutbound::getQty)
+                .sum();
+
+        Long newTotalOutboundQty = totalOtherOutboundQty + orderOutboundDto.getQty();
+
+        if (orderOutboundDto.getQty() <= 0) {
+            throw new IllegalArgumentException("출고 수량은 0보다 커야 합니다.");
+        }
+        if (newTotalOutboundQty > orderInbound.getQty()) {
+            throw new IllegalArgumentException("총 출고 수량이 입고 수량(" + orderInbound.getQty() + ")을 초과할 수 없습니다.");
+        }
+
+        existingOrderOutbound.updateOrderOutbound(orderOutboundDto);
+        existingOrderOutbound.setRemainingQuantity(orderInbound.getQty() - newTotalOutboundQty); // Update remainingQuantity
+
+        // Calculate maxUpdatableQty for the returned DTO
+        Long maxUpdatableQty = orderInbound.getQty() - totalOtherOutboundQty;
+        orderOutboundDto.setMaxUpdatableQty(maxUpdatableQty);
+
+        return orderOutboundDto;
     }
 
     @Transactional
