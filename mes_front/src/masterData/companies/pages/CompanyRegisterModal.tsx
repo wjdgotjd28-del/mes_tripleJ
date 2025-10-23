@@ -39,28 +39,28 @@ const initialCompanyState: Omit<Company, "companyId" | "status"> = {
 export default function CompanyRegisterModal({ onAdd }: Props) {
   const [open, setOpen] = React.useState(false);
   const [company, setCompany] = React.useState<Omit<Company, "companyId" | "status">>(initialCompanyState);
-  const [confirmOpen, setConfirmOpen] = React.useState(false); // State for confirmation dialog
+  const [confirmOpen, setConfirmOpen] = React.useState(false); 
 
   const handleOpen = () => setOpen(true);
 
   const handleClose = () => {
     const isChanged = JSON.stringify(company) !== JSON.stringify(initialCompanyState);
     if (isChanged) {
-      setConfirmOpen(true); // Open confirmation dialog if changes exist
+      setConfirmOpen(true); 
     } else {
       setOpen(false);
-      setCompany(initialCompanyState); // Reset and close if no changes
+      setCompany(initialCompanyState); 
     }
   };
 
   const confirmCancel = () => {
-    setOpen(false); // Close the main modal
-    setCompany(initialCompanyState); // Reset form data
-    setConfirmOpen(false); // Close confirmation dialog
+    setOpen(false); 
+    setCompany(initialCompanyState);
+    setConfirmOpen(false);
   };
 
   const cancelDialogClose = () => {
-    setConfirmOpen(false); // Just close the confirmation dialog
+    setConfirmOpen(false); 
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,8 +76,8 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
     try {
       const newCompany = await addCompany(company);
       onAdd(newCompany);
-      setOpen(false); // Close the main modal
-      setCompany(initialCompanyState); // Reset after successful submission
+      setOpen(false); 
+      setCompany(initialCompanyState); 
     } catch (error) {
       console.error("회사 등록 실패:", error);
     }
