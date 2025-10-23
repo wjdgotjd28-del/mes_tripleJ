@@ -93,7 +93,7 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
     }
 
     // Validate managerPhone format
-    const phoneRegex = /^\\d{3}-\\d{4}-\\d{4}$/;
+    const phoneRegex = /^\d{3}-\d{4}-\d{4}$/;
     if (company.managerPhone && !phoneRegex.test(company.managerPhone)) {
       alert("담당자 전화번호를 010-0000-0000 형식으로 입력해주세요.");
       return;
