@@ -17,6 +17,7 @@ import {
   IconButton,
   // MenuItem, FormControl, InputLabel, Select, type SelectChangeEvent, Chip,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { FileDownload as FileDownloadIcon } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -63,6 +64,8 @@ export default function RawInViewPage() {
     const filteredItems = filterRawItems(rawItems, appliedSearchValues);
     setDisplayedItems(filteredItems);
   }, [rawItems, appliedSearchValues]);
+
+  const navigate = useNavigate();
 
   const fetchRawItems = async () => {
     try {
@@ -160,20 +163,17 @@ export default function RawInViewPage() {
       manufacteDate: inboundData.manufacteDate,
       qty: inboundData.qty,
       inboundDate: inboundData.inboundDate,
-      inboundNo: "", // Will be assigned by backend
+      inboundNo: "",
       totalQty: rawItem.spec_qty * inboundData.qty,
     };
 
     try {
       await addMaterialInbound(newMaterialInbound);
       alert("입고 등록이 완료되었습니다.");
-      // Clear input fields for the registered item
-      setInboundInput((prev) => {
-        const newState = { ...prev };
-        delete newState[rawItem.material_item_id!];
-        return newState;
-      });
-      fetchRawItems(); // Refresh the list
+
+      // ✅ 수동 이동 플래그 설정 후 페이지 이동
+      sessionStorage.setItem("manualNav", "true");
+      navigate("/raw-materials/inbound/history");
     } catch (err) {
       console.error("입고 등록 실패:", err);
       alert("입고 등록 중 오류가 발생했습니다.");

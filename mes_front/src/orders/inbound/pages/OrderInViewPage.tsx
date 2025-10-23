@@ -21,7 +21,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
-
+import { useNavigate } from "react-router-dom";
 import {
   ArrowDownward,
   ArrowUpward,
@@ -77,6 +77,8 @@ export default function OrderInViewPage() {
   useEffect(() => {
     void fetchOrderItems();
   }, []);
+
+  const navigate = useNavigate();
 
   // 서버에서 거래 중인 품목 데이터 불러오기
   const fetchOrderItems = async (): Promise<void> => {
@@ -402,9 +404,8 @@ export default function OrderInViewPage() {
                             !values.date // 입고일자 없으면 비활성화
                           }
                           onClick={async () => {
-                            // 등록 payload 구성
                             const payload: OrderInbound = {
-                              id: 0, // 필수값, 서버에서 실제 id 생성
+                              id: 0,
                               order_item_id: row.order_item_id,
                               category: row.category,
                               customer_name: row.company_name,
@@ -421,16 +422,13 @@ export default function OrderInViewPage() {
                               await registerInbound(payload);
                               console.log("입고등록 완료:", payload);
 
-                              // ✅ 입력값 초기화
-                              setInputValues((prev) => ({
-                                ...prev,
-                                [id]: { qty: "", date: "" },
-                              }));
-
-                              // ✅ 최신 데이터 다시 불러오기
-                              await fetchOrderItems();
-
                               alert("입고가 등록되었습니다.");
+
+                              // ✅ 먼저 수동 네비게이션 플래그 설정
+                              sessionStorage.setItem("manualNav", "true");
+
+                              // ✅ 그 다음 페이지 이동
+                              navigate("/orders/inbound/history");
                             } catch (err) {
                               console.error("입고등록 실패:", err);
                               alert("입고 등록 중 오류가 발생했습니다.");

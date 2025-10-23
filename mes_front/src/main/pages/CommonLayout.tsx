@@ -209,14 +209,18 @@ export default function CommonLayout() {
 
   // 메뉴 상태 → URL 이동
   useEffect(() => {
-    if (isInitialSync) return; // 초기 렌더 시 navigate 비활성화
-
-    const targetRoute = routeMap[currentPath];
-    // 경로가 존재하고, 현재 경로와 다를 때만 이동
-    if (targetRoute && location.pathname !== targetRoute) {
-      navigate(targetRoute, { replace: true });
+    const isManual = sessionStorage.getItem("manualNav") === "true";
+    if (isManual) {
+      sessionStorage.removeItem("manualNav");
+      return; // ✅ 수동 이동 직후에는 자동 navigate 비활성화
     }
-  }, [currentPath, navigate, location.pathname, isInitialSync]);
+
+    if (isInitialSync) return;
+    const targetRoute = routeMap[currentPath];
+    if (!targetRoute || location.pathname === targetRoute) return;
+
+    navigate(targetRoute, { replace: true });
+  }, [currentPath, location.pathname, navigate, isInitialSync]);
 
   // 2계층 메뉴 클릭 핸들러
   const handleSubClick = (
