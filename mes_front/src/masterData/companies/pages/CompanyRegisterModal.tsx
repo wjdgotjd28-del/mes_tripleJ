@@ -23,7 +23,7 @@ const style = {
   flexDirection: "column",
 };
 
-const initialCompanyState: Omit<Company, "companyId" | "status"> = {
+const initialCompanyState: Omit<Company, "companyId" | "status"> = { 
   type: "CUSTOMER",
   bizRegNo: "",
   companyName: "",
@@ -154,6 +154,8 @@ export default function CompanyRegisterModal({ onAdd }: Props) {
       setOpen(false);
       setCompany(initialCompanyState);
       setValidationErrors({}); // 성공 시 에러 상태 초기화
+      // ✅ 등록 성공 시 alert
+      alert("업체 정보가 등록되었습니다."); 
     } catch (error) {
       console.error("회사 등록 실패:", error);
       alert("회사 등록에 실패했습니다.");
