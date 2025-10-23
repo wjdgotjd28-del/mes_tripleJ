@@ -83,6 +83,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+
     const newImages: OrderItemImage[] = Array.from(files).map(file => {
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 15);
@@ -90,8 +91,31 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
       const savedFileName = `${timestamp}_${randomStr}.${ext}`;
       return { file, img_url: URL.createObjectURL(file), img_ori_name: file.name, img_name: savedFileName };
     });
-    setNewData(prev => ({ ...prev, image: [...(prev.image ?? []), ...newImages] }));
+
+    setNewData(prev => {
+      const updatedImages = [...(prev.image ?? []), ...newImages];
+      // 첫 번째 이미지를 대표 이미지로 지정
+      if (!updatedImages.some(img => img.isMain)) {
+        updatedImages[0].isMain = true;
+      }
+      return { ...prev, image: updatedImages };
+    });
+
     e.target.value = "";
+  };
+  // 대표 이미지 선택 핸들러
+  const handleSetMainImage = (index: number) => {
+    setNewData(prev => {
+      const updatedImages = [...(prev.image ?? [])];
+      // 모든 이미지 isMain false 처리
+      updatedImages.forEach(img => img.isMain = false);
+      // 선택한 이미지 isMain true
+      updatedImages[index].isMain = true;
+      // 선택한 이미지를 배열 맨 앞으로 이동
+      const [mainImage] = updatedImages.splice(index, 1);
+      updatedImages.unshift(mainImage);
+      return { ...prev, image: updatedImages };
+    });
   };
 
   const handleImageDelete = (index: number) => {
@@ -469,26 +493,73 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
               이미지 선택 (다중 선택 가능)
               <input type="file" accept="image/*" multiple hidden onChange={handleImageUpload} />
             </Button>
-            {newData.image && newData.image.length > 0 && (
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 2 }}>
-                {newData.image.map((img, idx) => (
-                  <Box key={idx} sx={{ position: "relative", width: 140, height: 140, border: "1px solid #ddd", borderRadius: 1, overflow: "hidden" }}>
-                    <img src={img.img_url} alt={img.img_ori_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    <IconButton size="small" sx={{ position: "absolute", top: 4, right: 4, backgroundColor: "rgba(255,255,255,0.8)" }} onClick={() => handleImageDelete(idx)}>
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                    <Box sx={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "rgba(0,0,0,0.7)", color: "white", p: 0.5 }}>
-                      <Typography variant="caption" sx={{ fontSize: "0.65rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        원본: {img.img_ori_name}
-                      </Typography>
-                      <Typography variant="caption" sx={{ fontSize: "0.6rem", color: "#aaa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        저장명: {img.img_name}
-                      </Typography>
-                    </Box>
+
+            {/* 이미지 박스: 가로 정렬 */}
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 2 }}>
+              {newData.image?.map((img, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    position: "relative",
+                    width: 140,
+                    height: 140,
+                    border: "1px solid #ddd",
+                    borderRadius: 1,
+                    overflow: "hidden"
+                  }}
+                >
+                  <img
+                    src={img.img_url}
+                    alt={img.img_ori_name}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      border: img.isMain ? "2px solid #1976d2" : "1px solid #ddd"
+                    }}
+                  />
+                  <IconButton
+                    size="small"
+                    sx={{ position: "absolute", top: 4, right: 4, backgroundColor: "rgba(255,255,255,0.8)" }}
+                    onClick={() => handleImageDelete(idx)}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+
+                  {/* 대표 이미지 선택 */}
+                  <Checkbox
+                    checked={img.isMain ?? false}
+                    onChange={() => handleSetMainImage(idx)}
+                    sx={{ position: "absolute", top: 4, left: 4, backgroundColor: "rgba(255,255,255,0.8)" }}
+                  />
+
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      backgroundColor: "rgba(0,0,0,0.7)",
+                      color: "white",
+                      p: 0.5
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      sx={{ fontSize: "0.65rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                    >
+                      원본: {img.img_ori_name}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ fontSize: "0.6rem", color: "#aaa", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                    >
+                      저장명: {img.img_name}
+                    </Typography>
                   </Box>
-                ))}
-              </Box>
-            )}
+                </Box>
+              ))}
+            </Box>
           </Box>
 
           {/* 비고 */}
