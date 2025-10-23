@@ -70,6 +70,10 @@ export default function RawInHistoryPage() {
   const [editableRowData, setEditableRowData] = useState<MaterialInbound | null>(
     null
   );
+  const [specQtyInputString, setSpecQtyInputString] = useState<string>("");
+  const [qtyInputString, setQtyInputString] = useState<string>("");
+  const [specQtyError, setSpecQtyError] = useState<string | null>(null);
+  const [qtyError, setQtyError] = useState<string | null>(null);
 
   const [searchValues, setSearchValues] = useState({
     supplierName: "",
@@ -137,15 +141,32 @@ export default function RawInHistoryPage() {
   const handleUpdate = (row: MaterialInbound) => {
     setEditRowId(row.id);
     setEditableRowData(row);
+    setSpecQtyInputString(row.specQty.toString());
+    setQtyInputString(row.qty.toString());
   };
 
   const handleSave = async () => {
     if (!editableRowData) return;
+
+    // Final validation for specQty and qty
+    if (editableRowData.specQty < 1) {
+      setSpecQtyError("규격 수량은 1 이상의 정수여야 합니다.");
+      alert('규격 수량은 1 이상의 정수여야 합니다.');
+      return;
+    }
+    if (editableRowData.qty < 1) {
+      setQtyError("입고 수량은 1 이상의 정수여야 합니다.");
+      alert('입고 수량은 1 이상의 정수여야 합니다.');
+      return;
+    }
+
     try {
       console.log("Saving data:", editableRowData);
       await updateMaterialInbound(editableRowData);
       setEditRowId(null);
       setEditableRowData(null);
+      setSpecQtyInputString(""); // Clear after saving
+      setQtyInputString(""); // Clear after saving
       fetchMaterialInboundHistory(); // To get fresh data from server
     } catch (error) {
       console.error("Error saving material inbound data:", error);
@@ -167,30 +188,61 @@ export default function RawInHistoryPage() {
   const handleCancel = () => {
     setEditRowId(null);
     setEditableRowData(null);
+    setSpecQtyInputString("");
+    setQtyInputString("");
   };
 
   const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (!editableRowData) return;
     const { name, value } = e.target;
 
-    let updatedEditableRowData = { ...editableRowData, [name]: value };
+    let newSpecQtyInputString = specQtyInputString;
+    let newQtyInputString = qtyInputString;
+    let newSpecQtyError: string | null = null;
+    let newQtyError: string | null = null;
 
-    // Update specQty or qty as numbers
-    if (name === "specQty" || name === "qty") {
-      const numericValue = parseFloat(value);
-      if (!isNaN(numericValue)) {
-        updatedEditableRowData = { ...updatedEditableRowData, [name]: numericValue };
+    let updatedEditableRowData = { ...editableRowData };
+
+    if (name === "specQty") {
+      newSpecQtyInputString = value;
+      const numericValue = Number(value);
+      if (value === "" || isNaN(numericValue) || numericValue < 1) {
+        newSpecQtyError = "규격 수량은 1 이상의 정수여야 합니다.";
+        updatedEditableRowData.specQty = 0; // Set to 0 for invalid input
+      } else {
+        updatedEditableRowData.specQty = numericValue;
       }
+      setSpecQtyInputString(newSpecQtyInputString);
+      setSpecQtyError(newSpecQtyError);
+    } else if (name === "qty") {
+      newQtyInputString = value;
+      const numericValue = Number(value);
+      if (value === "" || isNaN(numericValue) || numericValue < 1) {
+        newQtyError = "입고 수량은 1 이상의 정수여야 합니다.";
+        updatedEditableRowData.qty = 0; // Set to 0 for invalid input
+      } else {
+        updatedEditableRowData.qty = numericValue;
+      }
+      setQtyInputString(newQtyInputString);
+      setQtyError(newQtyError);
+    } else {
+      // For other fields, update updatedEditableRowData directly
+      updatedEditableRowData = { ...editableRowData, [name]: value };
     }
 
-    // Recalculate totalQty if specQty, qty, or specUnit changes
-    const currentSpecQty = (name === "specQty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.specQty || 0);
-    const currentQty = (name === "qty" && !isNaN(parseFloat(value))) ? parseFloat(value) : (editableRowData.qty || 0);
+    // Recalculate totalQty
+    const currentSpecQtyForCalc = updatedEditableRowData.specQty;
+    const currentQtyForCalc = updatedEditableRowData.qty;
 
+    if (!isNaN(currentSpecQtyForCalc) && !isNaN(currentQtyForCalc) && currentSpecQtyForCalc >= 0 && currentQtyForCalc >= 0) {
+      updatedEditableRowData.totalQty = currentSpecQtyForCalc * currentQtyForCalc;
+    } else {
+      updatedEditableRowData.totalQty = 0; // Set to 0 if calculation is invalid
+    }
 
-    if (name === "specQty" || name === "qty" || name === "specUnit") {
-      const calculatedTotalQty = currentSpecQty * currentQty;
-      updatedEditableRowData = { ...updatedEditableRowData, totalQty: calculatedTotalQty };
+    // Update specUnit if it was changed
+    if (name === "specUnit") {
+        updatedEditableRowData.specUnit = value;
     }
 
     setEditableRowData(updatedEditableRowData);
@@ -339,10 +391,12 @@ export default function RawInHistoryPage() {
                             <TextField
                               size="small"
                               name="specQty"
-                              type="number"
-                              value={editableRowData?.specQty || ""}
+                              type="text"
+                              value={specQtyInputString}
                               onChange={handleEditChange}
                               sx={{ width: 80, mr: 1 }}
+                              error={!!specQtyError}
+                              helperText={specQtyError}
                             />
                             <TextField
                               size="small"
@@ -361,10 +415,12 @@ export default function RawInHistoryPage() {
                           <TextField
                             size="small"
                             name="qty"
-                            type="number"
-                            value={editableRowData?.qty || ""}
+                            type="text"
+                            value={qtyInputString}
                             onChange={handleEditChange}
                             sx={{ width: 80 }}
+                            error={!!qtyError}
+                            helperText={qtyError}
                           />
                         ) : (
                           row.qty

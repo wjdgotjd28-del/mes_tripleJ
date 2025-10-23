@@ -54,6 +54,8 @@ export default function RawInViewPage() {
   const [inboundInput, setInboundInput] = useState<
     Record<number, { manufacteDate: string; qty: number; inboundDate: string }>
   >({});
+  const [qtyInputStrings, setQtyInputStrings] = useState<Record<number, string>>({});
+  const [qtyErrors, setQtyErrors] = useState<Record<number, string | null>>({});
 
   useEffect(() => {
     fetchRawItems();
@@ -122,30 +124,76 @@ export default function RawInViewPage() {
   const handleInboundInputChange = (
     materialItemId: number,
     field: string,
-    value: string | number
+    value: string
   ) => {
-    if (field === 'qty') {
-      const numericValue = Number(value);
-      if (isNaN(numericValue) || numericValue < 0 || numericValue % 1 !== 0) {
-        return;
+    setInboundInput((prev) => {
+      const currentItemInput = prev[materialItemId] || {
+        manufacteDate: "",
+        qty: 0,
+        inboundDate: "",
+      };
+      let newQty = currentItemInput.qty;
+      let newQtyError: string | null = null;
+
+      if (field === 'qty') {
+        setQtyInputStrings((prevStrings) => ({
+          ...prevStrings,
+          [materialItemId]: value,
+        }));
+
+        if (value === "") {
+          newQty = 0; // Set to 0 when cleared
+          newQtyError = null;
+        } else {
+          const numericValue = Number(value);
+          if (isNaN(numericValue) || numericValue % 1 !== 0) {
+            newQty = 0; // Set to 0 for invalid input
+            newQtyError = "입고 수량은 1 이상의 정수여야 합니다.";
+          } else if (numericValue < 1) {
+            newQty = numericValue;
+            newQtyError = "입고 수량은 1 이상의 정수여야 합니다.";
+          } else {
+            newQty = numericValue;
+            newQtyError = null;
+          }
+        }
+        setQtyErrors((prevErrors) => ({
+          ...prevErrors,
+          [materialItemId]: newQtyError,
+        }));
+      } else {
+        // For other fields (manufacteDate, inboundDate)
+        setInboundInput((prev) => ({
+          ...prev,
+          [materialItemId]: {
+            ...currentItemInput,
+            [field]: value,
+          },
+        }));
+        return prev; // Return previous state as it's already updated
       }
-    }
-    setInboundInput((prev) => ({
-      ...prev,
-      [materialItemId]: {
-        ...(prev[materialItemId] || {
-          manufacteDate: "",
-          qty: 0,
-          inboundDate: "",
-        }),
-        [field]: value,
-      },
-    }));
+
+      // Update qty in inboundInput
+      return {
+        ...prev,
+        [materialItemId]: {
+          ...currentItemInput,
+          qty: newQty,
+        },
+      };
+    });
   };
 
   const handleRegisterInbound = async (rawItem: RawItems) => {
     console.log("handleRegisterInbound called!");
-    const inboundData = inboundInput[rawItem.material_item_id!];
+    const materialId = rawItem.material_item_id!;
+    const inboundData = inboundInput[materialId];
+
+    // Check for qty errors
+    if (qtyErrors[materialId]) {
+      alert(qtyErrors[materialId]);
+      return;
+    }
 
     if (
       !inboundData ||
@@ -157,8 +205,14 @@ export default function RawInViewPage() {
       return;
     }
 
+    // Final check for qty value (should be >= 1)
+    if (inboundData.qty < 1) {
+      alert("입고 수량은 1 이상의 정수여야 합니다.");
+      return;
+    }
+
     const newMaterialInbound: Omit<MaterialInbound, "id"> = {
-      materialItemId: rawItem.material_item_id!,
+      materialItemId: materialId,
       supplierName: rawItem.company_name,
       itemName: rawItem.item_name,
       itemCode: rawItem.item_code,
@@ -180,7 +234,17 @@ export default function RawInViewPage() {
       // Clear input fields for the registered item
       setInboundInput((prev) => {
         const newState = { ...prev };
-        delete newState[rawItem.material_item_id!];
+        delete newState[materialId];
+        return newState;
+      });
+      setQtyInputStrings((prevStrings) => {
+        const newState = { ...prevStrings };
+        delete newState[materialId];
+        return newState;
+      });
+      setQtyErrors((prevErrors) => {
+        const newState = { ...prevErrors };
+        delete newState[materialId];
         return newState;
       });
       fetchRawItems(); // Refresh the list
@@ -355,11 +419,13 @@ export default function RawInViewPage() {
                       <TableCell align="center">{row.manufacturer}</TableCell>
                       <TableCell align="center">
                         <TextField
-                          type="number"
+                          type="text"
                           size="small"
-                          value={inboundInput[materialId]?.qty || ""}
-                          onChange={(e) => handleInboundInputChange(materialId, "qty", Number(e.target.value))}
+                          value={qtyInputStrings[materialId] || ""}
+                          onChange={(e) => handleInboundInputChange(materialId, "qty", e.target.value)}
                           sx={{ width: 80 }}
+                          error={!!qtyErrors[materialId]}
+                          helperText={qtyErrors[materialId]}
                         />
                       </TableCell>
                       <TableCell align="center">
