@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "order_item_routing")
 @Getter
@@ -56,4 +59,8 @@ public class OrderItemRouting {
     public String getNote() {
         return routing != null ? routing.getNote() : null;
     }
+
+    // ProcessTracking과 1:N 관계
+    @OneToMany(mappedBy = "orderItemRouting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProcessTracking> processTrackings = new ArrayList<>();
 }

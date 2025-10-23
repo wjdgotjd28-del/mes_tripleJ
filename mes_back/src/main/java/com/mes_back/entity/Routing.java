@@ -33,6 +33,10 @@ public class Routing {
     @Column(length = 255)
     private String note;
 
+    // OrderItemRouting과 1:N 관계 매핑
+    @OneToMany(mappedBy = "routing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItemRouting> orderItemRoutings = new ArrayList<>();
+
 }
 
 
