@@ -45,7 +45,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
       setSelectedRouting([]);
       setNewData({
         company_name: "", item_name: "", item_code: "", category: "GENERAL",
-        paint_type: "LIQUID", unit_price: 0, color: "", note: "",
+        paint_type: "LIQUID", unit_price: "", color: "", note: "",
         use_yn: "Y", status: "Y", image: [], routing: []
       });
       setRoutingList([]);
@@ -166,7 +166,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
       newData.item_code !== "" ||
       newData.category !== "GENERAL" ||
       newData.paint_type !== "LIQUID" ||
-      newData.unit_price !== 0 ||
+      newData.unit_price !== "" ||
       newData.color !== "" ||
       newData.note !== "" ||
       newData.use_yn !== "Y" ||
@@ -306,8 +306,8 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
                 <Typography color="text.secondary" alignSelf="center">단가 *</Typography>
                 <TextField
                   type="number"
-                  value={newData.unit_price ?? 0}
-                  onChange={(e) => handleChange("unit_price", parseInt(e.target.value) || 0)}
+                  value={newData.unit_price}
+                  onChange={(e) => handleChange("unit_price", parseInt(e.target.value))}
                   size="small"
                   fullWidth
                   required
