@@ -30,8 +30,9 @@ export default function OrderDetailModal({
   const [isEditing, setIsEditing] = useState(false);
   const [selectedRouting, setSelectedRouting] = useState<RoutingFormDataWithProcessNo[]>([]);
   const [allRoutingList, setAllRoutingList] = useState<RoutingFormData[]>(routingList);
-  const [backupData, setBackupData] = useState<OrderItems | null>(data); // 변경 전 데이터 백업
-  const [confirmOpen, setConfirmOpen] = useState(false); // 취소 확인 다이얼로그
+  const [backupData, setBackupData] = useState<OrderItems | null>(data);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deletedImageIds, setDeletedImageIds] = useState<number[]>([]); // 삭제 예정 이미지 ID 목록
 
   useEffect(() => {
     if (!data) return;
@@ -70,13 +71,14 @@ export default function OrderDetailModal({
   const fetchDetail = async (id: number): Promise<void> => {
     const res: OrderItems = await getOrderItemsdtl(id);
 
-    // 🔹 백엔드 응답의 snake_case → camelCase 변환
+    // 🔹 백엔드 응답의 snake_case → camelCase 변환 + reg_yn을 isMain으로 매핑
     const convertedImages: OrderItemImage[] = (res.image ?? []).map(img => ({
       order_item_img_id: img.order_item_img_id,
       order_item_id: img.order_item_id,
       img_url: img.img_url,
       img_ori_name: img.img_ori_name,
-      img_name: img.img_name
+      img_name: img.img_name,
+      reg_yn: img.reg_yn === "Y" // reg_yn을 boolean으로 변환
     }));
 
     const convertedRouting: RoutingFormDataWithProcessNo[] = (res.routing ?? []).map((r, i) => ({
@@ -89,6 +91,11 @@ export default function OrderDetailModal({
     }));
 
     setEditData({
+      ...res,
+      image: convertedImages
+    });
+
+    setBackupData({
       ...res,
       image: convertedImages
     });
@@ -107,42 +114,32 @@ export default function OrderDetailModal({
 
   const handleImageAdd = (e: ChangeEvent<HTMLInputElement>): void => {
     if (!isEditing || !e.target.files) return;
-    const newImages: OrderItemImage[] = Array.from(e.target.files).map(file => ({
-      img_url: URL.createObjectURL(file),
-      img_ori_name: file.name,
-      img_name: file.name,
-      file,
-      orderItemImgId: undefined
-    }));
-    setEditData(prev => prev ? { ...prev, image: [...(prev.image ?? []), ...newImages] } : prev);
+    const newImages: OrderItemImage[] = Array.from(e.target.files).map(file => {
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      const ext = file.name.split(".").pop();
+      const savedFileName = `${timestamp}_${randomStr}.${ext}`;
+      return {
+        img_url: URL.createObjectURL(file),
+        img_ori_name: file.name,
+        img_name: savedFileName,
+        file,
+        order_item_img_id: undefined,
+        reg_yn: false // 새 이미지는 대표가 아님
+      };
+    });
+    
+    setEditData(prev => {
+      if (!prev) return prev;
+      const updatedImages = [...(prev.image ?? []), ...newImages];
+      // 대표 이미지가 하나도 없으면 첫 번째를 대표로
+      if (!updatedImages.some(img => img.reg_yn)) {
+        updatedImages[0].reg_yn = true;
+      }
+      return { ...prev, image: updatedImages };
+    });
     e.target.value = "";
   };
-
-  // const handleImageDelete = async (index: number): Promise<void> => {
-  //   if (!isEditing || !editData?.image) return;
-
-  //   const imgToDelete = editData.image[index];
-
-  //   // DB에 있는 이미지면 즉시 삭제
-  //   if (imgToDelete.order_item_img_id) {
-  //     try {
-  //       await deleteSingleImageAPI(imgToDelete.order_item_img_id); // 백엔드 API 호출
-  //     } catch (error) {
-  //       console.error("이미지 삭제 실패", error);
-  //       alert("이미지 삭제 중 오류가 발생했습니다.");
-  //       return;
-  //     }
-  //   }
-
-  //   // 프론트 상태에서 제거
-  //   setEditData(prev => {
-  //     if (!prev?.image) return prev;
-  //     const updated = [...prev.image];
-  //     if (imgToDelete.img_url.startsWith("blob:")) URL.revokeObjectURL(imgToDelete.img_url);
-  //     updated.splice(index, 1);
-  //     return { ...prev, image: updated };
-  //   });
-  // };
 
   const handleImageDeleteById = async (imgId: number): Promise<void> => {
     if (!isEditing || !editData?.image) return;
@@ -150,21 +147,69 @@ export default function OrderDetailModal({
     const imgToDelete = editData.image.find(img => img.order_item_img_id === imgId);
     if (!imgToDelete) return;
 
-    try {
-      // DB 삭제
-      await deleteSingleImageAPI(imgId);
+    // UI에서만 삭제
+    setEditData(prev => {
+      if (!prev?.image) return prev;
+      const updated = prev.image.filter(img => img.order_item_img_id !== imgId);
 
-      // 상태에서 제거
-      setEditData(prev => {
-        if (!prev?.image) return prev;
-        const updated = prev.image.filter(img => img.order_item_img_id !== imgId);
-        if (imgToDelete.img_url.startsWith("blob:")) URL.revokeObjectURL(imgToDelete.img_url);
-        return { ...prev, image: updated };
+      // 대표 이미지 처리
+      if (imgToDelete.reg_yn && updated.length > 0 && !updated.some(img => img.reg_yn)) {
+        updated[0].reg_yn = true;
+      }
+
+      return { ...prev, image: updated };
+    });
+
+    // 삭제 예정 ID 추가
+    setDeletedImageIds(prev => {
+      if (!prev.includes(imgId)) return [...prev, imgId];
+      return prev;
+    });
+  };
+
+  // 새로 추가된 이미지(file이 있는) 삭제
+  const handleImageDelete = (img: OrderItemImage, index: number) => {
+    if (!isEditing || !editData?.image) return;
+
+    setEditData(prev => {
+      if (!prev?.image) return prev;
+      const updated = [...prev.image];
+      updated.splice(index, 1);
+      return { ...prev, image: updated };
+    });
+
+    // 기존 이미지(DB에 있는 것만) 삭제 예정 목록에 추가
+    if (img.order_item_img_id) {
+      setDeletedImageIds(prev => {
+        const id = img.order_item_img_id;
+        return id !== undefined ? [...prev, id] : prev;
       });
-    } catch (error) {
-      console.error("이미지 삭제 실패", error);
-      alert("이미지 삭제 중 오류가 발생했습니다.");
     }
+
+    // 대표 이미지가 삭제된 경우 처리
+    const remainingImages = editData.image?.filter((_, i) => i !== index) ?? [];
+    if (img.reg_yn && remainingImages.length > 0 && !remainingImages.some(i => i.reg_yn)) {
+      remainingImages[0].reg_yn = true;
+      setEditData(prev => prev ? { ...prev, image: remainingImages } : prev);
+    }
+
+    // blob URL 해제
+    if (img.img_url.startsWith("blob:")) URL.revokeObjectURL(img.img_url);
+  };
+
+  // 대표 이미지 선택 핸들러
+  const handleSetMainImage = (index: number): void => {
+    if (!isEditing) return;
+    
+    setEditData(prev => {
+      if (!prev?.image) return prev;
+      const updatedImages = prev.image.map((img, idx) => ({
+        ...img,
+        reg_yn: idx === index
+      }));
+      
+      return { ...prev, image: updatedImages };
+    });
   };
 
   const handleRoutingToggle = (routing: RoutingFormData | RoutingFormDataWithProcessNo) => {
@@ -210,6 +255,11 @@ export default function OrderDetailModal({
       note: editData.note ?? "",
       use_yn: editData.use_yn,
       status: editData.status,
+      // 기존 이미지의 reg_yn 정보를 포함
+      image: editData.image?.filter(img => img.order_item_img_id).map(img => ({
+        order_item_img_id: img.order_item_img_id,
+        reg_yn: img.reg_yn ? "Y" : "N"
+      }))
     };
     formData.append("orderItem", new Blob([JSON.stringify(itemData)], { type: "application/json" }));
 
@@ -223,17 +273,38 @@ export default function OrderDetailModal({
       formData.append("routing", new Blob([JSON.stringify(routingData)], { type: "application/json" }));
     }
 
-    // 기존 이미지 ID만 전송
-    const keepImageIds = editData.image?.filter(img => img.order_item_img_id).map(img => img.order_item_img_id) ?? [];
-    formData.append("keepImageIds", new Blob([JSON.stringify(keepImageIds)], { type: "application/json" }));
-
     // 새로 추가한 이미지 파일 전송
-    editData.image?.forEach(img => {
+    const newImages = editData.image?.filter(img => img.file instanceof File) ?? [];
+    newImages.forEach(img => {
       if (img.file instanceof File) formData.append("images", img.file);
     });
 
+    // 새 이미지의 메타데이터 (대표 여부 포함)
+    if (newImages.length > 0) {
+      const imageMetaData = newImages.map(img => ({
+        img_ori_name: img.img_ori_name,
+        img_name: img.img_name,
+        reg_yn: img.reg_yn ? "Y" : "N"
+      }));
+      formData.append("imageMeta", new Blob([JSON.stringify(imageMetaData)], { type: "application/json" }));
+    }
+
     try {
+      // 1. 먼저 삭제 예정 이미지 처리
+      for (const id of deletedImageIds) {
+        try {
+          await deleteSingleImageAPI(id);
+        } catch (err) {
+          console.error("이미지 삭제 실패", err);
+        }
+      }
+      setDeletedImageIds([]);
+      // 2. 수정 내용 서버로 전송
       await updateOrderItems(editData.order_item_id, formData);
+      
+      // 3. 저장 후 데이터 다시 불러오기
+      await fetchDetail(editData.order_item_id);
+      
       setIsEditing(false);
       onSave();
     } catch (error) {
@@ -244,37 +315,32 @@ export default function OrderDetailModal({
 
   const toggleEditMode = (): void => setIsEditing(prev => !prev);
 
-  // 편집 취소 버튼 클릭
   const handleCancel = (): void => {
     if (!isEditing) {
       onClose();
       return;
     }
 
-    // 변경된 내용이 있는지 체크
     const isChanged = JSON.stringify(editData) !== JSON.stringify(backupData);
     if (isChanged) {
-      setConfirmOpen(true); // 변경이 있으면 확인 다이얼로그 오픈
+      setConfirmOpen(true);
     } else {
-      setIsEditing(false); // 변경 없음 → 편집 종료
+      setIsEditing(false);
     }
   };
 
-  // 다이얼로그 '예' 클릭
   const confirmCancel = (): void => {
     if (backupData) {
-      setEditData({ ...backupData }); // 🔹 새 객체 생성
+      setEditData({ ...backupData });
     }
-    setIsEditing(false);      // 편집 모드 종료
-    setConfirmOpen(false);    // 다이얼로그 닫기
+    setIsEditing(false);
+    setConfirmOpen(false);
   };
 
-  // 다이얼로그 '아니오' 클릭
   const cancelDialogClose = (): void => {
-    setConfirmOpen(false);    // 다이얼로그만 닫기
+    setConfirmOpen(false);
   };
 
-  // 모달 상단 닫기 버튼/외부 클릭
   const handleClose = (): void => {
     handleCancel();
   };
@@ -323,7 +389,6 @@ export default function OrderDetailModal({
                 <TextField value={editData.color ?? ""} onChange={e=>handleChange("color", e.target.value)} size="small" fullWidth InputProps={{ readOnly: !isEditing }} />
 
                 <Typography color="text.secondary" alignSelf="center">단가 *</Typography>
-                {/* <TextField type="number" value={editData.unit_price ?? 0} inputProps={{ min: 1 }} onChange={e=>handleChange("unit_price", parseInt(e.target.value, 10) || 0)} size="small" fullWidth InputProps={{ readOnly: !isEditing }} /> */}
                 <TextField
                   type="text"
                   value={editData.unit_price}
@@ -347,6 +412,7 @@ export default function OrderDetailModal({
                       ? "단가는 0보다 커야 합니다."
                       : ""
                   }
+                  InputProps={{ readOnly: !isEditing }}
                 />
                 <Typography color="text.secondary" alignSelf="center">도장방식 *</Typography>
                 <FormControl>
@@ -472,32 +538,143 @@ export default function OrderDetailModal({
           </Box>
 
           {/* --- 이미지 업로드 --- */}
-          <Box>
-            <Typography variant="subtitle2" color="primary" gutterBottom>이미지</Typography>
-            <Divider sx={{ mb: 1 }} />
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="subtitle2" color="primary" gutterBottom>제품 이미지</Typography>
+            <Divider sx={{ mb: 2 }} />
+            
+            {/* 이미지 박스: 가로 정렬 */}
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
               {editData.image?.map((img, idx) => (
-                <Box key={idx} sx={{ position: "relative" }}>
+                <Box
+                  key={img.order_item_img_id ?? `new-${idx}`}
+                  sx={{
+                    position: "relative",
+                    width: 140,
+                    height: 140,
+                    border: img.reg_yn ? "2px solid #1976d2" : "1px solid #ddd",
+                    borderRadius: 1,
+                    overflow: "hidden"
+                  }}
+                >
                   <img
                     src={img.img_url}
                     alt={img.img_ori_name}
-                    width={80} height={80}
-                    style={{ objectFit: "cover", borderRadius: 4 }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover"
+                    }}
                   />
+                  
+                  {/* 삭제 버튼 */}
                   {isEditing && (
                     <IconButton
                       size="small"
-                      sx={{ position: "absolute", top: 0, right: 0, bgcolor: "rgba(255,255,255,0.7)" }}
-                      onClick={() => handleImageDeleteById(img.order_item_img_id!)}
+                      sx={{ position: "absolute", top: 4, right: 4, backgroundColor: "rgba(255,255,255,0.8)" }}
+                      onClick={() => {
+                        // 새로 추가된 이미지 삭제
+                        if (!img.order_item_img_id) {
+                          handleImageDelete(img, idx); // 여기서 호출
+                        } else {
+                          handleImageDeleteById(img.order_item_img_id);
+                        }
+                      }}
                     >
                       <CloseIcon fontSize="small" />
                     </IconButton>
                   )}
+
+                  {/* 대표 이미지 체크박스 (수정 모드에서만) */}
+                  {isEditing && (
+                    <Checkbox
+                      checked={img.reg_yn === true || img.reg_yn === "Y"}
+                      onChange={() => handleSetMainImage(idx)}
+                      sx={{ 
+                        position: "absolute", 
+                        top: 4, 
+                        left: 4, 
+                        backgroundColor: "rgba(255,255,255,0.8)",
+                        padding: "4px"
+                      }}
+                    />
+                  )}
+
+                  {/* 대표 표시 (조회 모드에서만) */}
+                  {!isEditing && img.reg_yn && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 4,
+                        left: 4,
+                        backgroundColor: "#1976d2",
+                        color: "white",
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontSize: "0.75rem",
+                        fontWeight: "bold"
+                      }}
+                    >
+                      대표
+                    </Box>
+                  )}
+
+                  {/* 파일명 표시 */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      backgroundColor: "rgba(0,0,0,0.7)",
+                      color: "white",
+                      p: 0.5
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      sx={{ 
+                        fontSize: "0.65rem", 
+                        overflow: "hidden", 
+                        textOverflow: "ellipsis", 
+                        whiteSpace: "nowrap",
+                        display: "block"
+                      }}
+                    >
+                      원본: {img.img_ori_name}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{ 
+                        fontSize: "0.6rem", 
+                        color: "#aaa", 
+                        overflow: "hidden", 
+                        textOverflow: "ellipsis", 
+                        whiteSpace: "nowrap",
+                        display: "block"
+                      }}
+                    >
+                      저장명: {img.img_name}
+                    </Typography>
+                  </Box>
                 </Box>
               ))}
+              
+              {/* 이미지 추가 버튼 */}
               {isEditing && (
-                <Button component="label" size="small" startIcon={<AddIcon />}>
-                  추가
+                <Button 
+                  component="label" 
+                  size="small" 
+                  startIcon={<AddIcon />}
+                  sx={{ 
+                    width: 140, 
+                    height: 140, 
+                    border: "1px dashed #ccc",
+                    display: "flex",
+                    flexDirection: "column"
+                  }}
+                >
+                  이미지 추가
                   <input type="file" hidden multiple accept="image/*" onChange={handleImageAdd} />
                 </Button>
               )}

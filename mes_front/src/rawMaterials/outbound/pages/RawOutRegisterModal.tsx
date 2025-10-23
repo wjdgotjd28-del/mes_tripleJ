@@ -56,6 +56,8 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
     item_code: "",
     item_name: "",
   });
+  // formError 상태 추가
+  const [formError, setFormError] = useState<string>("");
 
   const [filteredInventory, setFilteredInventory] = useState<RawMaterialInventoryStatus[]>([]);
 
@@ -80,21 +82,6 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
     }
   };
 
-  // ✅ 검색 필터
-  // const filteredInventory = inventory.filter((item) => {
-  //   const searchLower = {
-  //     company_name: search.company_name.toLowerCase(),
-  //     item_code: search.item_code.toLowerCase(),
-  //     item_name: search.item_name.toLowerCase(),
-  //   };
-  //   return (
-  //     item.total_qty >= 1 &&
-  //     item.company_name.toLowerCase().includes(searchLower.company_name) &&
-  //     item.item_code.toLowerCase().includes(searchLower.item_code) &&
-  //     item.item_name.toLowerCase().includes(searchLower.item_name)
-  //   );
-  // });
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearch({ ...search, [e.target.name]: e.target.value });
   };
@@ -117,10 +104,6 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
       });
     }
   };
-
-  // const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-  //   setForm({ ...form, [e.target.name]: e.target.value });
-  // };
 
   // ✅ 출고 저장 처리
   const handleSave = async (): Promise<void> => {
@@ -155,6 +138,23 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
       item_name: search.item_name,
     });
     setFilteredInventory(result);
+  };
+
+  // 출고수량 입력 핸들러
+  const handleQtyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (/^\d*$/.test(val)) {
+      setForm({ ...form, outboundQty: val });
+
+      const qty = Number(val);
+      if (qty <= 0) {
+        setFormError("출고 수량은 0보다 커야 합니다.");
+      } else if (selected && qty > selected.total_qty) {
+        setFormError(`재고수량(${selected.total_qty}) 보다 많습니다.`);
+      } else {
+        setFormError("");
+      }
+    }
   };
 
   return (
@@ -265,7 +265,6 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
             InputProps={ReadOnlyInputProps}
             sx={{ width: 100 }}
           />
-
           {selected ? (
             <>
               <TextField
@@ -273,30 +272,17 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
                 name="outboundQty"
                 type="text"
                 value={form.outboundQty}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  // 숫자만 허용
-                  if (/^\d*$/.test(val)) {
-                    setForm({ ...form, outboundQty: val });
-                  }
-                }}
+                onChange={handleQtyChange}
                 onKeyDown={(e) => {
-                  // 숫자 외 입력 차단
-                  if (["e", "E", "+", "-", "."].includes(e.key)) {
-                    e.preventDefault();
-                  }
+                  if (["e", "E", "+", "-", "."].includes(e.key)) e.preventDefault();
                 }}
                 size="small"
                 InputLabelProps={{ shrink: true }}
                 inputProps={{ min: 1 }}
                 sx={{ width: 200 }}
                 minRows={1}
-                error={Number(form.outboundQty) <= 0 && form.outboundQty !== ""}
-                helperText={
-                  Number(form.outboundQty) <= 0 && form.outboundQty !== ""
-                    ? "출고 수량은 0보다 커야 합니다."
-                    : ""
-                }
+                error={!!formError}
+                helperText={formError}
               />
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
                 <DatePicker

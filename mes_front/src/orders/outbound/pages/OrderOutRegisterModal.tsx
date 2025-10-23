@@ -17,8 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useState, useEffect } from "react";
+// 가정: 타입 정의가 존재하는 경로
 import type { Inbound, OrderOutbound } from "../../../type";
+// 가정: API 함수가 존재하는 경로
 import { getInboundForOut } from "../../inbound/api/OrderInViewApi";
+// 가정: 엑셀 유틸리티 함수가 존재하는 경로
 import { exportToExcel } from "../../../Common/ExcelUtils";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 
@@ -35,7 +38,7 @@ const ReadOnlyInputProps = {
   sx: { backgroundColor: "#f5f5f5" },
 };
 
-
+// 분류 코드 한글 매핑
 const categoryKorMap: { [key: string]: string } = {
   DEFENSE: "방산",
   GENERAL: "일반",
@@ -53,16 +56,20 @@ export default function OrderOutRegisterModal({
     outboundQty: "",
     outboundDate: "",
   });
+  // 출고 수량이 입고 수량을 초과했는지 여부를 저장하는 상태
+  const [isQtyExceeded, setIsQtyExceeded] = useState(false);
 
   const [inbounds, setInbounds] = useState<Inbound[]>([]);
   const [filteredInbounds, setFilteredInbounds] = useState<Inbound[]>([]);
 
+  // 모달이 열릴 때 입고 데이터 불러오기
   useEffect(() => {
     if (open) {
       const fetchInbounds = async () => {
         try {
           const data = await getInboundForOut();
           console.log(data);
+          // 재고가 남아있고 (qty > 0) 공정 상태가 완료된 (processStatus === 2) 항목만 필터링
           const availableInbounds = data.filter(
             (item) => item.qty > 0 && item.processStatus === 2
           );
@@ -76,6 +83,7 @@ export default function OrderOutRegisterModal({
     }
   }, [open]);
 
+  // 검색 상태
   const [search, setSearch] = useState({
     customerName: "",
     itemCode: "",
@@ -84,11 +92,12 @@ export default function OrderOutRegisterModal({
     inboundDate: "",
   });
 
+  // 모달이 열리거나 닫힐 때 상태 초기화
   useEffect(() => {
     if (open) {
       setSelected(null);
-      // 모달 초기화 시 출고수량 및 출고일자는 비어있도록 설정
       setForm({ outboundQty: "", outboundDate: "" });
+      setIsQtyExceeded(false); 
       setSearch({
         customerName: "",
         itemCode: "",
@@ -96,33 +105,60 @@ export default function OrderOutRegisterModal({
         lotNo: "",
         inboundDate: "",
       });
+      // 검색 결과도 전체 목록으로 초기화
+      setFilteredInbounds(inbounds); 
     }
-  }, [open]);
+  }, [open, inbounds]); // inbounds가 업데이트 될 때 초기화 로직이 실행되도록 추가
 
+  // 테이블 항목 선택/해제 핸들러
   const handleSelect = (inbound: Inbound) => {
     if (selected?.orderInboundId === inbound.orderInboundId) {
       setSelected(null);
       // 해제 시 모두 초기화
       setForm({ outboundQty: "", outboundDate: "" });
+      setIsQtyExceeded(false); 
     } else {
       setSelected(inbound);
-      // 항목 선택 시 출고일자를 오늘 날짜로 자동 설정 (UX 개선)
+      // 항목 선택 시 출고일자를 오늘 날짜로 자동 설정
       setForm({
         ...form,
         outboundDate: new Date().toISOString().slice(0, 10),
         outboundQty: "", // 새 항목 선택 시 수량은 초기화
       });
+      setIsQtyExceeded(false); 
     }
   };
 
+  // 폼 입력 변경 핸들러 (출고 수량, 출고 일자)
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // 폼 상태 업데이트
+    setForm((prevForm) => ({ ...prevForm, [name]: value }));
+
+    // outboundQty가 변경될 때 입고 수량 초과 여부 실시간 검사
+    if (name === "outboundQty" && selected) {
+      const outboundQty = Number(value);
+      const inboundQty = selected.qty;
+      
+      const isNotEmpty = value !== "";
+      
+      let exceeded = false;
+      if (isNotEmpty) {
+          // 숫자가 아니거나 (isNaN), 0보다 작거나, 입고 수량을 초과하는 경우
+          exceeded = isNaN(outboundQty) || outboundQty <= 0 || outboundQty > inboundQty;
+      }
+
+      setIsQtyExceeded(exceeded);
+    }
   };
 
+  // 검색 필드 변경 핸들러
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch({ ...search, [e.target.name]: e.target.value });
   };
 
+  // 검색 버튼 클릭 핸들러
   const handleSearchClick = () => {
     const lowercasedSearch = {
       customerName: search.customerName.toLowerCase(),
@@ -144,25 +180,30 @@ export default function OrderOutRegisterModal({
     setFilteredInbounds(filtered);
   };
 
+  // 엑셀 다운로드 핸들러
   const handleExcelDownload = () => exportToExcel(filteredInbounds, "출고대상_수주목록");
 
+  // 출고 등록 제출 핸들러
   const handleSubmit = () => {
     if (!selected) return alert("출고할 항목을 선택하세요.");
 
     const qty = Number(form.outboundQty);
+    
     if (!qty || !form.outboundDate)
       return alert("출고 수량과 출고 일자를 입력해주세요.");
 
+    // 최종 검증: 0보다 큰지, 초과하지 않는지
     if (qty <= 0) return alert("출고 수량은 0보다 커야 합니다.");
-
     if (qty > selected.qty)
       return alert(
         `출고 수량(${qty})은 입고 수량(${selected.qty})을 초과할 수 없습니다.`
       );
 
+    // 출고 번호 생성 (예시)
     const today = new Date();
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, "");
-    const outboundNo = `OUT-${dateStr}-001`;
+    // 실제로는 DB에서 다음 번호를 가져와야 함. 여기서는 임시 값 사용.
+    const outboundNo = `OUT-${dateStr}-001`; 
 
     onSubmit({
       orderInboundId: selected.orderInboundId,
@@ -174,10 +215,11 @@ export default function OrderOutRegisterModal({
       outboundDate: form.outboundDate,
       category: selected.category,
       inboundDate: selected.inboundDate,
-      color: "",
+      color: "", // 필요하다면 color 값 추가
+      remainingQuantity: selected.qty, // Use selected.qty as remainingQuantity
+      maxUpdatableQty: selected.qty, // Set maxUpdatableQty for new outbound record
     });
     
-    // ✅ 출고 등록 성공 알림 추가
     alert("출고 정보가 등록되었습니다.");
     
     onClose();
@@ -228,7 +270,6 @@ export default function OrderOutRegisterModal({
             size="small"
             sx={{ width: 150 }}
           />
-          {/* 입고일자 필드: placeholder 사용, 값이 없을 때 텍스트 색상 조정 */}
           <TextField
             placeholder="입고일자"
             name="inboundDate"
@@ -239,7 +280,7 @@ export default function OrderOutRegisterModal({
             sx={{ width: 170 }}
             InputProps={{
               sx: {
-                // 값이 없을 때 '연도-월-일' 텍스트를 연한 회색으로 변경
+                // 값이 없을 때 '연도-월-일' 텍스트 색상 조정
                 color: search.inboundDate
                   ? "rgba(0, 0, 0, 0.87)"
                   : "rgba(0, 0, 0, 0.42)",
@@ -313,7 +354,7 @@ export default function OrderOutRegisterModal({
 
         {/* 🔹 선택된 품목 표시 및 입력 영역 (Read-only 필드에 스타일 적용) */}
         <Box sx={{ mt: 3, display: "flex", flexWrap: "wrap", gap: 2 }}>
-          {/* Read-only 필드 - 기존 ReadOnlyInputProps 사용 (배경색 제거됨) */}
+          {/* Read-only 필드 */}
           <TextField
             label="LOT번호"
             value={selected?.lotNo ?? "-"}
@@ -365,7 +406,7 @@ export default function OrderOutRegisterModal({
             sx={{ width: 200 }}
           />
 
-          {/* ✅ 출고 수량 필드: 선택 유무에 따라 스타일 분기 */}
+          {/* 🚀 출고 수량 필드 (실시간 검증 및 에러 표시) */}
           {selected ? (
             // 항목 선택됨: 활성 입력 필드
             <TextField
@@ -378,7 +419,19 @@ export default function OrderOutRegisterModal({
               InputLabelProps={{ shrink: true }}
               placeholder="출고 수량 입력하세요"
               sx={{ width: 200 }}
+              // 에러 상태와 메시지 설정
+              error={isQtyExceeded} 
+              helperText={
+                // isQtyExceeded가 true이고 입력 값이 비어있지 않을 때만 메시지 표시
+                isQtyExceeded && form.outboundQty !== ""
+                  ? `입고수량(${selected.qty})보다 많습니다`
+                  : ""
+              }
               InputProps={{
+                inputProps: {
+                  min: 1, // 0보다 커야 함
+                  max: selected?.qty, // 입고수량보다 클 수 없음 (선택된 경우에만)
+                },
                 sx: {
                   "&::placeholder": {
                     color: "black",
@@ -398,7 +451,7 @@ export default function OrderOutRegisterModal({
             />
           )}
 
-          {/* ✅ 출고일자 필드: 선택 유무에 따라 스타일 분기 */}
+          {/* ✅ 출고일자 필드 */}
           {selected ? (
             // 항목 선택됨: 활성 입력 필드
             <TextField
@@ -430,7 +483,8 @@ export default function OrderOutRegisterModal({
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={!selected || !form.outboundQty || !form.outboundDate}
+          // isQtyExceeded가 true이거나 필수 필드가 비어있으면 버튼 비활성화
+          disabled={!selected || !form.outboundQty || !form.outboundDate || isQtyExceeded}
         >
           출고 등록
         </Button>

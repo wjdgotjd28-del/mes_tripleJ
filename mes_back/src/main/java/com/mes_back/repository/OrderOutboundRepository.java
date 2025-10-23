@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface OrderOutboundRepository extends JpaRepository<OrderOutbound, Long> {
@@ -19,4 +20,5 @@ public interface OrderOutboundRepository extends JpaRepository<OrderOutbound, Lo
     @Query("SELECT SUM(oo.qty) FROM OrderOutbound oo WHERE oo.orderInbound = :orderInbound")
     Optional<Long> sumOutboundQtyByOrderInbound(@Param("orderInbound") OrderInbound orderInbound);
 
+    List<OrderOutbound> findByOrderInbound_OrderInboundId(Long orderInboundId);
 }

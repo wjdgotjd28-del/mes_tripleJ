@@ -398,13 +398,9 @@ export default function RawInHistoryPage() {
                               sx={{ width: 80, mr: 1 }}
                               error={!!specQtyError}
                               helperText={specQtyError}
-                            />
-                            <TextField
-                              size="small"
-                              name="specUnit"
-                              value={editableRowData?.specUnit || ""}
-                              onChange={handleEditChange}
-                              sx={{ width: 60 }}
+                              InputProps={{
+                                endAdornment: <span style={{ marginLeft: 1 }}>{row.specUnit}</span>,
+                              }}
                             />
                           </>
                         ) : (

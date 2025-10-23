@@ -79,11 +79,8 @@ export default function OrderOutViewPage() {
   const handleRegister = async (data: OrderOutbound) => {
     try {
       // API 호출
-      const newOrder = await addOrderOutbound(data);
-      setAllRows((prev) => [
-        ...prev,
-        newOrder, // API 응답으로 받은 객체를 추가
-      ]);
+      await addOrderOutbound(data);
+      loadOrderOutboundData(); // 데이터 다시 로드
       setRegisterOpen(false);
     } catch (error) {
       console.error("출고 등록 실패:", error);
@@ -122,6 +119,13 @@ export default function OrderOutViewPage() {
       alert('출고 수량은 1 이상의 정수여야 합니다.');
       return;
     }
+
+    if (parsedQty > editableRowData.maxUpdatableQty) {
+      setQtyError(`수정 가능 수량 최대 (${editableRowData.maxUpdatableQty})`);
+      alert(`수정 가능 수량을 초과할 수 없습니다. (최대: ${editableRowData.maxUpdatableQty})`);
+      return;
+    }
+
     setQtyError(null); // Clear any previous error
 
     // Create a new object with the validated qty
@@ -149,6 +153,7 @@ export default function OrderOutViewPage() {
     setEditRowId(null);
     setEditableRowData(null);
     setQtyInputString("");
+    setQtyError(null); // Clear any quantity error
   };
 
   // ✅ 인라인 수정 필드 변경
@@ -164,10 +169,13 @@ export default function OrderOutViewPage() {
         } else {
           const numericValue = Number(value);
           if (isNaN(numericValue) || numericValue % 1 !== 0) {
-            setQtyError("출고수량은 0보다 커야합니다");
+            setQtyError("출고수량은 1 이상의 정수여야 합니다.");
           } else if (numericValue < 1) {
-            setQtyError("출고수량은 0보다 커야합니다");
-          } else {
+            setQtyError("출고수량은 1 이상이어야 합니다.");
+          } else if (numericValue > editableRowData.maxUpdatableQty) {
+            setQtyError(`수정 가능 수량 최대 (${editableRowData.maxUpdatableQty})`);
+          }
+          else {
             setQtyError(null);
           }
         }
@@ -336,7 +344,7 @@ export default function OrderOutViewPage() {
                         size="small"
                         value={qtyInputString}
                         onChange={handleEditChange}
-                        sx={{ width: 80 }}
+                        sx={{ width: 250 }}
                         error={!!qtyError}
                         helperText={qtyError}
                       />
@@ -442,13 +450,6 @@ export default function OrderOutViewPage() {
         </Button>
       </Box>
 
-      {/* 수정 모달 */}
-      {/* <EditOrderOutModal // Removed
-        open={!!editData}
-        onClose={() => setEditData(null)}
-        editData={editData}
-        onSave={handleEditSave}
-      /> */}
 
       {/* 출고 등록 모달 */}
       <OrderOutRegisterModal

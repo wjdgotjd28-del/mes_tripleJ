@@ -28,9 +28,15 @@ export default function OrdersInDocModal({
   const mainImage = orderItem?.image?.reduce<
     NonNullable<OrderItems["image"]>[number] | undefined
   >((prev, curr) => {
+    // reg_yn이 Y 또는 true인 경우 우선 선택
+    const currReg = curr.reg_yn === "Y" || curr.reg_yn === true;
+    const prevReg = prev?.reg_yn === "Y" || prev?.reg_yn === true;
+
+    if (currReg && !prevReg) return curr; // 현재가 우선
+    if (!currReg && prevReg) return prev; // 이전이 우선
+    // 둘 다 reg_yn 동일하거나 없는 경우 id 기준 선택
     if (!prev) return curr;
-    return (curr.order_item_img_id ?? Infinity) <
-      (prev.order_item_img_id ?? Infinity)
+    return (curr.order_item_img_id ?? Infinity) < (prev.order_item_img_id ?? Infinity)
       ? curr
       : prev;
   }, orderItem?.image?.[0]);
@@ -285,9 +291,15 @@ export default function OrdersInDocModal({
           </table>
 
           {/* 대표 이미지 영역 */}
-          <div className="image-box">
+          <div 
+            className="image-box" 
+            style={{display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "3px 0"}}
+          >
             {mainImage ? (
-              <img src={mainImage.img_url} alt={mainImage.img_ori_name} />
+              <img src={mainImage.img_url} alt={mainImage.img_ori_name} width={200} />
             ) : (
               <span>이미지 없음</span>
             )}

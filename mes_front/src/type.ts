@@ -6,7 +6,7 @@ export interface OrderItemImage {
   img_ori_name: string;        // 원본 파일명
   img_name: string;            // 저장 파일명
   file?: File;                 // 신규 업로드 시 사용
-  isMain?: boolean; // 대표 이미지 여부
+  reg_yn?: boolean | string; // 대표 이미지 여부
 }
 
 // 수주 대상 품목 데이터 타입
@@ -94,6 +94,8 @@ export type OrderOutbound = {
   category: string;
   inboundDate: string;
   color: string;
+  remainingQuantity: number;
+  maxUpdatableQty: number; 
 };
 
 // 수주 출고에서 쓰이는 수주 입고 데이터 조회용 타입 

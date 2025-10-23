@@ -95,8 +95,8 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
     setNewData(prev => {
       const updatedImages = [...(prev.image ?? []), ...newImages];
       // 첫 번째 이미지를 대표 이미지로 지정
-      if (!updatedImages.some(img => img.isMain)) {
-        updatedImages[0].isMain = true;
+      if (!updatedImages.some(img => img.reg_yn)) {
+        updatedImages[0].reg_yn = true;
       }
       return { ...prev, image: updatedImages };
     });
@@ -107,13 +107,19 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
   const handleSetMainImage = (index: number) => {
     setNewData(prev => {
       const updatedImages = [...(prev.image ?? [])];
-      // 모든 이미지 isMain false 처리
-      updatedImages.forEach(img => img.isMain = false);
-      // 선택한 이미지 isMain true
-      updatedImages[index].isMain = true;
+
+      // 모든 이미지 isMain/ reg_yn false 처리
+      updatedImages.forEach(img => {
+        img.reg_yn = false;
+      });
+
+      // 선택한 이미지 isMain/ reg_yn true
+      updatedImages[index].reg_yn = true;
+
       // 선택한 이미지를 배열 맨 앞으로 이동
       const [mainImage] = updatedImages.splice(index, 1);
       updatedImages.unshift(mainImage);
+
       return { ...prev, image: updatedImages };
     });
   };
@@ -169,7 +175,21 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
       formData.append("routing", new Blob([JSON.stringify(routingData)], { type: "application/json" }));
     }
 
-    newData.image?.forEach(img => img.file && formData.append("images", img.file));
+    // ✅ 이미지 추가 시 regYn 포함해서 전달
+    newData.image?.forEach((img) => {
+      if (img.file) {
+        formData.append("images", img.file);
+      }
+    });
+
+    // ✅ 이미지 메타데이터 추가 (대표 여부 포함)
+    const imageMetaData = newData.image?.map((img) => ({
+      img_ori_name: img.img_ori_name,
+      img_name: img.img_name,
+      reg_yn: img.reg_yn ? "Y" : "N",  // 대표 이미지 여부
+    })) ?? [];
+
+    formData.append("imageMeta", new Blob([JSON.stringify(imageMetaData)], { type: "application/json" }));
 
     try {
       await createOrderItems(formData);
@@ -515,7 +535,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
                       width: "100%",
                       height: "100%",
                       objectFit: "cover",
-                      border: img.isMain ? "2px solid #1976d2" : "1px solid #ddd"
+                      border: img.reg_yn ? "2px solid #1976d2" : "1px solid #ddd"
                     }}
                   />
                   <IconButton
@@ -528,7 +548,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
 
                   {/* 대표 이미지 선택 */}
                   <Checkbox
-                    checked={img.isMain ?? false}
+                    checked={img.reg_yn === true || img.reg_yn === "Y"}
                     onChange={() => handleSetMainImage(idx)}
                     sx={{ position: "absolute", top: 4, left: 4, backgroundColor: "rgba(255,255,255,0.8)" }}
                   />
