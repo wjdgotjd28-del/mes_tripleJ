@@ -118,9 +118,9 @@ export default function RawOutRegisterModal({ open, onClose, reload }: Props) {
     }
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  // const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  //   setForm({ ...form, [e.target.name]: e.target.value });
+  // };
 
   // ✅ 출고 저장 처리
   const handleSave = async (): Promise<void> => {

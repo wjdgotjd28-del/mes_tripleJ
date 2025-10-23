@@ -168,12 +168,12 @@ export type MaterialInbound = {
   supplierName: string;
   itemName: string;
   itemCode: string;
-  specQty: number;
+  specQty: number | "";
   specUnit: string;
   manufacturer: string;
   manufacteDate: string;         // 'YYYY-MM-DD' 형식
-  qty: number;
+  qty: number | "";
   inboundDate: string;           // 'YYYY-MM-DD' 형식
   inboundNo: string;
-  totalQty: number;
+  totalQty: number | "";
 }
