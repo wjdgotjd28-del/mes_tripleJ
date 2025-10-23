@@ -313,6 +313,7 @@ export default function OrderOutViewPage() {
                         size="small"
                         value={editableRowData?.qty ?? ""}
                         onChange={handleEditChange}
+                        inputProps={{ min: 1 }}
                         sx={{ width: 80 }}
                       />
                     ) : (
