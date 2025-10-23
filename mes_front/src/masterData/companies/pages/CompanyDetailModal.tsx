@@ -279,6 +279,15 @@ export default function CompanyDetailModal({
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: "auto" }}>
             {!isEditing ? (
               <>
+                 <Button
+                  variant="outlined"
+                  size="small"
+                  color="error"
+                  onClick={handleCloseModal}
+                >
+                  닫기
+                </Button>
+                
                 <Button
                   variant="outlined"
                   size="small"
@@ -287,14 +296,6 @@ export default function CompanyDetailModal({
                   sx={{ mr: 1 }}
                 >
                   수정
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  color="error"
-                  onClick={handleCloseModal}
-                >
-                  닫기
                 </Button>
               </>
             ) : (
