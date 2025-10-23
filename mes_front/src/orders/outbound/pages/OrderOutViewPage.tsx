@@ -79,11 +79,8 @@ export default function OrderOutViewPage() {
   const handleRegister = async (data: OrderOutbound) => {
     try {
       // API 호출
-      const newOrder = await addOrderOutbound(data);
-      setAllRows((prev) => [
-        ...prev,
-        newOrder, // API 응답으로 받은 객체를 추가
-      ]);
+      await addOrderOutbound(data);
+      loadOrderOutboundData(); // 데이터 다시 로드
       setRegisterOpen(false);
     } catch (error) {
       console.error("출고 등록 실패:", error);
@@ -161,7 +158,6 @@ export default function OrderOutViewPage() {
   // ✅ 인라인 수정 필드 변경
     const handleEditChange = (e: ChangeEvent<HTMLInputElement>) => {
       if (!editableRowData) return;
-      console.log("editableRowData:", editableRowData);
       const { name, value } = e.target;
   
       if (name === "qty") {
