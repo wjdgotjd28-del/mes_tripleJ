@@ -61,14 +61,7 @@ export default function OrderOutViewPage() {
 
   // allRows 상태가 변경될 때마다 displayedRows를 자동으로 필터링하여 갱신
   useEffect(() => {
-    const filtered = allRows.filter(
-      (row) =>
-        (row.customerName ?? "").includes(search.customerName) &&
-        (row.itemCode ?? "").includes(search.itemCode) &&
-        (row.itemName ?? "").includes(search.itemName) &&
-        (row.outboundNo ?? "").includes(search.outboundNo)
-    );
-    setDisplayedRows(filtered);
+    setDisplayedRows(allRows);
   }, [allRows]);
 
   const loadOrderOutboundData = () => {
@@ -144,7 +137,7 @@ export default function OrderOutViewPage() {
     let updatedValue: string | number = value;
     if (name === "qty") {
       const numericValue = Number(value);
-      if (isNaN(numericValue) || numericValue < 0 || numericValue % 1 !== 0) {
+      if (isNaN(numericValue) || numericValue < 1 || numericValue % 1 !== 0) {
         return; // Prevent invalid input
       }
       updatedValue = numericValue;
