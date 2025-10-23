@@ -284,8 +284,9 @@ export default function CompanyDetailModal({
                   size="small"
                   color="error"
                   onClick={handleCloseModal}
+                  sx={{ mr: 1 }}
                 >
-                  닫기
+                  취소
                 </Button>
                 
                 <Button
@@ -293,7 +294,7 @@ export default function CompanyDetailModal({
                   size="small"
                   color="primary"
                   onClick={() => setIsEditing(true)}
-                  sx={{ mr: 1 }}
+                  
                 >
                   수정
                 </Button>
@@ -303,19 +304,21 @@ export default function CompanyDetailModal({
                 <Button
                   variant="outlined"
                   size="small"
-                  color="primary"
-                  onClick={handleSave}
+                  color="error"
+                  onClick={handleCancel}
                   sx={{ mr: 1 }}
                 >
-                  저장
+                  취소
                 </Button>
+
                 <Button
                   variant="outlined"
                   size="small"
-                  color="error"
-                  onClick={handleCancel}
+                  color="primary"
+                  onClick={handleSave}
+                  
                 >
-                  취소
+                  저장
                 </Button>
               </>
             )}
