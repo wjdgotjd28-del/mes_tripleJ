@@ -58,7 +58,10 @@ public class RoutingService {
                 .toList();
     }
 
+    @Transactional
     public void DeleteById(Long id) {
-        routingRepository.deleteById(id);
+        Routing routing = routingRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 공정입니다."));
+        routingRepository.delete(routing); // Cascade 덕분에 연결된 OrderItemRouting도 자동 삭제
     }
 }
