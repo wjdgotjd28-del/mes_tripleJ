@@ -227,7 +227,7 @@ export default function RawInViewPage() {
 
     try {
       await addMaterialInbound(newMaterialInbound);
-      alert("입고 등록이 완료되었습니다.");
+      alert("원자재 입고 등록이 완료되었습니다.");
       // Clear input fields for the registered item
       setInboundInput((prev) => {
         const newState = { ...prev };
