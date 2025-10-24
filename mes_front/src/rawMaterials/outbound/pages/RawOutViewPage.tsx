@@ -125,7 +125,7 @@ export default function RawMaterialOutViewPage() {
     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="ko">
       <Box sx={{ p: 4 }}>
         <Typography variant="h5" sx={{ mb: 2 }}>
-          원자재 출고 이력
+          원자재 출고 이력 조회
         </Typography>
 
         {/* 🔍 검색 영역 */}

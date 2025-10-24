@@ -277,7 +277,7 @@ export default function RawInHistoryPage() {
         gap: 3,
       }}
     >
-      <Typography variant="h5">원자재 입고 이력</Typography>
+      <Typography variant="h5">원자재 입고 이력 조회</Typography>
 
       {error && (
         <Alert severity="error" onClose={() => setError(null)}>

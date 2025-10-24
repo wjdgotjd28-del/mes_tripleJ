@@ -280,7 +280,7 @@ export default function InboundHistoryPage() {
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
-        입고된 수주 이력
+        수주 입고 이력 조회
       </Typography>
 
       {/* 검색 영역 */}

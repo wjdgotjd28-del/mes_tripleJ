@@ -212,7 +212,7 @@ export default function OrderInViewPage() {
       }}
     >
       {/* 페이지 제목 */}
-      <Typography variant="h5">거래중 품목 조회</Typography>
+      <Typography variant="h5">수주 대상 품목 입고</Typography>
 
       {/* 에러 메시지 */}
       {error && (

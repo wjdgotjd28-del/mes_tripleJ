@@ -56,7 +56,7 @@ const mainMenus: MainMenu[] = [
         subs: [{ text: "원자재 품목 입고" }, { text: "원자재 입고 이력 조회" }],
       },
       { text: "원자재 출고" },
-      { text: "재고현황" },
+      { text: "재고 현황" },
     ],
   },
   {
@@ -122,7 +122,7 @@ export default function CommonLayout() {
     // 2계층
     "수주 대상 관리 > 수주 출고": "/orders/outbound",
     "원자재 관리 > 원자재 출고": "/raw-materials/outbound",
-    "원자재 관리 > 재고현황": "/raw-materials/inventory",
+    "원자재 관리 > 재고 현황": "/raw-materials/inventory",
     "기준 정보 관리 > 수주 대상 품목 관리": "/items/order/view",
     "기준 정보 관리 > 원자재 품목 관리": "/items/raw/view",
     "기준 정보 관리 > 라우팅 관리": "/routings",
@@ -166,7 +166,7 @@ export default function CommonLayout() {
     },
     "/raw-materials/inventory": {
       main: "원자재 관리",
-      sub: "재고현황",
+      sub: "재고 현황",
       third: null,
     },
     "/items/order/view": {

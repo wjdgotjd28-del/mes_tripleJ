@@ -265,7 +265,7 @@ export default function RawInViewPage() {
         gap: 3,
       }}
     >
-      <Typography variant="h5">원자재 품목 관리</Typography>
+      <Typography variant="h5">원자재 품목 입고</Typography>
 
       {error && (
         <Alert severity="error" onClose={() => setError(null)}>

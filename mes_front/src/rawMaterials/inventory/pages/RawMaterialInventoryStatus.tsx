@@ -79,7 +79,7 @@ export default function RawMaterialInventoryStatus() {
   return (
     <Box sx={{ padding: 4, width: "100%" }}>
       <Typography variant="h5" sx={{ mb: 1 }}>
-        원자재 재고 현황 (총량 기준)
+        원자재 재고 현황
       </Typography>
 
       <Box

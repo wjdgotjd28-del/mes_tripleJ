@@ -289,7 +289,7 @@ export default function OrderRegisterModal({ open, onClose, onSubmit }: OrderReg
                     SelectProps={{ displayEmpty: true }} // 이 부분이 핵심
                   >
                     <MenuItem value="" disabled>
-                      매입처를 선택해주세요
+                      거래처를 선택해주세요
                     </MenuItem>
                     {companyList.map((company) => (
                       <MenuItem key={company.companyId} value={company.companyName}>

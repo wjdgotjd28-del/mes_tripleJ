@@ -240,7 +240,7 @@ export default function OrderOutViewPage() {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
-        출고 처리된 수주 목록
+        수주 출고 이력 조회
       </Typography>
       {/* 검색 + 등록 버튼 */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
